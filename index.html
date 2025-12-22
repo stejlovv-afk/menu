@@ -20,11 +20,11 @@
         .product-card { border-bottom: 1px solid var(--secondary); padding: 12px 15px; display: flex; gap: 12px; align-items: center; }
         .product-img { width: 85px; height: 85px; border-radius: 12px; object-fit: cover; flex-shrink: 0; background: #eee; }
         .product-content { flex-grow: 1; display: flex; flex-direction: column; gap: 6px; }
-        .product-name { font-weight: 600; font-size: 15px; line-height: 1.2; }
-        .size-selector { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 2px; }
-        .size-btn { flex: 1; border: 1px solid var(--secondary); background: var(--secondary); color: var(--text); padding: 6px 2px; border-radius: 8px; font-size: 10px; white-space: nowrap; }
+        .product-name { font-weight: 600; font-size: 15px; }
+        .size-selector { display: flex; gap: 4px; overflow-x: auto; }
+        .size-btn { flex: 1; border: 1px solid var(--secondary); background: var(--secondary); color: var(--text); padding: 6px 2px; border-radius: 8px; font-size: 10px; }
         .size-btn.active { background: var(--btn); color: var(--btn-text); border-color: var(--btn); }
-        .price-row { display: flex; justify-content: space-between; align-items: center; margin-top: 2px; }
+        .price-row { display: flex; justify-content: space-between; align-items: center; }
         .current-price { font-weight: bold; font-size: 16px; color: var(--btn); }
         .add-btn { background: var(--btn); color: var(--btn-text); border: none; padding: 6px 16px; border-radius: 10px; font-weight: bold; font-size: 18px; }
     </style>
@@ -33,7 +33,7 @@
 
 <div class="header">
     <h1 style="margin:0; font-size: 22px; color: var(--btn);">URBAN LUNCH</h1>
-    <p style="margin:4px 0 0; font-size: 12px; color: var(--hint);">Coffee & Food</p>
+    <p style="margin:4px 0 0; font-size: 12px; color: var(--hint);">Меню напитков</p>
 </div>
 
 <div id="app"></div>
@@ -42,6 +42,7 @@
     let tg = window.Telegram.WebApp;
     tg.expand();
 
+    // Путь к твоему фото на GitHub
     const seasonalImg = "./seasonal.jpg";
 
     const menuData = [
@@ -62,17 +63,15 @@
                 { name: "Капучино", prices: { "250мл": 190, "350мл": 230, "450мл": 270 } },
                 { name: "Латте", prices: { "250мл": 190, "350мл": 230, "450мл": 270 } },
                 { name: "Флат Уайт", prices: { "250мл": 220, "350мл": 260, "450мл": 360 } },
-                { name: "Раф", prices: { "250мл": 210, "350мл": 250, "450мл": 290 } },
-                { name: "Бамбл (теплый)", prices: { "250мл": 270, "350мл": 270, "450мл": 300 } }
+                { name: "Раф", prices: { "250мл": 210, "350мл": 250, "450мл": 290 } }
             ]
         },
         {
-            category: "Чай и Другое",
+            category: "Чай и Какао",
             items: [
-                { name: "Чай (ассортимент)", prices: { "250мл": 120, "450мл": 180 } },
+                { name: "Чай ассорти", prices: { "250мл": 120, "450мл": 180 } },
                 { name: "Матча латте", prices: { "250мл": 180, "350мл": 220, "450мл": 260 } },
-                { name: "Какао", prices: { "250мл": 180, "350мл": 220, "450мл": 260 } },
-                { name: "Пряный чай латте", prices: { "250мл": 240, "350мл": 280, "450мл": 320 } }
+                { name: "Какао", prices: { "250мл": 180, "350мл": 220, "450мл": 260 } }
             ]
         },
         {
@@ -80,9 +79,7 @@
             items: [
                 { name: "Айс Латте", prices: { "250мл": 240, "350мл": 280 } },
                 { name: "Эспрессо тоник", prices: { "250мл": 250, "350мл": 290 } },
-                { name: "Бамбл холодный", prices: { "250мл": 270, "350мл": 300 } },
-                { name: "Айс Матча", prices: { "250мл": 230, "350мл": 270 } },
-                { name: "Лимонады", prices: { "250мл": 260, "350мл": 290 } }
+                { name: "Бамбл", prices: { "250мл": 270, "350мл": 300 } }
             ]
         }
     ];
@@ -93,23 +90,18 @@
     function renderMenu() {
         const container = document.getElementById('app');
         container.innerHTML = ''; 
-        
         menuData.forEach(cat => {
             const title = document.createElement('div');
             title.className = 'category-title';
             title.innerText = cat.category;
             container.appendChild(title);
-            
             cat.items.forEach(item => {
                 const itemID = item.name.replace(/\s+/g, '').replace(/[^\w\s]/gi, '');
                 const sizes = Object.keys(item.prices);
                 const defSize = sizes[0];
-                
                 const card = document.createElement('div');
                 card.className = 'product-card';
-                
-                let imgPart = item.image ? `<img src="${item.image}" class="product-img" onerror="this.style.display='none'">` : '';
-                
+                let imgPart = item.image ? `<img src="${item.image}" class="product-img">` : '';
                 card.innerHTML = `
                     ${imgPart}
                     <div class="product-content">
@@ -141,17 +133,13 @@
         const item = menuData.flatMap(c => c.items).find(i => i.name === name);
         const opt = selectedOptions[itemID] || { size: Object.keys(item.prices)[0], price: Object.values(item.prices)[0] };
         cart.push({ name, size: opt.size, price: opt.price });
-        
         const total = cart.reduce((s, i) => s + i.price, 0);
-        tg.MainButton.text = `КОРЗИНА: ${total} ₽`;
+        tg.MainButton.text = `В КОРЗИНУ: ${total} ₽`;
         tg.MainButton.show();
         tg.HapticFeedback.notificationOccurred('success');
     };
 
-    tg.onEvent('mainButtonClicked', () => {
-        tg.sendData(JSON.stringify(cart));
-    });
-
+    tg.onEvent('mainButtonClicked', () => tg.sendData(JSON.stringify(cart)));
     renderMenu();
 </script>
 </body>
