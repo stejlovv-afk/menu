@@ -18,12 +18,15 @@
         .header { padding: 20px; text-align: center; background: var(--secondary); border-bottom: 1px solid rgba(0,0,0,0.1); }
         .category-title { padding: 15px 20px 5px; font-size: 13px; font-weight: bold; text-transform: uppercase; color: var(--hint); }
         .product-card { border-bottom: 1px solid var(--secondary); padding: 12px 15px; display: flex; gap: 12px; align-items: center; }
-        .product-img { width: 85px; height: 85px; border-radius: 12px; object-fit: cover; flex-shrink: 0; }
+        
+        /* Стиль для фото */
+        .product-img { width: 85px; height: 85px; border-radius: 12px; object-fit: cover; flex-shrink: 0; background: #f0f0f0; }
+        
         .product-content { flex-grow: 1; display: flex; flex-direction: column; gap: 6px; }
         .product-name { font-weight: 600; font-size: 16px; }
         .size-selector { display: flex; gap: 4px; }
         .size-btn { flex: 1; border: 1px solid var(--secondary); background: var(--secondary); color: var(--text); padding: 6px 2px; border-radius: 8px; font-size: 11px; }
-        .size-btn.active { background: var(--btn); color: var(--btn-text); }
+        .size-btn.active { background: var(--btn); color: var(--btn-text); border-color: var(--btn); }
         .price-row { display: flex; justify-content: space-between; align-items: center; }
         .current-price { font-weight: bold; font-size: 16px; color: var(--btn); }
         .add-btn { background: var(--btn); color: var(--btn-text); border: none; padding: 8px 18px; border-radius: 10px; font-weight: bold; font-size: 18px; }
@@ -32,7 +35,7 @@
 <body>
 
 <div class="header">
-    <h1 style="margin:0;">URBAN LUNCH</h1>
+    <h1 style="margin:0; font-size: 20px;">URBAN LUNCH</h1>
 </div>
 
 <div id="app"></div>
@@ -41,17 +44,17 @@
     let tg = window.Telegram.WebApp;
     tg.expand();
 
-    // ПРЯМАЯ ССЫЛКА НА ТВОЕ ФОТО
-    const myPhoto = "https://files.catbox.moe/978w3n.jpg";
+    // Ваша ссылка на фото (проверенная прямая ссылка)
+    const mySeasonalPhoto = "https://iimg.su/s/22/oQA4a5.jpg";
 
     const menuData = [
         {
             category: "Сезонные напитки",
             items: [
-                { name: "Латте Халва", image: myPhoto, prices: { "350мл": 290, "450мл": 350 } },
-                { name: "Латте Тыква", image: myPhoto, prices: { "350мл": 290, "450мл": 350 } },
-                { name: "Раф Сникерс", image: myPhoto, prices: { "350мл": 320, "450мл": 380 } },
-                { name: "Латте Orange Christmas", image: myPhoto, prices: { "350мл": 320, "450мл": 380 } }
+                { name: "Латте Халва", image: mySeasonalPhoto, prices: { "350мл": 290, "450мл": 350 } },
+                { name: "Латте Тыква", image: mySeasonalPhoto, prices: { "350мл": 290, "450мл": 350 } },
+                { name: "Раф Сникерс", image: mySeasonalPhoto, prices: { "350мл": 320, "450мл": 380 } },
+                { name: "Латте Orange Christmas", image: mySeasonalPhoto, prices: { "350мл": 320, "450мл": 380 } }
             ]
         },
         {
@@ -78,18 +81,24 @@
     function renderMenu() {
         const container = document.getElementById('app');
         container.innerHTML = ''; 
+        
         menuData.forEach(cat => {
             const title = document.createElement('div');
             title.className = 'category-title';
             title.innerText = cat.category;
             container.appendChild(title);
+            
             cat.items.forEach(item => {
-                const itemID = item.name.replace(/\s+/g, '');
+                const itemID = item.name.replace(/\s+/g, '').replace(/[^\w\s]/gi, '');
                 const sizes = Object.keys(item.prices);
                 const defSize = sizes[0];
+                
                 const card = document.createElement('div');
                 card.className = 'product-card';
+                
+                // Добавляем картинку только если она прописана в данных
                 let imgPart = item.image ? `<img src="${item.image}" class="product-img">` : '';
+                
                 card.innerHTML = `
                     ${imgPart}
                     <div class="product-content">
@@ -109,18 +118,23 @@
     }
 
     window.selectSize = (itemID, size, price) => {
-        document.getElementById(`sizes-${itemID}`).querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+        const btnContainer = document.getElementById(`sizes-${itemID}`);
+        btnContainer.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
         event.target.classList.add('active');
         document.getElementById(`price-${itemID}`).innerText = price + " ₽";
         selectedOptions[itemID] = { size, price };
+        tg.HapticFeedback.selectionChanged();
     };
 
     window.addToCart = (name, itemID) => {
         const item = menuData.flatMap(c => c.items).find(i => i.name === name);
-        const opt = selectedOptions[itemID] || { size: Object.keys(item.prices)[0], price: Object.values(item.prices)[0] };
-        cart.push({ name, size: opt.size, price: opt.price });
-        tg.MainButton.text = `В КОРЗИНЕ: ${cart.reduce((s, i) => s + i.price, 0)} ₽`;
+        const option = selectedOptions[itemID] || { size: Object.keys(item.prices)[0], price: Object.values(item.prices)[0] };
+        cart.push({ name, size: option.size, price: option.price });
+        
+        const total = cart.reduce((s, i) => s + i.price, 0);
+        tg.MainButton.text = `КОРЗИНА: ${total} ₽`;
         tg.MainButton.show();
+        tg.HapticFeedback.notificationOccurred('success');
     };
 
     tg.onEvent('mainButtonClicked', () => tg.sendData(JSON.stringify(cart)));
