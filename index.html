@@ -18,51 +18,52 @@
         body {
             font-family: -apple-system, system-ui, sans-serif;
             background-color: var(--bg); color: var(--text);
-            margin: 0; padding: 0; padding-bottom: 80px;
+            margin: 0; padding: 0; padding-bottom: 100px;
         }
 
-        .header { padding: 20px; text-align: center; background: var(--secondary); }
-        
+        .header { padding: 20px; text-align: center; background: var(--secondary); border-bottom: 1px solid #ddd; }
+        .header h1 { margin: 0; font-size: 22px; color: var(--btn); }
+
         .category-title { 
-            padding: 15px 20px 5px; font-size: 14px; font-weight: bold; 
+            padding: 15px 20px 5px; font-size: 13px; font-weight: bold; 
             text-transform: uppercase; color: var(--hint); letter-spacing: 1px;
         }
 
         .product-card {
             background: var(--bg); border-bottom: 1px solid var(--secondary);
-            padding: 12px 20px; display: flex; gap: 15px; align-items: flex-start;
+            padding: 12px 15px; display: flex; gap: 12px; align-items: flex-start;
         }
 
         .product-img {
-            width: 85px; height: 85px; border-radius: 12px;
+            width: 80px; height: 80px; border-radius: 10px;
             object-fit: cover; background: var(--secondary); flex-shrink: 0;
         }
 
         .product-content { flex-grow: 1; }
-        .product-name { font-weight: 600; font-size: 16px; margin-bottom: 4px; }
+        .product-name { font-weight: 600; font-size: 15px; margin-bottom: 5px; line-height: 1.2; }
 
-        .size-selector { display: flex; gap: 5px; margin-bottom: 8px; }
+        .size-selector { display: flex; gap: 4px; margin-bottom: 8px; }
         .size-btn {
             flex: 1; border: 1px solid var(--secondary); background: var(--secondary);
-            color: var(--text); padding: 6px; border-radius: 8px; font-size: 11px;
+            color: var(--text); padding: 5px 2px; border-radius: 6px; font-size: 10px;
             cursor: pointer;
         }
         .size-btn.active { background: var(--btn); color: var(--btn-text); border-color: var(--btn); }
 
         .price-row { display: flex; justify-content: space-between; align-items: center; }
-        .current-price { font-weight: bold; font-size: 16px; color: var(--btn); }
+        .current-price { font-weight: bold; font-size: 15px; color: var(--btn); }
 
         .add-btn {
             background: var(--btn); color: var(--btn-text); border: none;
-            padding: 6px 14px; border-radius: 10px; font-weight: bold; font-size: 18px;
+            padding: 5px 15px; border-radius: 8px; font-weight: bold; font-size: 16px;
         }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <h1>Urban Lunch</h1>
-    <p>Свежий кофе и сезонные новинки</p>
+    <h1>URBAN LUNCH</h1>
+    <p style="margin: 5px 0 0; font-size: 12px; color: var(--hint);">Coffee & Food</p>
 </div>
 
 <div id="app"></div>
@@ -71,9 +72,9 @@
     let tg = window.Telegram.WebApp;
     tg.expand();
 
-    // Ссылка на твое загруженное фото (я использую временную ссылку, замени её если нужно)
-    const seasonalImg = "https://files.catbox.moe/978w3n.jpg"; 
-    const defaultImg = "https://img.freepik.com/free-vector/coffee-cup-flat-style_78370-141.jpg";
+    // Ссылка на твое фото для сезонных напитков
+    const seasonalImg = "https://iimg.su/i/oQA4a5";
+    const coffeeImg = "https://img.freepik.com/free-vector/coffee-cup-flat-style_78370-141.jpg";
 
     const menuData = [
         {
@@ -88,9 +89,32 @@
         {
             category: "Кофе",
             items: [
-                { name: "Капучино", image: defaultImg, prices: { "250мл": 190, "350мл": 230, "450мл": 270 } },
-                { name: "Латте", image: defaultImg, prices: { "250мл": 190, "350мл": 230, "450мл": 270 } },
-                { name: "Эспрессо", image: defaultImg, prices: { "30мл": 110, "60мл": 150 } }
+                { name: "Капучино", image: coffeeImg, prices: { "250мл": 190, "350мл": 230, "450мл": 270 } },
+                { name: "Латте", image: coffeeImg, prices: { "250мл": 190, "350мл": 230, "450мл": 270 } },
+                { name: "Эспрессо", image: coffeeImg, prices: { "30мл": 110, "60мл": 150 } },
+                { name: "Американо", image: coffeeImg, prices: { "250мл": 180, "350мл": 220, "450мл": 260 } },
+                { name: "Флат Уайт", image: coffeeImg, prices: { "250мл": 220, "350мл": 260, "450мл": 360 } },
+                { name: "Раф", image: coffeeImg, prices: { "250мл": 210, "350мл": 250, "450мл": 290 } },
+                { name: "Бамбл теплый", image: coffeeImg, prices: { "250мл": 270, "350мл": 270, "450мл": 300 } }
+            ]
+        },
+        {
+            category: "Чай",
+            items: [
+                { name: "Чай (Черный, Зеленый и др.)", image: "https://cdn-icons-png.flaticon.com/512/924/924514.png", prices: { "250мл": 120, "450мл": 180 } },
+                { name: "Матча", image: "https://cdn-icons-png.flaticon.com/512/3062/3062181.png", prices: { "250мл": 180, "350мл": 220, "450мл": 260 } },
+                { name: "Какао", image: "https://cdn-icons-png.flaticon.com/512/3121/3121818.png", prices: { "250мл": 180, "350мл": 220, "450мл": 260 } },
+                { name: "Пряный чай", image: "https://cdn-icons-png.flaticon.com/512/924/924484.png", prices: { "250мл": 240, "350мл": 280, "450мл": 320 } }
+            ]
+        },
+        {
+            category: "Холодное",
+            items: [
+                { name: "Айс Латте", image: "https://cdn-icons-png.flaticon.com/512/2935/2935307.png", prices: { "250мл": 240, "350мл": 280 } },
+                { name: "Эспрессо тоник", image: "https://cdn-icons-png.flaticon.com/512/2935/2935307.png", prices: { "250мл": 250, "350мл": 290 } },
+                { name: "Бамбл холодный", image: "https://cdn-icons-png.flaticon.com/512/2935/2935307.png", prices: { "250мл": 270, "350мл": 300 } },
+                { name: "Айс Матча", image: "https://cdn-icons-png.flaticon.com/512/2935/2935307.png", prices: { "250мл": 230, "350мл": 270 } },
+                { name: "Лимонад", image: "https://cdn-icons-png.flaticon.com/512/924/924524.png", prices: { "250мл": 260, "350мл": 290 } }
             ]
         }
     ];
@@ -101,13 +125,15 @@
     function renderMenu() {
         const container = document.getElementById('app');
         menuData.forEach(cat => {
-            const catDiv = document.createElement('div');
-            catDiv.innerHTML = `<div class="category-title">${cat.category}</div>`;
+            const catHeader = document.createElement('div');
+            catHeader.className = 'category-title';
+            catHeader.innerText = cat.category;
+            container.appendChild(catHeader);
             
             cat.items.forEach(item => {
                 const sizes = Object.keys(item.prices);
                 const defaultSize = sizes[0];
-                const itemID = item.name.replace(/\s+/g, '');
+                const itemID = item.name.replace(/\s+/g, '').replace(/[^\w\s]/gi, '');
 
                 const card = document.createElement('div');
                 card.className = 'product-card';
@@ -124,9 +150,8 @@
                         </div>
                     </div>
                 `;
-                catDiv.appendChild(card);
+                container.appendChild(card);
             });
-            container.appendChild(catDiv);
         });
     }
 
@@ -136,20 +161,27 @@
         event.target.classList.add('active');
         document.getElementById(`price-${itemID}`).innerText = price + " ₽";
         selectedOptions[itemID] = { size, price };
+        tg.HapticFeedback.selectionChanged();
     };
 
     window.addToCart = (name, itemID) => {
+        const item = menuData.flatMap(c=>c.items).find(i=>i.name===name);
         const option = selectedOptions[itemID] || { 
-            size: Object.keys(menuData.flatMap(c=>c.items).find(i=>i.name===name).prices)[0],
-            price: Object.values(menuData.flatMap(c=>c.items).find(i=>i.name===name).prices)[0]
+            size: Object.keys(item.prices)[0],
+            price: Object.values(item.prices)[0]
         };
         cart.push({ name, size: option.size, price: option.price });
-        tg.MainButton.text = `Оплатить: ${cart.reduce((s, i) => s + i.price, 0)} ₽`;
+        
+        const total = cart.reduce((s, i) => s + i.price, 0);
+        tg.MainButton.text = `В КОРЗИНЕ: ${total} ₽`;
         tg.MainButton.show();
         tg.HapticFeedback.notificationOccurred('success');
     };
 
-    tg.onEvent('mainButtonClicked', () => tg.sendData(JSON.stringify(cart)));
+    tg.onEvent('mainButtonClicked', () => {
+        tg.sendData(JSON.stringify(cart));
+    });
+
     renderMenu();
 </script>
 </body>
