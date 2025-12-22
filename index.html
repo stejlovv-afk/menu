@@ -14,17 +14,17 @@
             --btn-text: var(--tg-theme-button-text-color, #ffffff);
             --secondary: var(--tg-theme-secondary-bg-color, #f5f5f5);
         }
-        body { font-family: sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 100px; -webkit-tap-highlight-color: transparent; }
+        body { font-family: sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 100px; }
         .header { padding: 20px; text-align: center; background: var(--secondary); border-bottom: 1px solid rgba(0,0,0,0.1); }
         .category-title { padding: 15px 20px 5px; font-size: 13px; font-weight: bold; text-transform: uppercase; color: var(--hint); }
         .product-card { border-bottom: 1px solid var(--secondary); padding: 12px 15px; display: flex; gap: 12px; align-items: center; }
-        .product-img { width: 85px; height: 85px; border-radius: 12px; object-fit: cover; flex-shrink: 0; background: #eee; }
+        .product-img { width: 85px; height: 85px; border-radius: 12px; object-fit: cover; flex-shrink: 0; }
         .product-content { flex-grow: 1; display: flex; flex-direction: column; gap: 6px; }
-        .product-name { font-weight: 600; font-size: 16px; color: var(--text); }
+        .product-name { font-weight: 600; font-size: 16px; }
         .size-selector { display: flex; gap: 4px; }
-        .size-btn { flex: 1; border: 1px solid var(--secondary); background: var(--secondary); color: var(--text); padding: 6px 2px; border-radius: 8px; font-size: 11px; transition: 0.2s; }
-        .size-btn.active { background: var(--btn); color: var(--btn-text); border-color: var(--btn); }
-        .price-row { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; }
+        .size-btn { flex: 1; border: 1px solid var(--secondary); background: var(--secondary); color: var(--text); padding: 6px 2px; border-radius: 8px; font-size: 11px; }
+        .size-btn.active { background: var(--btn); color: var(--btn-text); }
+        .price-row { display: flex; justify-content: space-between; align-items: center; }
         .current-price { font-weight: bold; font-size: 16px; color: var(--btn); }
         .add-btn { background: var(--btn); color: var(--btn-text); border: none; padding: 8px 18px; border-radius: 10px; font-weight: bold; font-size: 18px; }
     </style>
@@ -32,7 +32,7 @@
 <body>
 
 <div class="header">
-    <h1 style="margin:0; font-size: 20px;">URBAN LUNCH</h1>
+    <h1 style="margin:0;">URBAN LUNCH</h1>
 </div>
 
 <div id="app"></div>
@@ -41,19 +41,17 @@
     let tg = window.Telegram.WebApp;
     tg.expand();
 
-    // Заменил на максимально стабильную прямую ссылку
-    const seasonalImg = "https://raw.githubusercontent.com/Artem-Urban/urban-lunch/main/seasonal.jpg"; 
-    // Если на GitHub еще не загрузил файл seasonal.jpg, используем эту проверенную:
-    const backupImg = "https://files.catbox.moe/978w3n.jpg";
+    // ПРЯМАЯ ССЫЛКА НА ТВОЕ ФОТО
+    const myPhoto = "https://files.catbox.moe/978w3n.jpg";
 
     const menuData = [
         {
             category: "Сезонные напитки",
             items: [
-                { name: "Латте Халва", image: backupImg, prices: { "350мл": 290, "450мл": 350 } },
-                { name: "Латте Тыква", image: backupImg, prices: { "350мл": 290, "450мл": 350 } },
-                { name: "Раф Сникерс", image: backupImg, prices: { "350мл": 320, "450мл": 380 } },
-                { name: "Латте Orange Christmas", image: backupImg, prices: { "350мл": 320, "450мл": 380 } }
+                { name: "Латте Халва", image: myPhoto, prices: { "350мл": 290, "450мл": 350 } },
+                { name: "Латте Тыква", image: myPhoto, prices: { "350мл": 290, "450мл": 350 } },
+                { name: "Раф Сникерс", image: myPhoto, prices: { "350мл": 320, "450мл": 380 } },
+                { name: "Латте Orange Christmas", image: myPhoto, prices: { "350мл": 320, "450мл": 380 } }
             ]
         },
         {
@@ -80,23 +78,18 @@
     function renderMenu() {
         const container = document.getElementById('app');
         container.innerHTML = ''; 
-        
         menuData.forEach(cat => {
             const title = document.createElement('div');
             title.className = 'category-title';
             title.innerText = cat.category;
             container.appendChild(title);
-            
             cat.items.forEach(item => {
                 const itemID = item.name.replace(/\s+/g, '');
                 const sizes = Object.keys(item.prices);
                 const defSize = sizes[0];
-                
                 const card = document.createElement('div');
                 card.className = 'product-card';
-                
-                let imgPart = item.image ? `<img src="${item.image}" class="product-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/924/924514.png'">` : '';
-                
+                let imgPart = item.image ? `<img src="${item.image}" class="product-img">` : '';
                 card.innerHTML = `
                     ${imgPart}
                     <div class="product-content">
@@ -116,23 +109,18 @@
     }
 
     window.selectSize = (itemID, size, price) => {
-        const btnContainer = document.getElementById(`sizes-${itemID}`);
-        btnContainer.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(`sizes-${itemID}`).querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
         event.target.classList.add('active');
         document.getElementById(`price-${itemID}`).innerText = price + " ₽";
         selectedOptions[itemID] = { size, price };
-        tg.HapticFeedback.selectionChanged();
     };
 
     window.addToCart = (name, itemID) => {
         const item = menuData.flatMap(c => c.items).find(i => i.name === name);
-        const option = selectedOptions[itemID] || { size: Object.keys(item.prices)[0], price: Object.values(item.prices)[0] };
-        cart.push({ name, size: option.size, price: option.price });
-        
-        const total = cart.reduce((s, i) => s + i.price, 0);
-        tg.MainButton.text = `ЗАКАЗАТЬ: ${total} ₽`;
+        const opt = selectedOptions[itemID] || { size: Object.keys(item.prices)[0], price: Object.values(item.prices)[0] };
+        cart.push({ name, size: opt.size, price: opt.price });
+        tg.MainButton.text = `В КОРЗИНЕ: ${cart.reduce((s, i) => s + i.price, 0)} ₽`;
         tg.MainButton.show();
-        tg.HapticFeedback.notificationOccurred('success');
     };
 
     tg.onEvent('mainButtonClicked', () => tg.sendData(JSON.stringify(cart)));
