@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coffee Shop Menu</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: var(--tg-theme-bg-color); /* Берем цвет фона из ТГ */
+            color: var(--tg-theme-text-color);         /* Цвет текста из ТГ */
+            margin: 0; padding: 20px;
+        }
+        .item {
+            background: var(--tg-theme-secondary-bg-color);
+            padding: 15px; border-radius: 12px; margin-bottom: 10px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .button {
+            background: var(--tg-theme-button-color); /* Синяя кнопка ТГ */
+            color: var(--tg-theme-button-text-color);
+            border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;
+        }
+        .cart-status { text-align: center; margin-top: 20px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h2>☕️ Меню кофейни</h2>
+    
+    <div id="menu">
+        <div class="item">
+            <span>Капучино — 250₽</span>
+            <button class="button" onclick="addToCart('Капучино', 250)">+</button>
+        </div>
+        <div class="item">
+            <span>Латте — 280₽</span>
+            <button class="button" onclick="addToCart('Латте', 280)">+</button>
+        </div>
+    </div>
+
+    <div class="cart-status" id="status">Корзина пуста</div>
+
+    <script>
+        let tg = window.Telegram.WebApp;
+        tg.expand(); // Раскрываем на весь экран
+
+        let cart = [];
+
+        function addToCart(name, price) {
+            cart.push({name, price});
+            document.getElementById('status').innerText = `В корзине товаров: ${cart.length}`;
+            
+            // Показываем главную кнопку внизу Телеграма
+            tg.MainButton.text = "Оформить заказ";
+            tg.MainButton.show();
+        }
+
+        // Когда нажали на большую синюю кнопку "Оформить заказ" внизу
+        tg.onEvent('mainButtonClicked', function(){
+            tg.sendData(JSON.stringify(cart)); // Отправляем данные боту
+        });
+    </script>
+</body>
+</html>
