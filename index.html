@@ -31,7 +31,7 @@
 
         .product-card {
             background: var(--bg); border-bottom: 1px solid var(--secondary);
-            padding: 12px 15px; display: flex; gap: 12px; align-items: flex-start;
+            padding: 12px 15px; display: flex; gap: 12px; align-items: center;
         }
 
         .product-img {
@@ -72,9 +72,8 @@
     let tg = window.Telegram.WebApp;
     tg.expand();
 
-    // Прямая ссылка на ваше изображение
+    // Ссылка на твое фото для сезонных напитков
     const seasonalImg = "https://iimg.su/s/22/oQA4a5.jpg";
-    const coffeeImg = "https://img.freepik.com/free-vector/coffee-cup-flat-style_78370-141.jpg";
 
     const menuData = [
         {
@@ -89,32 +88,32 @@
         {
             category: "Кофе",
             items: [
-                { name: "Капучино", image: coffeeImg, prices: { "250мл": 190, "350мл": 230, "450мл": 270 } },
-                { name: "Латте", image: coffeeImg, prices: { "250мл": 190, "350мл": 230, "450мл": 270 } },
-                { name: "Эспрессо", image: coffeeImg, prices: { "30/60мл": 110, "60мл": 150 } },
-                { name: "Американо", image: coffeeImg, prices: { "250мл": 180, "350мл": 220, "450мл": 260 } },
-                { name: "Флат Уайт", image: coffeeImg, prices: { "250мл": 220, "350мл": 260, "450мл": 360 } },
-                { name: "Раф", image: coffeeImg, prices: { "250мл": 210, "350мл": 250, "450мл": 290 } },
-                { name: "Бамбл теплый", image: coffeeImg, prices: { "250мл": 270, "350мл": 270, "450мл": 300 } }
+                { name: "Капучино", prices: { "250мл": 190, "350мл": 230, "450мл": 270 } },
+                { name: "Латте", prices: { "250мл": 190, "350мл": 230, "450мл": 270 } },
+                { name: "Эспрессо", prices: { "30/60мл": 110, "60мл": 150 } },
+                { name: "Американо", prices: { "250мл": 180, "350мл": 220, "450мл": 260 } },
+                { name: "Флат Уайт", prices: { "250мл": 220, "350мл": 260, "450мл": 360 } },
+                { name: "Раф", prices: { "250мл": 210, "350мл": 250, "450мл": 290 } },
+                { name: "Бамбл теплый", prices: { "250мл": 270, "350мл": 270, "450мл": 300 } }
             ]
         },
         {
             category: "Чай",
             items: [
-                { name: "Чай (Черный, Зеленый и др.)", image: "https://cdn-icons-png.flaticon.com/512/924/924514.png", prices: { "250мл": 120, "450мл": 180 } },
-                { name: "Матча", image: "https://cdn-icons-png.flaticon.com/512/3062/3062181.png", prices: { "250мл": 180, "350мл": 220, "450мл": 260 } },
-                { name: "Какао", image: "https://cdn-icons-png.flaticon.com/512/3121/3121818.png", prices: { "250мл": 180, "350мл": 220, "450мл": 260 } },
-                { name: "Пряный чай", image: "https://cdn-icons-png.flaticon.com/512/924/924484.png", prices: { "250мл": 240, "350мл": 280, "450мл": 320 } }
+                { name: "Чай (Черный, Зеленый и др.)", prices: { "250мл": 120, "450мл": 180 } },
+                { name: "Матча", prices: { "250мл": 180, "350мл": 220, "450мл": 260 } },
+                { name: "Какао", prices: { "250мл": 180, "350мл": 220, "450мл": 260 } },
+                { name: "Пряный чай", prices: { "250мл": 240, "350мл": 280, "450мл": 320 } }
             ]
         },
         {
             category: "Холодное",
             items: [
-                { name: "Айс Латте", image: "https://cdn-icons-png.flaticon.com/512/2935/2935307.png", prices: { "250мл": 240, "350мл": 280 } },
-                { name: "Эспрессо тоник", image: "https://cdn-icons-png.flaticon.com/512/2935/2935307.png", prices: { "250мл": 250, "350мл": 290 } },
-                { name: "Бамбл холодный", image: "https://cdn-icons-png.flaticon.com/512/2935/2935307.png", prices: { "250мл": 270, "350мл": 300 } },
-                { name: "Айс Матча", image: "https://cdn-icons-png.flaticon.com/512/2935/2935307.png", prices: { "250мл": 230, "350мл": 270 } },
-                { name: "Лимонад", image: "https://cdn-icons-png.flaticon.com/512/924/924524.png", prices: { "250мл": 260, "350мл": 290 } }
+                { name: "Айс Латте", prices: { "250мл": 240, "350мл": 280 } },
+                { name: "Эспрессо тоник", prices: { "250мл": 250, "350мл": 290 } },
+                { name: "Бамбл холодный", prices: { "250мл": 270, "350мл": 300 } },
+                { name: "Айс Матча", prices: { "250мл": 230, "350мл": 270 } },
+                { name: "Лимонад", prices: { "250мл": 260, "350мл": 290 } }
             ]
         }
     ];
@@ -137,8 +136,12 @@
 
                 const card = document.createElement('div');
                 card.className = 'product-card';
+                
+                // Проверяем, есть ли картинка у товара
+                const imgHTML = item.image ? `<img src="${item.image}" class="product-img">` : '';
+
                 card.innerHTML = `
-                    <img src="${item.image}" class="product-img">
+                    ${imgHTML}
                     <div class="product-content">
                         <div class="product-name">${item.name}</div>
                         <div class="size-selector" id="sizes-${itemID}">
@@ -173,16 +176,4 @@
         cart.push({ name, size: option.size, price: option.price });
         
         const total = cart.reduce((s, i) => s + i.price, 0);
-        tg.MainButton.text = `ОФОРМИТЬ ЗАКАЗ: ${total} ₽`;
-        tg.MainButton.show();
-        tg.HapticFeedback.notificationOccurred('success');
-    };
-
-    tg.onEvent('mainButtonClicked', () => {
-        tg.sendData(JSON.stringify(cart));
-    });
-
-    renderMenu();
-</script>
-</body>
-</html>
+        tg.MainButton.text = `ОФОРМИТ
