@@ -33,7 +33,6 @@
 
 <div class="header">
     <h1 style="margin:0; font-size: 22px; color: var(--btn);">URBAN LUNCH</h1>
-    <p style="margin:4px 0 0; font-size: 12px; color: var(--hint);">Меню напитков</p>
 </div>
 
 <div id="app"></div>
@@ -42,44 +41,30 @@
     let tg = window.Telegram.WebApp;
     tg.expand();
 
-    // Путь к твоему фото на GitHub
-    const seasonalImg = "./seasonal.jpg";
-
     const menuData = [
-        {
-            category: "Сезонные напитки",
-            items: [
-                { name: "Латте Халва", image: seasonalImg, prices: { "350мл": 290, "450мл": 350 } },
-                { name: "Латте Тыква", image: seasonalImg, prices: { "350мл": 290, "450мл": 350 } },
-                { name: "Раф Сникерс", image: seasonalImg, prices: { "350мл": 320, "450мл": 380 } },
-                { name: "Латте Orange Christmas", image: seasonalImg, prices: { "350мл": 320, "450мл": 380 } }
-            ]
-        },
         {
             category: "Классический кофе",
             items: [
+                { name: "Капучино", image: "./kapuchino.jpg", prices: { "250мл": 190, "350мл": 230, "450мл": 270 } },
+                { name: "Латте", image: "./latte.jpg", prices: { "250мл": 190, "350мл": 230, "450мл": 270 } },
                 { name: "Эспрессо", prices: { "30мл": 110, "60мл": 150 } },
                 { name: "Американо", prices: { "250мл": 180, "350мл": 220, "450мл": 260 } },
-                { name: "Капучино", prices: { "250мл": 190, "350мл": 230, "450мл": 270 } },
-                { name: "Латте", prices: { "250мл": 190, "350мл": 230, "450мл": 270 } },
-                { name: "Флат Уайт", prices: { "250мл": 220, "350мл": 260, "450мл": 360 } },
                 { name: "Раф", prices: { "250мл": 210, "350мл": 250, "450мл": 290 } }
-            ]
-        },
-        {
-            category: "Чай и Какао",
-            items: [
-                { name: "Чай ассорти", prices: { "250мл": 120, "450мл": 180 } },
-                { name: "Матча латте", prices: { "250мл": 180, "350мл": 220, "450мл": 260 } },
-                { name: "Какао", prices: { "250мл": 180, "350мл": 220, "450мл": 260 } }
             ]
         },
         {
             category: "Холодные напитки",
             items: [
+                { name: "Бамбл", image: "./bambl.jpg", prices: { "250мл": 270, "350мл": 300 } },
                 { name: "Айс Латте", prices: { "250мл": 240, "350мл": 280 } },
-                { name: "Эспрессо тоник", prices: { "250мл": 250, "350мл": 290 } },
-                { name: "Бамбл", prices: { "250мл": 270, "350мл": 300 } }
+                { name: "Эспрессо тоник", prices: { "250мл": 250, "350мл": 290 } }
+            ]
+        },
+        {
+            category: "Сезонное меню",
+            items: [
+                { name: "Латте Халва", image: "./seasonal.jpg", prices: { "350мл": 290, "450мл": 350 } },
+                { name: "Латте Тыква", image: "./seasonal.jpg", prices: { "350мл": 290, "450мл": 350 } }
             ]
         }
     ];
@@ -90,18 +75,23 @@
     function renderMenu() {
         const container = document.getElementById('app');
         container.innerHTML = ''; 
+        
         menuData.forEach(cat => {
             const title = document.createElement('div');
             title.className = 'category-title';
             title.innerText = cat.category;
             container.appendChild(title);
+            
             cat.items.forEach(item => {
                 const itemID = item.name.replace(/\s+/g, '').replace(/[^\w\s]/gi, '');
                 const sizes = Object.keys(item.prices);
                 const defSize = sizes[0];
                 const card = document.createElement('div');
                 card.className = 'product-card';
-                let imgPart = item.image ? `<img src="${item.image}" class="product-img">` : '';
+                
+                // Если картинки нет, этот блок просто не будет создан
+                let imgPart = item.image ? `<img src="${item.image}" class="product-img" onerror="this.style.display='none'">` : '';
+                
                 card.innerHTML = `
                     ${imgPart}
                     <div class="product-content">
