@@ -72,8 +72,8 @@
     let tg = window.Telegram.WebApp;
     tg.expand();
 
-    // Ссылка на твое фото для сезонных напитков
-    const seasonalImg = "https://iimg.su/i/oQA4a5";
+    // Прямая ссылка на ваше изображение
+    const seasonalImg = "https://iimg.su/s/22/oQA4a5.jpg";
     const coffeeImg = "https://img.freepik.com/free-vector/coffee-cup-flat-style_78370-141.jpg";
 
     const menuData = [
@@ -91,7 +91,7 @@
             items: [
                 { name: "Капучино", image: coffeeImg, prices: { "250мл": 190, "350мл": 230, "450мл": 270 } },
                 { name: "Латте", image: coffeeImg, prices: { "250мл": 190, "350мл": 230, "450мл": 270 } },
-                { name: "Эспрессо", image: coffeeImg, prices: { "30мл": 110, "60мл": 150 } },
+                { name: "Эспрессо", image: coffeeImg, prices: { "30/60мл": 110, "60мл": 150 } },
                 { name: "Американо", image: coffeeImg, prices: { "250мл": 180, "350мл": 220, "450мл": 260 } },
                 { name: "Флат Уайт", image: coffeeImg, prices: { "250мл": 220, "350мл": 260, "450мл": 360 } },
                 { name: "Раф", image: coffeeImg, prices: { "250мл": 210, "350мл": 250, "450мл": 290 } },
@@ -173,7 +173,7 @@
         cart.push({ name, size: option.size, price: option.price });
         
         const total = cart.reduce((s, i) => s + i.price, 0);
-        tg.MainButton.text = `В КОРЗИНЕ: ${total} ₽`;
+        tg.MainButton.text = `ОФОРМИТЬ ЗАКАЗ: ${total} ₽`;
         tg.MainButton.show();
         tg.HapticFeedback.notificationOccurred('success');
     };
