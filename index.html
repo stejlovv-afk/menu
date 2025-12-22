@@ -2,65 +2,186 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coffee Shop Menu</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Urban Lunch Coffee</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
+        :root {
+            --bg: var(--tg-theme-bg-color, #ffffff);
+            --text: var(--tg-theme-text-color, #222222);
+            --hint: var(--tg-theme-hint-color, #777777);
+            --btn: var(--tg-theme-button-color, #4e342e); /* Кофейный цвет */
+            --btn-text: var(--tg-theme-button-text-color, #ffffff);
+            --secondary: var(--tg-theme-secondary-bg-color, #f5f5f5);
+        }
+
         body {
-            font-family: sans-serif;
-            background-color: var(--tg-theme-bg-color); /* Берем цвет фона из ТГ */
-            color: var(--tg-theme-text-color);         /* Цвет текста из ТГ */
-            margin: 0; padding: 20px;
+            font-family: -apple-system, system-ui, sans-serif;
+            background-color: var(--bg); color: var(--text);
+            margin: 0; padding: 0; padding-bottom: 80px;
         }
-        .item {
-            background: var(--tg-theme-secondary-bg-color);
-            padding: 15px; border-radius: 12px; margin-bottom: 10px;
-            display: flex; justify-content: space-between; align-items: center;
+
+        .header { padding: 20px; text-align: center; background: var(--secondary); }
+        .category-title { 
+            padding: 15px 20px 5px; font-size: 18px; font-weight: bold; 
+            text-transform: uppercase; color: var(--hint); letter-spacing: 1px;
         }
-        .button {
-            background: var(--tg-theme-button-color); /* Синяя кнопка ТГ */
-            color: var(--tg-theme-button-text-color);
-            border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;
+
+        .product-card {
+            background: var(--bg); border-bottom: 1px solid var(--secondary);
+            padding: 15px 20px; display: flex; flex-direction: column; gap: 10px;
         }
-        .cart-status { text-align: center; margin-top: 20px; font-weight: bold; }
+
+        .product-info { display: flex; justify-content: space-between; align-items: center; }
+        .product-name { font-weight: 600; font-size: 17px; }
+
+        .size-selector {
+            display: flex; gap: 8px; margin-top: 5px;
+        }
+
+        .size-btn {
+            flex: 1; border: 1px solid var(--secondary); background: var(--secondary);
+            color: var(--text); padding: 8px; border-radius: 10px; font-size: 12px;
+            cursor: pointer; transition: 0.2s;
+        }
+
+        .size-btn.active {
+            background: var(--btn); color: var(--btn-text); border-color: var(--btn);
+        }
+
+        .price-row {
+            display: flex; justify-content: space-between; align-items: center; margin-top: 5px;
+        }
+
+        .current-price { font-weight: bold; font-size: 18px; color: var(--btn); }
+
+        .add-btn {
+            background: var(--btn); color: var(--btn-text); border: none;
+            padding: 10px 20px; border-radius: 12px; font-weight: bold;
+        }
     </style>
 </head>
 <body>
 
-    <h2>☕️ Меню кофейни</h2>
-    
-    <div id="menu">
-        <div class="item">
-            <span>Капучино — 250₽</span>
-            <button class="button" onclick="addToCart('Капучино', 250)">+</button>
-        </div>
-        <div class="item">
-            <span>Латте — 280₽</span>
-            <button class="button" onclick="addToCart('Латте', 280)">+</button>
-        </div>
+<div class="header">
+    <h1>Urban Lunch</h1>
+    <p>Выберите любимый напиток</p>
+</div>
+
+<div id="app">
     </div>
 
-    <div class="cart-status" id="status">Корзина пуста</div>
+<script>
+    let tg = window.Telegram.WebApp;
+    tg.expand();
 
-    <script>
-        let tg = window.Telegram.WebApp;
-        tg.expand(); // Раскрываем на весь экран
-
-        let cart = [];
-
-        function addToCart(name, price) {
-            cart.push({name, price});
-            document.getElementById('status').innerText = `В корзине товаров: ${cart.length}`;
-            
-            // Показываем главную кнопку внизу Телеграма
-            tg.MainButton.text = "Оформить заказ";
-            tg.MainButton.show();
+    const menuData = [
+        {
+            category: "Кофе",
+            items: [
+                { name: "Капучино", prices: { "250мл": 190, "350мл": 230, "450мл": 270 } },
+                { name: "Латте", prices: { "250мл": 190, "350мл": 230, "450мл": 270 } },
+                { name: "Эспрессо", prices: { "30мл": 110, "60мл": 150 } },
+                { name: "Американо", prices: { "250мл": 180, "350мл": 220, "450мл": 260 } },
+                { name: "Флат Уайт", prices: { "250мл": 220, "350мл": 260, "450мл": 360 } },
+                { name: "Раф", prices: { "250мл": 210, "350мл": 250, "450мл": 290 } },
+                { name: "Бамбл теплый", prices: { "250мл": 270, "350мл": 270, "450мл": 300 } }
+            ]
+        },
+        {
+            category: "Чай & Напитки",
+            items: [
+                { name: "Чай (Черный, Зеленый и др.)", prices: { "250мл": 120, "350мл": 150, "450мл": 180 } },
+                { name: "Матча", prices: { "250мл": 180, "350мл": 220, "450мл": 260 } },
+                { name: "Какао", prices: { "250мл": 180, "350мл": 220, "450мл": 260 } },
+                { name: "Пряный чай", prices: { "250мл": 240, "350мл": 280, "450мл": 320 } }
+            ]
+        },
+        {
+            category: "Холодные напитки",
+            items: [
+                { name: "Айс Латте", prices: { "250мл": 240, "350мл": 280 } },
+                { name: "Эспрессо тоник", prices: { "250мл": 250, "350мл": 290 } },
+                { name: "Бамбл холодный", prices: { "250мл": 270, "350мл": 300 } },
+                { name: "Айс Матча", prices: { "250мл": 230, "350мл": 270 } },
+                { name: "Лимонад", prices: { "250мл": 260, "350мл": 290 } }
+            ]
+        },
+        {
+            category: "Сезонные напитки",
+            items: [
+                { name: "Латте Халва", prices: { "350мл": 290, "450мл": 350 } },
+                { name: "Латте Тыква", prices: { "350мл": 290, "450мл": 350 } },
+                { name: "Раф Сникерс", prices: { "350мл": 320, "450мл": 380 } },
+                { name: "Латте Orange Christmas", prices: { "350мл": 320, "450мл": 380 } }
+            ]
         }
+    ];
 
-        // Когда нажали на большую синюю кнопку "Оформить заказ" внизу
-        tg.onEvent('mainButtonClicked', function(){
-            tg.sendData(JSON.stringify(cart)); // Отправляем данные боту
+    let cart = [];
+
+    function renderMenu() {
+        const container = document.getElementById('app');
+        menuData.forEach(cat => {
+            const catDiv = document.createElement('div');
+            catDiv.innerHTML = `<div class="category-title">${cat.category}</div>`;
+            
+            cat.items.forEach(item => {
+                const sizes = Object.keys(item.prices);
+                const defaultSize = sizes[0];
+                const itemID = item.name.replace(/\s+/g, '');
+
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.innerHTML = `
+                    <div class="product-name">${item.name}</div>
+                    <div class="size-selector" id="sizes-${itemID}">
+                        ${sizes.map(s => `<button class="size-btn ${s===defaultSize?'active':''}" onclick="selectSize('${itemID}', '${s}', ${item.prices[s]})">${s}</button>`).join('')}
+                    </div>
+                    <div class="price-row">
+                        <div class="current-price" id="price-${itemID}">${item.prices[defaultSize]} ₽</div>
+                        <button class="add-btn" onclick="addToCart('${item.name}', '${itemID}')">Добавить</button>
+                    </div>
+                `;
+                catDiv.appendChild(card);
+            });
+            container.appendChild(catDiv);
         });
-    </script>
+    }
+
+    let selectedOptions = {};
+
+    window.selectSize = (itemID, size, price) => {
+        const buttons = document.querySelectorAll(`#sizes-${itemID} .size-btn`);
+        buttons.forEach(b => b.classList.remove('active'));
+        event.target.classList.add('active');
+        document.getElementById(`price-${itemID}`).innerText = price + " ₽";
+        selectedOptions[itemID] = { size, price };
+        tg.HapticFeedback.selectionChanged();
+    };
+
+    window.addToCart = (name, itemID) => {
+        const option = selectedOptions[itemID] || { 
+            size: Object.keys(menuData.flatMap(c=>c.items).find(i=>i.name===name).prices)[0],
+            price: Object.values(menuData.flatMap(c=>c.items).find(i=>i.name===name).prices)[0]
+        };
+        
+        cart.push({ name, size: option.size, price: option.price });
+        updateMainButton();
+        tg.HapticFeedback.notificationOccurred('success');
+    };
+
+    function updateMainButton() {
+        const total = cart.reduce((sum, i) => sum + i.price, 0);
+        tg.MainButton.text = `Оформить заказ: ${total} ₽`;
+        tg.MainButton.show();
+    }
+
+    tg.onEvent('mainButtonClicked', () => {
+        tg.sendData(JSON.stringify(cart));
+    });
+
+    renderMenu();
+</script>
 </body>
 </html>
