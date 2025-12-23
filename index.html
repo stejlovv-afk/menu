@@ -18,7 +18,7 @@
         .header { padding: 20px; text-align: center; background: var(--secondary); border-bottom: 1px solid rgba(0,0,0,0.1); }
         .category-title { padding: 15px 20px 5px; font-size: 13px; font-weight: bold; text-transform: uppercase; color: var(--hint); letter-spacing: 1px; }
         .product-card { border-bottom: 1px solid var(--secondary); padding: 12px 15px; display: flex; gap: 12px; align-items: center; }
-        .product-img { width: 85px; height: 85px; border-radius: 12px; object-fit: cover; flex-shrink: 0; background: #eee; }
+        .product-img { width: 85px; height: 85px; border-radius: 12px; object-fit: cover; flex-shrink: 0; background: #f0f0f0; border: 1px solid rgba(0,0,0,0.05); }
         .product-content { flex-grow: 1; display: flex; flex-direction: column; gap: 4px; }
         .product-name { font-weight: 600; font-size: 15px; }
         .product-desc { font-size: 11px; color: var(--hint); line-height: 1.2; }
@@ -42,77 +42,78 @@
     let tg = window.Telegram.WebApp;
     tg.expand();
 
+    // ВАЖНО: Если фото не грузятся, проверь, чтобы названия файлов на GitHub были МАЛЕНЬКИМИ БУКВАМИ
     const menuData = [
         {
             category: "Кофе",
             items: [
-                { name: "Капучино", image: "./kapuchino.jpg", prices: { "250мл": 190, "350мл": 230, "450мл": 270 } },
-                { name: "Латте", image: "./latte.jpg", prices: { "250мл": 190, "350мл": 230, "450мл": 270 } },
-                { name: "Эспрессо", image: "./espresso1.jpg", prices: { "30мл": 110, "60мл": 150 } },
-                { name: "Американо", image: "./americano.jpg", prices: { "250мл": 180, "350мл": 220, "450мл": 260 } },
-                { name: "Флат Уайт", image: "./latte.jpg", prices: { "250мл": 220, "350мл": 260, "450мл": 360 } },
-                { name: "Раф", image: "./latte.jpg", prices: { "250мл": 210, "350мл": 250, "450мл": 290 } },
-                { name: "Бамбл Теплый", image: "./oblepihapunch.jpg", prices: { "250мл": 270, "350мл": 270, "450мл": 300 } },
-                { name: "Глинтвейн", image: "./glintveinpunch.jpg", prices: { "350мл": 230, "450мл": 270 } }
+                { name: "Капучино", image: "kapuchino.jpg", prices: { "250мл": 190, "350мл": 230, "450мл": 270 } },
+                { name: "Латте", image: "latte.jpg", prices: { "250мл": 190, "350мл": 230, "450мл": 270 } },
+                { name: "Эспрессо", image: "espresso1.jpg", prices: { "30мл": 110, "60мл": 150 } },
+                { name: "Американо", image: "americano.jpg", prices: { "250мл": 180, "350мл": 220, "450мл": 260 } },
+                { name: "Флат Уайт", image: "latte.jpg", prices: { "250мл": 220, "350мл": 260, "450мл": 360 } },
+                { name: "Раф", image: "latte.jpg", prices: { "250мл": 210, "350мл": 250, "450мл": 290 } },
+                { name: "Бамбл Теплый", image: "oblepihapunch.jpg", prices: { "250мл": 270, "350мл": 270, "450мл": 300 } },
+                { name: "Глинтвейн", image: "glintveinpunch.jpg", prices: { "350мл": 230, "450мл": 270 } }
             ]
         },
         {
             category: "Чай (250мл / 450мл)",
             items: [
-                { name: "Чай Черный", image: "./teablack.jpg", prices: { "250мл": 120, "450мл": 180 } },
-                { name: "Чай Зеленый", image: "./greentea.jpg", prices: { "250мл": 120, "450мл": 180 } },
-                { name: "Чай Каркаде", image: "./karkadetea.jpg", prices: { "250мл": 120, "450мл": 180 } },
-                { name: "Чай Зеленый Жасмин", image: "./greenjasmin.jpg", prices: { "250мл": 120, "450мл": 180 } },
-                { name: "Чай Травяной", image: "./travatea.jpg", prices: { "250мл": 120, "450мл": 180 } },
-                { name: "Матча", image: "./matcha.jpg", prices: { "250мл": 180, "350мл": 220, "450мл": 260 } },
-                { name: "Какао", image: "./kakao.jpg", prices: { "250мл": 180, "350мл": 220, "450мл": 260 } },
-                { name: "Пряный чай", image: "./pryanytea.jpg", prices: { "250мл": 240, "350мл": 280, "450мл": 320 } }
+                { name: "Чай Черный", image: "teablack.jpg", prices: { "250мл": 120, "450мл": 180 } },
+                { name: "Чай Зеленый", image: "greentea.jpg", prices: { "250мл": 120, "450мл": 180 } },
+                { name: "Чай Каркаде", image: "karkadetea.jpg", prices: { "250мл": 120, "450мл": 180 } },
+                { name: "Чай Зеленый Жасмин", image: "greenjasmin.jpg", prices: { "250мл": 120, "450мл": 180 } },
+                { name: "Чай Травяной", image: "travatea.jpg", prices: { "250мл": 120, "450мл": 180 } },
+                { name: "Матча", image: "matcha.jpg", prices: { "250мл": 180, "350мл": 220, "450мл": 260 } },
+                { name: "Какао", image: "kakao.jpg", prices: { "250мл": 180, "350мл": 220, "450мл": 260 } },
+                { name: "Пряный чай", image: "pryanytea.jpg", prices: { "250мл": 240, "350мл": 280, "450мл": 320 } }
             ]
         },
         {
             category: "Пунши",
             items: [
-                { name: "Облепиховый пунш", image: "./oblepihapunch.jpg", prices: { "350мл": 230, "450мл": 270 } },
-                { name: "Малиновый пунш", image: "./malinapunsh.jpg", prices: { "350мл": 230, "450мл": 270 } }
+                { name: "Облепиховый пунш", image: "oblepihapunch.jpg", prices: { "350мл": 230, "450мл": 270 } },
+                { name: "Малиновый пунш", image: "malinapunsh.jpg", prices: { "350мл": 230, "450мл": 270 } }
             ]
         },
         {
             category: "Холодные напитки",
             items: [
-                { name: "Айс Латте", image: "./latte.jpg", prices: { "250мл": 240, "350мл": 280 } },
-                { name: "Эспрессо Тоник", image: "./granattonic.jpg", desc: "Гранатовый или обычный", prices: { "250мл": 250, "350мл": 290 } },
-                { name: "Бамбл Холодный", image: "./granattonic.jpg", prices: { "250мл": 270, "350мл": 300 } },
-                { name: "Айс Матча", image: "./matcha.jpg", prices: { "250мл": 230, "350мл": 270 } },
-                { name: "Лимонад", image: "./lemonchernogo.jpg", desc: "Киви-Фейхоа, Манго-Маракуйя, Смородина-Мята", prices: { "250мл": 260, "350мл": 290 } }
+                { name: "Айс Латте", image: "latte.jpg", prices: { "250мл": 240, "350мл": 280 } },
+                { name: "Эспрессо Тоник", image: "granattonic.jpg", desc: "Гранатовый или обычный", prices: { "250мл": 250, "350мл": 290 } },
+                { name: "Бамбл Холодный", image: "granattonic.jpg", prices: { "250мл": 270, "350мл": 300 } },
+                { name: "Айс Матча", image: "matcha.jpg", prices: { "250мл": 230, "350мл": 270 } },
+                { name: "Лимонад", image: "lemonchernogo.jpg", desc: "Киви-Фейхоа, Манго-Маракуйя, Смородина-Мята", prices: { "250мл": 260, "350мл": 290 } }
             ]
         },
         {
             category: "Сладости и батончики",
             items: [
-                { name: "Bombbar лесной орех", image: "./bombbarfunduk.jpg", prices: { "1шт": 130 } },
-                { name: "Bombbar малиновый", image: "./bombbarmalina.jpg", prices: { "1шт": 130 } },
-                { name: "Bombbar кокос", image: "./bombbarcocos.jpg", prices: { "1шт": 130 } },
-                { name: "Snaqer лесной орех", image: "./snaqerfunduk.jpg", prices: { "1шт": 130 } },
-                { name: "Cookie смородина", image: "./chikabiscuitblackcurrant.jpg", prices: { "1шт": 170 } },
-                { name: "Cookie банан", image: "./chikabiscuitbanan.jpg", prices: { "1шт": 170 } }
+                { name: "Bombbar лесной орех", image: "bombbarfunduk.jpg", prices: { "1шт": 130 } },
+                { name: "Bombbar малиновый", image: "bombbarmalina.jpg", prices: { "1шт": 130 } },
+                { name: "Bombbar кокос", image: "bombbarcocos.jpg", prices: { "1шт": 130 } },
+                { name: "Snaqer лесной орех", image: "snaqerfunduk.jpg", prices: { "1шт": 130 } },
+                { name: "Cookie смородина", image: "chikabiscuitblackcurrant.jpg", prices: { "1шт": 170 } },
+                { name: "Cookie банан", image: "chikabiscuitbanan.jpg", prices: { "1шт": 170 } }
             ]
         },
         {
             category: "Газировка",
             items: [
-                { name: "Черноголовка Cola", image: "./colachernogo.jpg", prices: { "0.5л": 140 } },
-                { name: "Черноголовка Байкал", image: "./baikalchernogo.jpg", prices: { "0.5л": 140 } },
-                { name: "Черноголовка Лимонад", image: "./lemonchernogo.jpg", prices: { "0.5л": 140 } },
-                { name: "Вода газ/негаз", image: "./negazcernogo.jpg", prices: { "0.5л": 70 } }
+                { name: "Черноголовка Cola", image: "colachernogo.jpg", prices: { "0.5л": 140 } },
+                { name: "Черноголовка Байкал", image: "baikalchernogo.jpg", prices: { "0.5л": 140 } },
+                { name: "Черноголовка Лимонад", image: "lemonchernogo.jpg", prices: { "0.5л": 140 } },
+                { name: "Вода газ/негаз", image: "negazcernogo.jpg", prices: { "0.5л": 70 } }
             ]
         },
         {
             category: "Сезонные напитки",
             items: [
-                { name: "Латте Халва", image: "./lattehalva.jpg", prices: { "350мл": 290, "450мл": 350 } },
-                { name: "Латте Тыква", image: "./lattetikva.jpg", prices: { "350мл": 290, "450мл": 350 } },
-                { name: "Раф Сникерс", image: "./rafsnikers.jpg", prices: { "350мл": 320, "450мл": 380 } },
-                { name: "Латте Orange Christmas", image: "./latteorangecristmas.jpg", prices: { "350мл": 320, "450мл": 380 } }
+                { name: "Латте Халва", image: "lattehalva.jpg", prices: { "350мл": 290, "450мл": 350 } },
+                { name: "Латте Тыква", image: "lattetikva.jpg", prices: { "350мл": 290, "450мл": 350 } },
+                { name: "Раф Сникерс", image: "rafsnikers.jpg", prices: { "350мл": 320, "450мл": 380 } },
+                { name: "Латте Orange Christmas", image: "latteorangecristmas.jpg", prices: { "350мл": 320, "450мл": 380 } }
             ]
         }
     ];
@@ -138,7 +139,9 @@
 
                 const card = document.createElement('div');
                 card.className = 'product-card';
-                let imgPart = item.image ? `<img src="${item.image}" class="product-img" onerror="this.style.display='none'">` : '';
+                
+                // Добавлен параметр ?v=1 для сброса кэша изображений
+                let imgPart = item.image ? `<img src="${item.image}?v=1" class="product-img" onerror="console.log('Ошибка загрузки: ' + this.src); this.style.display='none'">` : '';
                 
                 card.innerHTML = `
                     ${imgPart}
