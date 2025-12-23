@@ -18,7 +18,7 @@
         .header { padding: 20px; text-align: center; background: var(--secondary); border-bottom: 1px solid rgba(0,0,0,0.1); }
         .category-title { padding: 15px 20px 5px; font-size: 13px; font-weight: bold; text-transform: uppercase; color: var(--hint); letter-spacing: 1px; }
         .product-card { border-bottom: 1px solid var(--secondary); padding: 12px 15px; display: flex; gap: 12px; align-items: center; }
-        .product-img { width: 85px; height: 85px; border-radius: 12px; object-fit: cover; flex-shrink: 0; background: #f0f0f0; border: 1px solid rgba(0,0,0,0.05); }
+        .product-img { width: 85px; height: 85px; border-radius: 12px; object-fit: cover; flex-shrink: 0; background: #eee; }
         .product-content { flex-grow: 1; display: flex; flex-direction: column; gap: 4px; }
         .product-name { font-weight: 600; font-size: 15px; }
         .product-desc { font-size: 11px; color: var(--hint); line-height: 1.2; }
@@ -42,7 +42,9 @@
     let tg = window.Telegram.WebApp;
     tg.expand();
 
-    // ВАЖНО: Если фото не грузятся, проверь, чтобы названия файлов на GitHub были МАЛЕНЬКИМИ БУКВАМИ
+    // Автоматическое определение пути к папке с картинками
+    const baseUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
+
     const menuData = [
         {
             category: "Кофе",
@@ -58,7 +60,7 @@
             ]
         },
         {
-            category: "Чай (250мл / 450мл)",
+            category: "Чай",
             items: [
                 { name: "Чай Черный", image: "teablack.jpg", prices: { "250мл": 120, "450мл": 180 } },
                 { name: "Чай Зеленый", image: "greentea.jpg", prices: { "250мл": 120, "450мл": 180 } },
@@ -84,7 +86,7 @@
                 { name: "Эспрессо Тоник", image: "granattonic.jpg", desc: "Гранатовый или обычный", prices: { "250мл": 250, "350мл": 290 } },
                 { name: "Бамбл Холодный", image: "granattonic.jpg", prices: { "250мл": 270, "350мл": 300 } },
                 { name: "Айс Матча", image: "matcha.jpg", prices: { "250мл": 230, "350мл": 270 } },
-                { name: "Лимонад", image: "lemonchernogo.jpg", desc: "Киви-Фейхоа, Манго-Маракуйя, Смородина-Мята", prices: { "250мл": 260, "350мл": 290 } }
+                { name: "Лимонад", image: "lemonchernogo.jpg", desc: "Киви/Манго/Смородина", prices: { "250мл": 260, "350мл": 290 } }
             ]
         },
         {
@@ -140,8 +142,9 @@
                 const card = document.createElement('div');
                 card.className = 'product-card';
                 
-                // Добавлен параметр ?v=1 для сброса кэша изображений
-                let imgPart = item.image ? `<img src="${item.image}?v=1" class="product-img" onerror="console.log('Ошибка загрузки: ' + this.src); this.style.display='none'">` : '';
+                // Формируем полный путь к картинке для обхода проблем с путями
+                let fullImgPath = baseUrl + item.image;
+                let imgPart = item.image ? `<img src="${fullImgPath}" class="product-img" onerror="this.style.display='none'">` : '';
                 
                 card.innerHTML = `
                     ${imgPart}
