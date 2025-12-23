@@ -42,61 +42,56 @@
     let tg = window.Telegram.WebApp;
     tg.expand();
 
-    // Путь к папке
-    const IMG_PATH = "menu24/";
+    // Оставляем пустым, так как папки menu24 судя по скриншоту нет
+    const IMG_PATH = ""; 
 
     const menuData = [
         {
             category: "Кофе",
             items: [
-                { name: "Капучино", image: "kapuchino.min.jpg", prices: { "250мл": 190, "350мл": 230, "450мл": 270 } },
-                { name: "Латте", image: "latte.min.jpg", prices: { "250мл": 190, "350мл": 230, "450мл": 270 } },
-                { name: "Эспрессо", image: "espresso1.min.jpg", prices: { "30мл": 110, "60мл": 150 } },
-                { name: "Американо", image: "americano.min.jpg", prices: { "250мл": 180, "350мл": 220, "450мл": 260 } },
-                { name: "Раф", image: "latte.min.jpg", prices: { "250мл": 210, "350мл": 250, "450мл": 290 } },
-                { name: "Глинтвейн", image: "glintveinpunch.min.jpg", prices: { "350мл": 230, "450мл": 270 } }
+                { name: "Капучино", image: "kapuchino-min.jpg", prices: { "250мл": 190, "350мл": 230, "450мл": 270 } },
+                { name: "Латте", image: "latte-min.jpg", prices: { "250мл": 190, "350мл": 230, "450мл": 270 } },
+                { name: "Эспрессо", image: "espresso1-min.jpg", prices: { "30мл": 110, "60мл": 150 } },
+                { name: "Американо", image: "americano-min.jpg", prices: { "250мл": 180, "350мл": 220, "450мл": 260 } },
+                { name: "Раф", image: "latte-min.jpg", prices: { "250мл": 210, "350мл": 250, "450мл": 290 } },
+                { name: "Глинтвейн", image: "glintveinpunch-min.jpg", prices: { "350мл": 230, "450мл": 270 } }
             ]
         },
         {
             category: "Чай",
             items: [
-                { name: "Чай Черный", image: "teablack.min.jpg", prices: { "250мл": 120, "450мл": 180 } },
-                { name: "Чай Зеленый", image: "greentea.min.jpg", prices: { "250мл": 120, "450мл": 180 } },
-                { name: "Матча", image: "matcha.min.jpg", prices: { "250мл": 180, "350мл": 220, "450мл": 260 } },
-                { name: "Какао", image: "kakao.min.jpg", prices: { "250мл": 180, "350мл": 220, "450мл": 260 } }
-            ]
-        },
-        {
-            category: "Пунши",
-            items: [
-                { name: "Облепиховый пунш", image: "oblepihapunch.min.jpg", prices: { "350мл": 230, "450мл": 270 } },
-                { name: "Малиновый пунш", image: "malinapunsh.min.jpg", prices: { "350мл": 230, "450мл": 270 } }
+                { name: "Чай Черный", image: "teablack-min.jpg", prices: { "250мл": 120, "450мл": 180 } },
+                { name: "Чай Зеленый", image: "greentea-min.jpg", prices: { "250мл": 120, "450мл": 180 } },
+                { name: "Каркаде", image: "karkadetea-min.jpg", prices: { "250мл": 120, "450мл": 180 } },
+                { name: "Зеленый Жасмин", image: "greenjasmin-min.jpg", prices: { "250мл": 120, "450мл": 180 } },
+                { name: "Травяной", image: "travatea-min.jpg", prices: { "250мл": 120, "450мл": 180 } },
+                { name: "Какао", image: "kakao-min.jpg", prices: { "250мл": 180, "350мл": 220, "450мл": 260 } }
             ]
         },
         {
             category: "Сладости",
             items: [
-                { name: "Bombbar орех", image: "bombbarfunduk.min.jpg", prices: { "1шт": 130 } },
-                { name: "Bombbar малина", image: "bombbarmalina.min.jpg", prices: { "1шт": 130 } },
-                { name: "Snaqer орех", image: "snaqerfunduk.min.jpg", prices: { "1шт": 130 } },
-                { name: "Cookie смородина", image: "chikabiscuitblackcurrant.min.jpg", prices: { "1шт": 170 } }
+                { name: "Bombbar орех", image: "bombbarfunduk-min.jpg", prices: { "1шт": 130 } },
+                { name: "Bombbar малина", image: "bombbarmalina-min.jpg", prices: { "1шт": 130 } },
+                { name: "Snaqer орех", image: "snaqerfunduk-min.jpg", prices: { "1шт": 130 } },
+                { name: "Cookie смородина", image: "chikabiscuitblackcurrant-min.jpg", prices: { "1шт": 170 } }
             ]
         },
         {
             category: "Газировка",
             items: [
-                { name: "Cola", image: "colachernogo.min.jpg", prices: { "0.5л": 140 } },
-                { name: "Байкал", image: "baikalchernogo.min.jpg", prices: { "0.5л": 140 } },
-                { name: "Лимонад", image: "lemonchernogo.min.jpg", prices: { "0.5л": 140 } },
-                { name: "Вода", image: "negazcernogo.min.jpg", prices: { "0.5л": 70 } }
+                { name: "Cola", image: "colachernogo-min.jpg", prices: { "0.5л": 140 } },
+                { name: "Байкал", image: "baikalchernogo-min.jpg", prices: { "0.5л": 140 } },
+                { name: "Лимонад", image: "lemonchernogo-min.jpg", prices: { "0.5л": 140 } },
+                { name: "Вода", image: "negazcernogo-min.jpg", prices: { "0.5л": 70 } }
             ]
         },
         {
             category: "Сезонные",
             items: [
-                { name: "Латте Халва", image: "lattehalva.min.jpg", prices: { "350мл": 290, "450мл": 350 } },
-                { name: "Латте Тыква", image: "lattetikva.min.jpg", prices: { "350мл": 290, "450мл": 350 } },
-                { name: "Раф Сникерс", image: "rafsnikers.min.jpg", prices: { "350мл": 320, "450мл": 380 } }
+                { name: "Латте Халва", image: "lattehalva-min.jpg", prices: { "350мл": 290, "450мл": 350 } },
+                { name: "Латте Тыква", image: "lattetikva-min.jpg", prices: { "350мл": 290, "450мл": 350 } },
+                { name: "Orange Christmas", image: "latteorangecristmas-min.jpg", prices: { "350мл": 320, "450мл": 380 } }
             ]
         }
     ];
@@ -123,8 +118,7 @@
                 const card = document.createElement('div');
                 card.className = 'product-card';
                 
-                // Добавляем версию для обхода кэша
-                const fullImgUrl = IMG_PATH + item.image + "?v=2";
+                const fullImgUrl = IMG_PATH + item.image + "?v=3";
                 
                 card.innerHTML = `
                     <div class="img-container">
