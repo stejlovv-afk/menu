@@ -67,24 +67,24 @@
 
     const menuData = [
         { category: "Кофе", items: [
-            { name: "Капучино", image: "kapuchino-min.jpg", prices: { "250мл": 190, "350мл": 230, "450мл": 270 }, coffee: true },
-            { name: "Латте", image: "latte-min.jpg", prices: { "250мл": 190, "350мл": 230, "450мл": 270 }, coffee: true },
-            { name: "Эспрессо", image: "espresso1-min.jpg", prices: { "30мл": 110, "60мл": 150 }, coffee: true },
-            { name: "Американо", image: "americano-min.jpg", prices: { "250мл": 180, "350мл": 220, "450мл": 260 }, coffee: true },
-            { name: "Флат Уайт", image: "latte-min.jpg", prices: { "250мл": 220, "350мл": 260, "450мл": 360 }, coffee: true },
-            { name: "Раф", image: "latte-min.jpg", prices: { "250мл": 210, "350мл": 250, "450мл": 290 }, coffee: true },
-            { name: "Бамбл Теплый", image: "oblepihapunch-min.jpg", prices: { "250мл": 270, "350мл": 270, "450мл": 300 }, coffee: true }
+            { name: "Капучино", image: "kapuchino-min.jpg", prices: { "250мл": 190, "350мл": 230, "450мл": 270 }, coffee: true, hasMilk: true },
+            { name: "Латте", image: "latte-min.jpg", prices: { "250мл": 190, "350мл": 230, "450мл": 270 }, coffee: true, hasMilk: true },
+            { name: "Эспрессо", image: "espresso1-min.jpg", prices: { "30мл": 110, "60мл": 150 }, coffee: true, hasMilk: false },
+            { name: "Американо", image: "americano-min.jpg", prices: { "250мл": 180, "350мл": 220, "450мл": 260 }, coffee: true, hasMilk: false },
+            { name: "Флат Уайт", image: "latte-min.jpg", prices: { "250мл": 220, "350мл": 260, "450мл": 360 }, coffee: true, hasMilk: true },
+            { name: "Раф", image: "latte-min.jpg", prices: { "250мл": 210, "350мл": 250, "450мл": 290 }, coffee: true, hasMilk: true },
+            { name: "Бамбл Теплый", image: "oblepihapunch-min.jpg", prices: { "250мл": 270, "350мл": 270, "450мл": 300 }, coffee: true, hasMilk: false }
         ]},
         { category: "Чай", items: [
-            { name: "Чай Черный", image: "teablack-min.jpg", prices: { "250мл": 120, "350мл": 150, "450мл": 180 } },
-            { name: "Чай Зеленый", image: "greentea-min.jpg", prices: { "250мл": 120, "350мл": 150, "450мл": 180 } },
-            { name: "Чай Каркаде", image: "karkadetea-min.jpg", prices: { "250мл": 120, "350мл": 150, "450мл": 180 } },
-            { name: "Зеленый Жасмин", image: "greenjasmin-min.jpg", prices: { "250мл": 120, "350мл": 150, "450мл": 180 } },
-            { name: "Травяной Чай", image: "travatea-min.jpg", prices: { "250мл": 120, "350мл": 150, "450мл": 180 } },
-            { name: "Матча", image: "matcha-min.jpg", prices: { "250мл": 180, "350мл": 220, "450мл": 260 } },
-            { name: "Какао", image: "kakao-min.jpg", prices: { "250мл": 180, "350мл": 220, "450мл": 260 } },
-            { name: "Пряный Чай", image: "pryanytea-min.jpg", prices: { "250мл": 240, "350мл": 280, "450мл": 320 } },
-            { name: "Горячий Шоколад", image: "kakao-min.jpg", prices: { "250мл": 180, "350мл": 220, "450мл": 260 } }
+            { name: "Чай Черный", image: "teablack-min.jpg", prices: { "250мл": 120, "350мл": 150, "450мл": 180 }, hasSugar: true },
+            { name: "Чай Зеленый", image: "greentea-min.jpg", prices: { "250мл": 120, "350мл": 150, "450мл": 180 }, hasSugar: true },
+            { name: "Чай Каркаде", image: "karkadetea-min.jpg", prices: { "250мл": 120, "350мл": 150, "450мл": 180 }, hasSugar: true },
+            { name: "Зеленый Жасмин", image: "greenjasmin-min.jpg", prices: { "250мл": 120, "350мл": 150, "450мл": 180 }, hasSugar: true },
+            { name: "Травяной Чай", image: "travatea-min.jpg", prices: { "250мл": 120, "350мл": 150, "450мл": 180 }, hasSugar: true },
+            { name: "Матча", image: "matcha-min.jpg", prices: { "250мл": 180, "350мл": 220, "450мл": 260 }, hasSugar: true },
+            { name: "Какао", image: "kakao-min.jpg", prices: { "250мл": 180, "350мл": 220, "450мл": 260 }, hasSugar: true },
+            { name: "Пряный Чай", image: "pryanytea-min.jpg", prices: { "250мл": 240, "350мл": 280, "450мл": 320 }, hasSugar: true },
+            { name: "Горячий Шоколад", image: "kakao-min.jpg", prices: { "250мл": 180, "350мл": 220, "450мл": 260 }, hasSugar: true }
         ]},
         { category: "Пунши и Глинтвейн", items: [
             { name: "Глинтвейн", image: "glintveinpunch-min.jpg", prices: { "350мл": 230, "450мл": 270 } },
@@ -92,17 +92,17 @@
             { name: "Малиновый пунш", image: "malinapunsh-min.jpg", prices: { "350мл": 230, "450мл": 270 } }
         ]},
         { category: "Холодные напитки", items: [
-            { name: "Айс Латте", image: "latte-min.jpg", prices: { "250мл": 240, "350мл": 280 }, coffee: true },
-            { name: "Эспрессо Тоник", image: "granattonic-min.jpg", prices: { "250мл": 250, "350мл": 290 }, coffee: true },
-            { name: "Бамбл Холодный", image: "granattonic-min.jpg", prices: { "250мл": 270, "350мл": 300 }, coffee: true },
+            { name: "Айс Латте", image: "latte-min.jpg", prices: { "250мл": 240, "350мл": 280 }, coffee: true, hasMilk: true },
+            { name: "Эспрессо Тоник", image: "granattonic-min.jpg", prices: { "250мл": 250, "350мл": 290 }, coffee: true, hasMilk: false },
+            { name: "Бамбл Холодный", image: "granattonic-min.jpg", prices: { "250мл": 270, "350мл": 300 }, coffee: true, hasMilk: false },
             { name: "Айс Матча", image: "matcha-min.jpg", prices: { "250мл": 230, "350мл": 270 } },
             { name: "Лимонад", image: "lemonchernogo-min.jpg", prices: { "250мл": 260, "350мл": 290 } }
         ]},
         { category: "Сезонные", items: [
-            { name: "Латте Халва", image: "lattehalva-min.jpg", prices: { "350мл": 290, "450мл": 350 }, coffee: true },
-            { name: "Латте Тыква", image: "lattetikva-min.jpg", prices: { "350мл": 290, "450мл": 350 }, coffee: true },
-            { name: "Раф Сникерс", image: "rafsnikers-min.jpg", prices: { "350мл": 320, "450мл": 380 }, coffee: true },
-            { name: "Orange Christmas", image: "latteorangecristmas-min.jpg", prices: { "350мл": 320, "450мл": 380 }, coffee: true }
+            { name: "Латте Халва", image: "lattehalva-min.jpg", prices: { "350мл": 290, "450мл": 350 }, coffee: true, hasMilk: true },
+            { name: "Латте Тыква", image: "lattetikva-min.jpg", prices: { "350мл": 290, "450мл": 350 }, coffee: true, hasMilk: true },
+            { name: "Раф Сникерс", image: "rafsnikers-min.jpg", prices: { "350мл": 320, "450мл": 380 }, coffee: true, hasMilk: true },
+            { name: "Orange Christmas", image: "latteorangecristmas-min.jpg", prices: { "350мл": 320, "450мл": 380 }, coffee: true, hasMilk: true }
         ]},
         { category: "Сладости", items: [
             { name: "Bombbar Лесной орех", image: "bombbarfunduk-min.jpg", prices: { "1шт": 130 } },
@@ -146,13 +146,35 @@
             <div style="font-size:18px;font-weight:bold">${item.name}</div></div>
             <div class="section-label">Объем</div>
             <div class="option-list">${Object.keys(item.prices).map(s => `<div class="opt-btn ${s==cur.size?'active':''}" onclick="setS('${s}',this)">${s}</div>`).join('')}</div>
-            ${item.coffee ? `
+            
+            ${item.hasMilk ? `
                 <div class="section-label">Молоко (+70₽)</div>
                 <div class="option-list">${Object.keys(milks).map(m=>`<div class="opt-btn ${m==cur.milk?'active':''}" onclick="setM('${m}',this)">${m}</div>`).join('')}</div>
+            ` : ''}
+
+            ${item.coffee ? `
                 <div class="section-label">Сироп (+25-60₽)</div>
                 <div class="option-list">${syrups.map(sr=>`<div class="opt-btn ${sr==cur.syrup?'active':''}" onclick="setSr('${sr}',this)">${sr}</div>`).join('')}</div>
-                <div style="display:flex;gap:20px"><div style="flex:1"><div class="section-label">Сахар</div><div class="option-list"><div class="opt-btn ${cur.sugar=='Да'?'active':''}" onclick="setSu('Да',this)">Да</div><div class="opt-btn ${cur.sugar=='Нет'?'active':''}" onclick="setSu('Нет',this)">Нет</div></div></div>
-                <div style="flex:1"><div class="section-label">Корица</div><div class="option-list"><div class="opt-btn ${cur.cinnamon=='Да'?'active':''}" onclick="setCi('Да',this)">Да</div><div class="opt-btn ${cur.cinnamon=='Нет'?'active':''}" onclick="setCi('Нет',this)">Нет</div></div></div></div>
+            ` : ''}
+
+            ${item.coffee || item.hasSugar ? `
+                <div style="display:flex;gap:20px">
+                    <div style="flex:1">
+                        <div class="section-label">Сахар</div>
+                        <div class="option-list">
+                            <div class="opt-btn ${cur.sugar=='Да'?'active':''}" onclick="setSu('Да',this)">Да</div>
+                            <div class="opt-btn ${cur.sugar=='Нет'?'active':''}" onclick="setSu('Нет',this)">Нет</div>
+                        </div>
+                    </div>
+                    ${item.coffee ? `
+                    <div style="flex:1">
+                        <div class="section-label">Корица</div>
+                        <div class="option-list">
+                            <div class="opt-btn ${cur.cinnamon=='Да'?'active':''}" onclick="setCi('Да',this)">Да</div>
+                            <div class="opt-btn ${cur.cinnamon=='Нет'?'active':''}" onclick="setCi('Нет',this)">Нет</div>
+                        </div>
+                    </div>` : ''}
+                </div>
             ` : ''}
             <button class="confirm-btn" onclick="addT()">Добавить за ${calcPrice()} ₽</button>`;
         document.getElementById('modal-overlay').style.display='block';
@@ -161,8 +183,8 @@
 
     function calcPrice() {
         let p = cur.item.prices[cur.size];
-        if(cur.milk !== "Обычное") p += 70;
-        if(cur.syrup !== "Нет") p += sPrices[cur.size] || 0;
+        if(cur.item.hasMilk && cur.milk !== "Обычное") p += 70;
+        if(cur.item.coffee && cur.syrup !== "Нет") p += sPrices[cur.size] || 0;
         return p;
     }
 
@@ -190,7 +212,13 @@
         list.innerHTML = cart.map(i => `
             <div class="cart-item">
                 <div style="display:flex;justify-content:space-between"><b>${i.item.name}</b> <span>${i.finalPrice} ₽</span></div>
-                <div class="cart-item-meta">${i.size}${i.item.coffee ? `, ${i.milk}, сироп: ${i.syrup}, сахар: ${i.sugar}, корица: ${i.cinnamon}`:''}</div>
+                <div class="cart-item-meta">
+                    ${i.size}
+                    ${i.item.hasMilk ? `, ${i.milk}` : ''}
+                    ${i.item.coffee && i.syrup !== 'Нет' ? `, сироп: ${i.syrup}` : ''}
+                    ${i.sugar === 'Да' ? ', с сахаром' : ''}
+                    ${i.cinnamon === 'Да' ? ', с корицей' : ''}
+                </div>
             </div>`).join('');
         document.getElementById('cart-total-price').innerText = `Итого: ${cart.reduce((a,b)=>a+b.finalPrice, 0)} ₽`;
         document.getElementById('cart-overlay').style.display='block';
