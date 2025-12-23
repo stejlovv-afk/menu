@@ -1,4 +1,49 @@
-const IMG_PATH = "menu24/";
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Urban Lunch Menu</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg: var(--tg-theme-bg-color, #ffffff);
+            --text: var(--tg-theme-text-color, #222222);
+            --hint: var(--tg-theme-hint-color, #777777);
+            --btn: var(--tg-theme-button-color, #4e342e);
+            --btn-text: var(--tg-theme-button-text-color, #ffffff);
+            --secondary: var(--tg-theme-secondary-bg-color, #f5f5f5);
+        }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 100px; }
+        .header { padding: 20px; text-align: center; background: var(--secondary); border-bottom: 1px solid rgba(0,0,0,0.1); }
+        .category-title { padding: 15px 20px 5px; font-size: 13px; font-weight: bold; text-transform: uppercase; color: var(--hint); letter-spacing: 1px; }
+        .product-card { border-bottom: 1px solid var(--secondary); padding: 12px 15px; display: flex; gap: 12px; align-items: center; }
+        .img-container { width: 85px; height: 85px; flex-shrink: 0; background: #eee; border-radius: 12px; overflow: hidden; }
+        .product-img { width: 100%; height: 100%; object-fit: cover; }
+        .product-content { flex-grow: 1; display: flex; flex-direction: column; gap: 4px; }
+        .product-name { font-weight: 600; font-size: 15px; }
+        .size-selector { display: flex; gap: 4px; margin-top: 4px; }
+        .size-btn { flex: 1; border: none; background: var(--secondary); color: var(--text); padding: 6px 2px; border-radius: 8px; font-size: 10px; cursor: pointer; }
+        .size-btn.active { background: var(--btn); color: var(--btn-text); }
+        .price-row { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; }
+        .current-price { font-weight: bold; font-size: 16px; color: var(--btn); }
+        .add-btn { background: var(--btn); color: var(--btn-text); border: none; padding: 6px 16px; border-radius: 10px; font-weight: bold; font-size: 18px; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1 style="margin:0; font-size: 22px; color: var(--btn);">URBAN LUNCH</h1>
+</div>
+
+<div id="app"></div>
+
+<script>
+    let tg = window.Telegram.WebApp;
+    tg.expand();
+
+    // Путь к папке
+    const IMG_PATH = "menu24/";
 
     const menuData = [
         {
@@ -8,9 +53,7 @@ const IMG_PATH = "menu24/";
                 { name: "Латте", image: "latte.min.jpg", prices: { "250мл": 190, "350мл": 230, "450мл": 270 } },
                 { name: "Эспрессо", image: "espresso1.min.jpg", prices: { "30мл": 110, "60мл": 150 } },
                 { name: "Американо", image: "americano.min.jpg", prices: { "250мл": 180, "350мл": 220, "450мл": 260 } },
-                { name: "Флат Уайт", image: "latte.min.jpg", prices: { "250мл": 220, "350мл": 260, "450мл": 360 } },
                 { name: "Раф", image: "latte.min.jpg", prices: { "250мл": 210, "350мл": 250, "450мл": 290 } },
-                { name: "Бамбл Теплый", image: "oblepihapunch.min.jpg", prices: { "250мл": 270, "350мл": 270, "450мл": 300 } },
                 { name: "Глинтвейн", image: "glintveinpunch.min.jpg", prices: { "350мл": 230, "450мл": 270 } }
             ]
         },
@@ -19,12 +62,8 @@ const IMG_PATH = "menu24/";
             items: [
                 { name: "Чай Черный", image: "teablack.min.jpg", prices: { "250мл": 120, "450мл": 180 } },
                 { name: "Чай Зеленый", image: "greentea.min.jpg", prices: { "250мл": 120, "450мл": 180 } },
-                { name: "Чай Каркаде", image: "karkadetea.min.jpg", prices: { "250мл": 120, "450мл": 180 } },
-                { name: "Чай Зеленый Жасмин", image: "greenjasmin.min.jpg", prices: { "250мл": 120, "450мл": 180 } },
-                { name: "Чай Травяной", image: "travatea.min.jpg", prices: { "250мл": 120, "450мл": 180 } },
                 { name: "Матча", image: "matcha.min.jpg", prices: { "250мл": 180, "350мл": 220, "450мл": 260 } },
-                { name: "Какао", image: "kakao.min.jpg", prices: { "250мл": 180, "350мл": 220, "450мл": 260 } },
-                { name: "Пряный чай", image: "pryanytea.min.jpg", prices: { "250мл": 240, "350мл": 280, "450мл": 320 } }
+                { name: "Какао", image: "kakao.min.jpg", prices: { "250мл": 180, "350мл": 220, "450мл": 260 } }
             ]
         },
         {
@@ -35,42 +74,95 @@ const IMG_PATH = "menu24/";
             ]
         },
         {
-            category: "Холодные напитки",
-            items: [
-                { name: "Айс Латте", image: "latte.min.jpg", prices: { "250мл": 240, "350мл": 280 } },
-                { name: "Эспрессо Тоник", image: "granattonic.min.jpg", prices: { "250мл": 250, "350мл": 290 } },
-                { name: "Бамбл Холодный", image: "granattonic.min.jpg", prices: { "250мл": 270, "350мл": 300 } },
-                { name: "Айс Матча", image: "matcha.min.jpg", prices: { "250мл": 230, "350мл": 270 } },
-                { name: "Лимонад", image: "lemonchernogo.min.jpg", prices: { "250мл": 260, "350мл": 290 } }
-            ]
-        },
-        {
             category: "Сладости",
             items: [
-                { name: "Bombbar лесной орех", image: "bombbarfunduk.min.jpg", prices: { "1шт": 130 } },
-                { name: "Bombbar малиновый", image: "bombbarmalina.min.jpg", prices: { "1шт": 130 } },
-                { name: "Bombbar кокос", image: "bombbarcocos.min.jpg", prices: { "1шт": 130 } },
-                { name: "Snaqer лесной орех", image: "snaqerfunduk.min.jpg", prices: { "1шт": 130 } },
-                { name: "Cookie смородина", image: "chikabiscuitblackcurrant.min.jpg", prices: { "1шт": 170 } },
-                { name: "Cookie банан", image: "chikabiscuitbanan.min.jpg", prices: { "1шт": 170 } }
+                { name: "Bombbar орех", image: "bombbarfunduk.min.jpg", prices: { "1шт": 130 } },
+                { name: "Bombbar малина", image: "bombbarmalina.min.jpg", prices: { "1шт": 130 } },
+                { name: "Snaqer орех", image: "snaqerfunduk.min.jpg", prices: { "1шт": 130 } },
+                { name: "Cookie смородина", image: "chikabiscuitblackcurrant.min.jpg", prices: { "1шт": 170 } }
             ]
         },
         {
             category: "Газировка",
             items: [
-                { name: "Черноголовка Cola", image: "colachernogo.min.jpg", prices: { "0.5л": 140 } },
-                { name: "Черноголовка Байкал", image: "baikalchernogo.min.jpg", prices: { "0.5л": 140 } },
-                { name: "Черноголовка Лимонад", image: "lemonchernogo.min.jpg", prices: { "0.5л": 140 } },
-                { name: "Вода газ/негаз", image: "negazcernogo.min.jpg", prices: { "0.5л": 70 } }
+                { name: "Cola", image: "colachernogo.min.jpg", prices: { "0.5л": 140 } },
+                { name: "Байкал", image: "baikalchernogo.min.jpg", prices: { "0.5л": 140 } },
+                { name: "Лимонад", image: "lemonchernogo.min.jpg", prices: { "0.5л": 140 } },
+                { name: "Вода", image: "negazcernogo.min.jpg", prices: { "0.5л": 70 } }
             ]
         },
         {
-            category: "Сезонные напитки",
+            category: "Сезонные",
             items: [
                 { name: "Латте Халва", image: "lattehalva.min.jpg", prices: { "350мл": 290, "450мл": 350 } },
                 { name: "Латте Тыква", image: "lattetikva.min.jpg", prices: { "350мл": 290, "450мл": 350 } },
-                { name: "Раф Сникерс", image: "rafsnikers.min.jpg", prices: { "350мл": 320, "450мл": 380 } },
-                { name: "Латте Orange Christmas", image: "latteorangecristmas.min.jpg", prices: { "350мл": 320, "450мл": 380 } }
+                { name: "Раф Сникерс", image: "rafsnikers.min.jpg", prices: { "350мл": 320, "450мл": 380 } }
             ]
         }
     ];
+
+    let cart = [];
+    let selectedOptions = {};
+
+    function renderMenu() {
+        const container = document.getElementById('app');
+        container.innerHTML = ''; 
+        
+        menuData.forEach((cat, catIdx) => {
+            const title = document.createElement('div');
+            title.className = 'category-title';
+            title.innerText = cat.category;
+            container.appendChild(title);
+            
+            cat.items.forEach((item, itemIdx) => {
+                const itemID = `id-${catIdx}-${itemIdx}`;
+                const sizes = Object.keys(item.prices);
+                const defSize = sizes[0];
+                selectedOptions[itemID] = { size: defSize, price: item.prices[defSize] };
+
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                
+                // Добавляем версию для обхода кэша
+                const fullImgUrl = IMG_PATH + item.image + "?v=2";
+                
+                card.innerHTML = `
+                    <div class="img-container">
+                        <img src="${fullImgUrl}" class="product-img">
+                    </div>
+                    <div class="product-content">
+                        <div class="product-name">${item.name}</div>
+                        <div class="size-selector">
+                            ${sizes.map(s => `<button class="size-btn ${s===defSize?'active':''}" onclick="selectSize(event, '${itemID}', '${s}', ${item.prices[s]})">${s}</button>`).join('')}
+                        </div>
+                        <div class="price-row">
+                            <div class="current-price" id="price-${itemID}">${item.prices[defSize]} ₽</div>
+                            <button class="add-btn" onclick="addToCart('${item.name}', '${itemID}')">+</button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        });
+    }
+
+    window.selectSize = (e, itemID, size, price) => {
+        const row = e.currentTarget.parentElement;
+        row.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+        e.currentTarget.classList.add('active');
+        document.getElementById(`price-${itemID}`).innerText = price + " ₽";
+        selectedOptions[itemID] = { size, price };
+    };
+
+    window.addToCart = (name, itemID) => {
+        const opt = selectedOptions[itemID];
+        cart.push({ name, size: opt.size, price: opt.price });
+        const total = cart.reduce((s, i) => s + i.price, 0);
+        tg.MainButton.setParams({ text: `В КОРЗИНУ: ${total} ₽`, color: '#4e342e', is_visible: true });
+    };
+
+    renderMenu();
+    tg.onEvent('mainButtonClicked', () => tg.sendData(JSON.stringify(cart)));
+</script>
+</body>
+</html>
