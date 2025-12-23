@@ -42,8 +42,8 @@
     let tg = window.Telegram.WebApp;
     tg.expand();
 
-    // Автоматическое определение пути к папке с картинками
-    const baseUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
+    // ПУТЬ К ПАПКЕ С КАРТИНКАМИ
+    const folder = "menu24/";
 
     const menuData = [
         {
@@ -142,9 +142,9 @@
                 const card = document.createElement('div');
                 card.className = 'product-card';
                 
-                // Формируем полный путь к картинке для обхода проблем с путями
-                let fullImgPath = baseUrl + item.image;
-                let imgPart = item.image ? `<img src="${fullImgPath}" class="product-img" onerror="this.style.display='none'">` : '';
+                // Добавляем папку к имени файла
+                let imgSrc = item.image ? folder + item.image : null;
+                let imgPart = imgSrc ? `<img src="${imgSrc}" class="product-img" onerror="this.style.display='none'">` : '';
                 
                 card.innerHTML = `
                     ${imgPart}
@@ -171,7 +171,6 @@
         e.currentTarget.classList.add('active');
         document.getElementById(`price-${itemID}`).innerText = price + " ₽";
         selectedOptions[itemID] = { size, price };
-        tg.HapticFeedback.selectionChanged();
     };
 
     window.addToCart = (name, itemID) => {
