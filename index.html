@@ -64,7 +64,7 @@
     const syrups = ["Нет", "Фисташка", "Красный апельсин", "Лаванда", "Клубника", "Имбирный пряник", "Лесной орех", "Персик", "Дыня", "Слива", "Яблоко", "Лемонграсс", "Малина", "Попкорн", "Кокос", "Миндаль", "Вишня", "Баблгам", "Соленая карамель", "Карамель", "Ваниль"];
     const milks = { "Обычное": 0, "Банановое": 70, "Кокосовое": 70, "Миндальное": 70, "Безлактозное": 70 };
     const sugarGrams = ["0г", "5г", "10г", "15г", "20г"];
-    const sPrices = { "250мл": 25, "350мл": 35, "450мл": 60, "30мл": 0, "60мл": 0, "1шт": 0, "0.5л": 0 };
+    const sPrices = { "250мл": 25, "350мл": 35, "450мл": 60, "1шт": 0, "0.5л": 0 };
 
     const menuData = [
         { category: "Кофе", items: [
@@ -77,27 +77,27 @@
             { name: "Бамбл Теплый", image: "oblepihapunch-min.jpg", prices: {"250мл": 270, "350мл": 270, "450мл": 300}, hasJuice: true, hasSyrup: true, hasSugar: true }
         ]},
         { category: "Чай", items: [
-            { name: "Чай Черный", image: "teablack-min.jpg", prices: {"250мл": 120, "350мл": 150, "450мл": 180}, hasSugar: true },
-            { name: "Чай Зеленый", image: "greentea-min.jpg", prices: {"250мл": 120, "350мл": 150, "450мл": 180}, hasSugar: true },
+            { name: "Чай Черный", image: "teablack-min.jpg", prices: {"250мл": 120, "350мл": 150, "450мл": 180}, hasSugar: true, hasLemon: true },
+            { name: "Чай Зеленый", image: "greentea-min.jpg", prices: {"250мл": 120, "350мл": 150, "450мл": 180}, hasSugar: true, hasLemon: true },
             { name: "Чай Каркаде", image: "karkadetea-min.jpg", prices: {"250мл": 120, "350мл": 150, "450мл": 180}, hasSugar: true },
             { name: "Зеленый Жасмин", image: "greenjasmin-min.jpg", prices: {"250мл": 120, "350мл": 150, "450мл": 180}, hasSugar: true },
             { name: "Травяной Чай", image: "travatea-min.jpg", prices: {"250мл": 120, "350мл": 150, "450мл": 180}, hasSugar: true },
             { name: "Матча", image: "matcha-min.jpg", prices: {"250мл": 180, "350мл": 220, "450мл": 260}, isMatcha: true, hasMilk: true, hasSyrup: true, hasSugar: true },
             { name: "Какао", image: "kakao-min.jpg", prices: {"250мл": 180, "350мл": 220, "450мл": 260}, hasMilk: true, hasSyrup: true, hasSugar: true },
-            { name: "Пряный Чай", image: "pryanytea-min.jpg", prices: {"250мл": 240, "350мл": 280, "450мл": 320}, hasSugar: true },
+            { name: "Пряный Чай", image: "pryanytea-min.jpg", prices: {"250мл": 240, "350мл": 280, "450мл": 320}, hasMilk: true, hasSyrup: true, hasSugar: true },
             { name: "Горячий Шоколад", image: "kakao-min.jpg", prices: {"250мл": 180, "350мл": 220, "450мл": 260}, hasSugar: true }
         ]},
         { category: "Пунши и Глинтвейн", items: [
             { name: "Глинтвейн", image: "glintveinpunch-min.jpg", prices: {"350мл": 230, "450мл": 270} },
-            { name: "Облепиховый пунш", image: "oblepihapunch-min.jpg", prices: {"350мл": 230, "450мл": 270} },
+            { name: "Облепиховый пунш", image: "oblepihapunch-min.jpg", prices: {"350мл": 230, "450мл": 270}, hasHoney: true },
             { name: "Малиновый пунш", image: "malinapunsh-min.jpg", prices: {"350мл": 230, "450мл": 270} }
         ]},
         { category: "Холодные напитки", items: [
-            { name: "Айс Латте", image: "latte-min.jpg", prices: {"250мл": 240, "350мл": 280}, hasMilk: true, hasSyrup: true, hasSugar: true },
-            { name: "Эспрессо Тоник", image: "granattonic-min.jpg", prices: {"250мл": 250, "350мл": 290}, hasSugar: true },
-            { name: "Бамбл Холодный", image: "granattonic-min.jpg", prices: {"270мл": 270, "300мл": 300}, hasJuice: true, hasSyrup: true, hasSugar: true },
-            { name: "Айс Матча", image: "matcha-min.jpg", prices: {"230мл": 230, "270мл": 270}, isMatcha: true, hasMilk: true, hasSyrup: true, hasSugar: true },
-            { name: "Лимонад", image: "lemonchernogo-min.jpg", prices: {"250мл": 260, "350мл": 290} }
+            { name: "Айс Латте", image: "latte-min.jpg", prices: {"350мл": 240, "450мл": 280}, hasMilk: true, hasSyrup: true, hasSugar: true },
+            { name: "Эспрессо Тоник", image: "granattonic-min.jpg", prices: {"350мл": 250, "450мл": 290}, hasSugar: true },
+            { name: "Бамбл Холодный", image: "granattonic-min.jpg", prices: {"350мл": 270, "450мл": 300}, hasJuice: true, hasSyrup: true, hasSugar: true },
+            { name: "Айс Матча", image: "matcha-min.jpg", prices: {"350мл": 230, "450мл": 270}, isMatcha: true, hasMilk: true, hasSyrup: true, hasSugar: true },
+            { name: "Лимонад", image: "lemonchernogo-min.jpg", prices: {"350мл": 260, "450мл": 290}, hasLemonadeTaste: true }
         ]},
         { category: "Сезонные", items: [
             { name: "Латте Халва", image: "lattehalva-min.jpg", prices: {"350мл": 290, "450мл": 350}, hasMilk: true, hasSyrup: true, hasSugar: true },
@@ -109,8 +109,8 @@
             { name: "Bombbar лесной орех", image: "bombbarfunduk-min.jpg", prices: {"1шт": 130} },
             { name: "Bombbar малиновый", image: "bombbarmalina-min.jpg", prices: {"1шт": 130} },
             { name: "Bombbar кокос", image: "bombbarcocos-min.jpg", prices: {"1шт": 130} },
-            { name: "Snaqer лесной орех/карамель", image: "snaqerfunduk-min.jpg", prices: {"1шт": 130} },
-            { name: "Cookie черная смородина", image: "chikabiscuitblackcurrant-min.jpg", prices: {"1шт": 170} },
+            { name: "Snaqer орех/карамель", image: "snaqerfunduk-min.jpg", prices: {"1шт": 130} },
+            { name: "Cookie смородина", image: "chikabiscuitblackcurrant-min.jpg", prices: {"1шт": 170} },
             { name: "Cookie банан", image: "chikabiscuitbanan-min.jpg", prices: {"1шт": 170} }
         ]},
         { category: "Газировка", items: [
@@ -140,7 +140,19 @@
     }
 
     function openModal(item) {
-        cur = { item: item, size: Object.keys(item.prices)[0], milk: "Обычное", syrup: "Нет", sugar: "0г", cinnamon: "Нет", juice: "Апельсиновый", matchaType: "Зеленая" };
+        cur = { 
+            item: item, 
+            size: Object.keys(item.prices)[0], 
+            milk: "Обычное", 
+            syrup: "Нет", 
+            sugar: "0г", 
+            cinnamon: "Нет", 
+            juice: "Апельсиновый", 
+            matchaType: "Зеленая", 
+            lemon: "Нет", 
+            honey: "Нет",
+            lemonadeTaste: "Киви-Фейхоа" 
+        };
         renderModal();
         document.getElementById('modal-overlay').style.display='block';
         document.getElementById('modal').classList.add('open');
@@ -156,12 +168,18 @@
             <div class="section-label">Объем</div>
             <div class="option-list">${Object.keys(item.prices).map(s => `<div class="opt-btn ${s==cur.size?'active':''}" onclick="setS('${s}',this)">${s}</div>`).join('')}</div>
             
+            ${item.hasLemonadeTaste ? `<div class="section-label">Вкус лимонада</div><div class="option-list"><div class="opt-btn ${cur.lemonadeTaste=='Киви-Фейхоа'?'active':''}" onclick="setLT('Киви-Фейхоа',this)">Киви-Фейхоа</div><div class="opt-btn ${cur.lemonadeTaste=='Манго-Маракуйа'?'active':''}" onclick="setLT('Манго-Маракуйа',this)">Манго-Маракуйа</div><div class="opt-btn ${cur.lemonadeTaste=='Смородина-Мята'?'active':''}" onclick="setLT('Смородина-Мята',this)">Смородина-Мята</div></div>` : ''}
             ${item.isMatcha ? `<div class="section-label">Вид Матчи</div><div class="option-list"><div class="opt-btn ${cur.matchaType=='Зеленая'?'active':''}" onclick="setMType('Зеленая',this)">Зеленая</div><div class="opt-btn ${cur.matchaType=='Голубая'?'active':''}" onclick="setMType('Голубая',this)">Голубая</div></div>` : ''}
             ${item.hasJuice ? `<div class="section-label">Выбор сока</div><div class="option-list"><div class="opt-btn ${cur.juice=='Апельсиновый'?'active':''}" onclick="setJ('Апельсиновый',this)">Апельсиновый</div><div class="opt-btn ${cur.juice=='Вишневый'?'active':''}" onclick="setJ('Вишневый',this)">Вишневый</div></div>` : ''}
             ${item.hasMilk ? `<div class="section-label">Молоко (+70₽)</div><div class="option-list">${Object.keys(milks).map(m=>`<div class="opt-btn ${m==cur.milk?'active':''}" onclick="setM('${m}',this)">${m}</div>`).join('')}</div>` : ''}
             ${item.hasSyrup ? `<div class="section-label">Сироп (+25-60₽)</div><div class="option-list">${syrups.map(sr=>`<div class="opt-btn ${sr==cur.syrup?'active':''}" onclick="setSr('${sr}',this)">${sr}</div>`).join('')}</div>` : ''}
             ${item.hasSugar ? `<div class="section-label">Сахар</div><div class="option-list">${sugarGrams.map(g=>`<div class="opt-btn ${cur.sugar==g?'active':''}" onclick="setSu('${g}',this)">${g}</div>`).join('')}</div>` : ''}
-            ${item.hasCinnamon ? `<div class="section-label">Корица</div><div class="option-list"><div class="opt-btn ${cur.cinnamon=='Да'?'active':''}" onclick="setCi('Да',this)">Да</div><div class="opt-btn ${cur.cinnamon=='Нет'?'active':''}" onclick="setCi('Нет',this)">Нет</div></div>` : ''}
+            
+            <div style="display:flex; gap:10px">
+                ${item.hasCinnamon ? `<div style="flex:1"><div class="section-label">Корица</div><div class="option-list"><div class="opt-btn ${cur.cinnamon=='Да'?'active':''}" onclick="setCi('Да',this)">Да</div><div class="opt-btn ${cur.cinnamon=='Нет'?'active':''}" onclick="setCi('Нет',this)">Нет</div></div></div>` : ''}
+                ${item.hasLemon ? `<div style="flex:1"><div class="section-label">Лимон</div><div class="option-list"><div class="opt-btn ${cur.lemon=='Да'?'active':''}" onclick="setL('Да',this)">Да</div><div class="opt-btn ${cur.lemon=='Нет'?'active':''}" onclick="setL('Нет',this)">Нет</div></div></div>` : ''}
+                ${item.hasHoney ? `<div style="flex:1"><div class="section-label">Мёд</div><div class="option-list"><div class="opt-btn ${cur.honey=='Да'?'active':''}" onclick="setH('Да',this)">Да</div><div class="opt-btn ${cur.honey=='Нет'?'active':''}" onclick="setH('Нет',this)">Нет</div></div></div>` : ''}
+            </div>
             
             <button class="confirm-btn" onclick="addT()">Добавить за ${calcPrice()} ₽</button>
         `;
@@ -174,18 +192,16 @@
         return p;
     }
 
-    window.setS = (s,el) => { cur.size=s; select(el); renderModal(); };
-    window.setM = (m,el) => { cur.milk=m; select(el); renderModal(); };
-    window.setSr = (sr,el) => { cur.syrup=sr; select(el); renderModal(); };
-    window.setSu = (v,el) => { cur.sugar=v; select(el); renderModal(); };
-    window.setCi = (v,el) => { cur.cinnamon=v; select(el); renderModal(); };
-    window.setJ = (v,el) => { cur.juice=v; select(el); renderModal(); };
-    window.setMType = (v,el) => { cur.matchaType=v; select(el); renderModal(); };
-
-    function select(el) {
-        el.parentElement.querySelectorAll('.opt-btn').forEach(b=>b.classList.remove('active'));
-        el.classList.add('active');
-    }
+    window.setS = (s,el) => { cur.size=s; renderModal(); };
+    window.setM = (m,el) => { cur.milk=m; renderModal(); };
+    window.setSr = (sr,el) => { cur.syrup=sr; renderModal(); };
+    window.setSu = (v,el) => { cur.sugar=v; renderModal(); };
+    window.setCi = (v,el) => { cur.cinnamon=v; renderModal(); };
+    window.setJ = (v,el) => { cur.juice=v; renderModal(); };
+    window.setMType = (v,el) => { cur.matchaType=v; renderModal(); };
+    window.setL = (v,el) => { cur.lemon=v; renderModal(); };
+    window.setH = (v,el) => { cur.honey=v; renderModal(); };
+    window.setLT = (v,el) => { cur.lemonadeTaste=v; renderModal(); };
 
     window.addT = () => {
         cart.push({...cur, finalPrice: calcPrice()});
@@ -198,7 +214,7 @@
             <div class="cart-item">
                 <div style="display:flex;justify-content:space-between"><b>${i.item.name}</b> <span>${i.finalPrice} ₽</span></div>
                 <div class="cart-item-meta">
-                    ${i.size}${i.item.isMatcha ? `, ${i.matchaType}` : ''}${i.item.hasJuice ? `, сок: ${i.juice}` : ''}${i.item.hasMilk && i.milk!=='Обычное' ? `, ${i.milk}` : ''}${i.item.hasSyrup && i.syrup!=='Нет' ? `, сироп: ${i.syrup}` : ''}${i.item.hasSugar && i.sugar!=='0г' ? `, сахар: ${i.sugar}` : ''}${i.cinnamon === 'Да' ? ', корица' : ''}
+                    ${i.size}${i.item.hasLemonadeTaste ? `, ${i.lemonadeTaste}` : ''}${i.item.isMatcha ? `, ${i.matchaType}` : ''}${i.item.hasJuice ? `, сок: ${i.juice}` : ''}${i.item.hasMilk && i.milk!=='Обычное' ? `, ${i.milk}` : ''}${i.item.hasSyrup && i.syrup!=='Нет' ? `, сироп: ${i.syrup}` : ''}${i.item.hasSugar && i.sugar!=='0г' ? `, сахар: ${i.sugar}` : ''}${i.lemon === 'Да' ? ', с лимоном' : ''}${i.honey === 'Да' ? ', с мёдом' : ''}${i.cinnamon === 'Да' ? ', корица' : ''}
                 </div>
             </div>`).join('');
         document.getElementById('cart-total-price').innerText = `Итого: ${cart.reduce((a,b)=>a+b.finalPrice, 0)} ₽`;
