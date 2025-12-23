@@ -23,7 +23,7 @@
         .product-name { font-weight: 600; font-size: 15px; }
         .product-desc { font-size: 11px; color: var(--hint); line-height: 1.2; }
         .size-selector { display: flex; gap: 4px; margin-top: 4px; }
-        .size-btn { flex: 1; border: 1px solid var(--secondary); background: var(--secondary); color: var(--text); padding: 6px 2px; border-radius: 8px; font-size: 10px; cursor: pointer; border: none; }
+        .size-btn { flex: 1; border: none; background: var(--secondary); color: var(--text); padding: 6px 2px; border-radius: 8px; font-size: 10px; cursor: pointer; }
         .size-btn.active { background: var(--btn); color: var(--btn-text); }
         .price-row { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; }
         .current-price { font-weight: bold; font-size: 16px; color: var(--btn); }
@@ -52,16 +52,28 @@
                 { name: "Американо", prices: { "250мл": 180, "350мл": 220, "450мл": 260 } },
                 { name: "Флат Уайт", prices: { "250мл": 220, "350мл": 260, "450мл": 360 } },
                 { name: "Раф", prices: { "250мл": 210, "350мл": 250, "450мл": 290 } },
-                { name: "Бамбл Теплый", prices: { "250мл": 270, "350мл": 270, "450мл": 300 } }
+                { name: "Бамбл Теплый", prices: { "250мл": 270, "350мл": 270, "450мл": 300 } },
+                { name: "Глинтвейн", prices: { "350мл": 230, "450мл": 270 } }
             ]
         },
         {
-            category: "Чай и Горячие напитки",
+            category: "Чай (250мл / 450мл)",
             items: [
-                { name: "Чай", desc: "Черный, Зеленый, Каркаде, Жасмин, Травяной", prices: { "250мл": 120, "450мл": 180 } },
+                { name: "Чай Черный", prices: { "250мл": 120, "450мл": 180 } },
+                { name: "Чай Зеленый", prices: { "250мл": 120, "450мл": 180 } },
+                { name: "Чай Каркаде", prices: { "250мл": 120, "450мл": 180 } },
+                { name: "Чай Зеленый Жасмин", prices: { "250мл": 120, "450мл": 180 } },
+                { name: "Чай Травяной", prices: { "250мл": 120, "450мл": 180 } },
                 { name: "Матча", prices: { "250мл": 180, "350мл": 220, "450мл": 260 } },
                 { name: "Какао", prices: { "250мл": 180, "350мл": 220, "450мл": 260 } },
                 { name: "Пряный чай", prices: { "250мл": 240, "350мл": 280, "450мл": 320 } }
+            ]
+        },
+        {
+            category: "Пунши",
+            items: [
+                { name: "Облепиховый пунш", prices: { "350мл": 230, "450мл": 270 } },
+                { name: "Малиновый пунш", prices: { "350мл": 230, "450мл": 270 } }
             ]
         },
         {
@@ -72,6 +84,26 @@
                 { name: "Бамбл Холодный", image: "./bambl.jpg", prices: { "250мл": 270, "350мл": 300 } },
                 { name: "Айс Матча", prices: { "250мл": 230, "350мл": 270 } },
                 { name: "Лимонад", desc: "Киви-Фейхоа, Манго-Маракуйя, Смородина-Мята", prices: { "250мл": 260, "350мл": 290 } }
+            ]
+        },
+        {
+            category: "Сладости и батончики",
+            items: [
+                { name: "Bombbar лесной орех", prices: { "1шт": 130 } },
+                { name: "Bombbar малиновый", prices: { "1шт": 130 } },
+                { name: "Bombbar кокос", prices: { "1шт": 130 } },
+                { name: "Snaqer лесной орех", prices: { "1шт": 130 } },
+                { name: "Cookie смородина", prices: { "1шт": 170 } },
+                { name: "Cookie банан", prices: { "1шт": 170 } }
+            ]
+        },
+        {
+            category: "Газировка",
+            items: [
+                { name: "Черноголовка Cola", prices: { "0.5л": 140 } },
+                { name: "Черноголовка Байкал", prices: { "0.5л": 140 } },
+                { name: "Черноголовка Лимонад", prices: { "0.5л": 140 } },
+                { name: "Вода газ/негаз", prices: { "0.5л": 70 } }
             ]
         },
         {
@@ -102,12 +134,10 @@
                 const itemID = `id-${catIdx}-${itemIdx}`;
                 const sizes = Object.keys(item.prices);
                 const defSize = sizes[0];
-                
                 selectedOptions[itemID] = { size: defSize, price: item.prices[defSize] };
 
                 const card = document.createElement('div');
                 card.className = 'product-card';
-                
                 let imgPart = item.image ? `<img src="${item.image}" class="product-img" onerror="this.style.display='none'">` : '';
                 
                 card.innerHTML = `
@@ -116,11 +146,7 @@
                         <div class="product-name">${item.name}</div>
                         ${item.desc ? `<div class="product-desc">${item.desc}</div>` : ''}
                         <div class="size-selector" id="sizes-${itemID}">
-                            ${sizes.map(s => `
-                                <button class="size-btn ${s===defSize?'active':''}" 
-                                        onclick="selectSize(event, '${itemID}', '${s}', ${item.prices[s]})">
-                                    ${s}
-                                </button>`).join('')}
+                            ${sizes.map(s => `<button class="size-btn ${s===defSize?'active':''}" onclick="selectSize(event, '${itemID}', '${s}', ${item.prices[s]})">${s}</button>`).join('')}
                         </div>
                         <div class="price-row">
                             <div class="current-price" id="price-${itemID}">${item.prices[defSize]} ₽</div>
@@ -137,7 +163,6 @@
         const btnContainer = document.getElementById(`sizes-${itemID}`);
         btnContainer.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
         e.currentTarget.classList.add('active');
-        
         document.getElementById(`price-${itemID}`).innerText = price + " ₽";
         selectedOptions[itemID] = { size, price };
         tg.HapticFeedback.selectionChanged();
@@ -146,20 +171,12 @@
     window.addToCart = (name, itemID) => {
         const opt = selectedOptions[itemID];
         cart.push({ name, size: opt.size, price: opt.price });
-        
         const total = cart.reduce((s, i) => s + i.price, 0);
-        tg.MainButton.setParams({
-            text: `В КОРЗИНУ: ${total} ₽`,
-            color: '#4e342e',
-            is_visible: true
-        });
+        tg.MainButton.setParams({ text: `В КОРЗИНУ: ${total} ₽`, color: '#4e342e', is_visible: true });
         tg.HapticFeedback.notificationOccurred('success');
     };
 
-    tg.onEvent('mainButtonClicked', () => {
-        tg.sendData(JSON.stringify(cart));
-    });
-
+    tg.onEvent('mainButtonClicked', () => tg.sendData(JSON.stringify(cart)));
     renderMenu();
 </script>
 </body>
