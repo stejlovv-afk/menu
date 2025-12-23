@@ -14,29 +14,59 @@
             --btn-text: var(--tg-theme-button-text-color, #ffffff);
             --secondary: var(--tg-theme-secondary-bg-color, #f5f5f5);
         }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 100px; }
-        .header { padding: 15px; text-align: center; background: var(--secondary); }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 100px; overflow-x: hidden; }
+        
+        /* Список товаров */
+        .header { padding: 15px; text-align: center; background: var(--secondary); font-weight: bold; }
         .category-title { padding: 15px 20px 5px; font-size: 12px; font-weight: bold; text-transform: uppercase; color: var(--hint); }
-        .product-card { border-bottom: 1px solid var(--secondary); padding: 12px 15px; display: flex; gap: 12px; align-items: center; }
-        .img-container { width: 80px; height: 80px; flex-shrink: 0; background: #eee; border-radius: 10px; overflow: hidden; }
+        .product-card { border-bottom: 1px solid var(--secondary); padding: 12px 15px; display: flex; gap: 15px; align-items: center; cursor: pointer; }
+        .img-container { width: 65px; height: 65px; flex-shrink: 0; border-radius: 12px; overflow: hidden; background: #eee; }
         .product-img { width: 100%; height: 100%; object-fit: cover; }
-        .product-content { flex-grow: 1; display: flex; flex-direction: column; gap: 4px; }
-        .product-name { font-weight: 600; font-size: 15px; }
-        .size-selector { display: flex; flex-wrap: wrap; gap: 4px; }
-        .size-btn { border: none; background: var(--secondary); color: var(--text); padding: 5px 8px; border-radius: 6px; font-size: 10px; cursor: pointer; }
-        .size-btn.active { background: var(--btn); color: var(--btn-text); }
-        .price-row { display: flex; justify-content: space-between; align-items: center; margin-top: 5px; }
-        .current-price { font-weight: bold; font-size: 16px; color: var(--btn); }
-        .add-btn { background: var(--btn); color: var(--btn-text); border: none; padding: 5px 15px; border-radius: 8px; font-weight: bold; font-size: 18px; }
+        .product-info { flex-grow: 1; }
+        .product-name { font-weight: 600; font-size: 16px; margin-bottom: 2px; }
+        .product-price-from { color: var(--hint); font-size: 14px; }
+
+        /* Модальное окно */
+        #modal-overlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.5); display: none; z-index: 100; 
+        }
+        #modal { 
+            position: fixed; bottom: -100%; left: 0; width: 100%; 
+            background: var(--bg); border-radius: 20px 20px 0 0; 
+            padding: 20px; box-sizing: border-box; z-index: 101; 
+            transition: bottom 0.3s ease; box-shadow: 0 -5px 20px rgba(0,0,0,0.2);
+        }
+        #modal.open { bottom: 0; }
+        .modal-header { display: flex; gap: 15px; margin-bottom: 20px; }
+        .modal-img { width: 100px; height: 100px; border-radius: 15px; object-fit: cover; }
+        .modal-title { font-size: 20px; font-weight: bold; }
+        
+        .size-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0; }
+        .size-option { 
+            padding: 12px; border: 2px solid var(--secondary); border-radius: 12px; 
+            text-align: center; cursor: pointer; transition: 0.2s;
+        }
+        .size-option.selected { border-color: var(--btn); background: var(--secondary); }
+        .size-name { display: block; font-weight: bold; }
+        .size-price { font-size: 14px; color: var(--hint); }
+
+        .confirm-btn { 
+            width: 100%; background: var(--btn); color: var(--btn-text); 
+            border: none; padding: 15px; border-radius: 15px; 
+            font-size: 16px; font-weight: bold; cursor: pointer; 
+        }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <h2 style="margin:0; color: var(--btn);">URBAN LUNCH</h2>
-</div>
-
+<div class="header">URBAN LUNCH</div>
 <div id="app"></div>
+
+<div id="modal-overlay" onclick="closeModal()"></div>
+<div id="modal">
+    <div id="modal-content"></div>
+</div>
 
 <script>
     const tg = window.Telegram.WebApp;
@@ -60,114 +90,98 @@
             items: [
                 { name: "Чай Черный", image: "teablack-min.jpg", prices: { "250мл": 120, "350мл": 150, "450мл": 180 } },
                 { name: "Чай Зеленый", image: "greentea-min.jpg", prices: { "250мл": 120, "350мл": 150, "450мл": 180 } },
-                { name: "Чай Каркаде", image: "karkadetea-min.jpg", prices: { "250мл": 120, "350мл": 150, "450мл": 180 } },
-                { name: "Зеленый Жасмин", image: "greenjasmin-min.jpg", prices: { "250мл": 120, "350мл": 150, "450мл": 180 } },
-                { name: "Травяной Чай", image: "travatea-min.jpg", prices: { "250мл": 120, "350мл": 150, "450мл": 180 } },
-                { name: "Матча", image: "matcha-min.jpg", prices: { "250мл": 180, "350мл": 220, "450мл": 260 } },
-                { name: "Какао", image: "kakao-min.jpg", prices: { "250мл": 180, "350мл": 220, "450мл": 260 } },
                 { name: "Пряный Чай", image: "pryanytea-min.jpg", prices: { "250мл": 240, "350мл": 280, "450мл": 320 } }
             ]
         },
         {
-            category: "Пунши и Глинтвейн",
+            category: "Пунши",
             items: [
                 { name: "Глинтвейн", image: "glintveinpunch-min.jpg", prices: { "350мл": 230, "450мл": 270 } },
-                { name: "Облепиховый пунш", image: "oblepihapunch-min.jpg", prices: { "350мл": 230, "450мл": 270 } },
-                { name: "Малиновый пунш", image: "malinapunsh-min.jpg", prices: { "350мл": 230, "450мл": 270 } }
-            ]
-        },
-        {
-            category: "Холодные напитки",
-            items: [
-                { name: "Айс Латте", image: "latte-min.jpg", prices: { "250мл": 240, "350мл": 280 } },
-                { name: "Эспрессо Тоник", image: "granattonic-min.jpg", prices: { "250мл": 250, "350мл": 290 } },
-                { name: "Бамбл Холодный", image: "granattonic-min.jpg", prices: { "250мл": 270, "350мл": 300 } },
-                { name: "Айс Матча", image: "matcha-min.jpg", prices: { "250мл": 230, "350мл": 270 } },
-                { name: "Лимонад", image: "lemonchernogo-min.jpg", prices: { "250мл": 260, "350мл": 290 } }
-            ]
-        },
-        {
-            category: "Сладости",
-            items: [
-                { name: "Bombbar Орех", image: "bombbarfunduk-min.jpg", prices: { "1шт": 130 } },
-                { name: "Bombbar Малина", image: "bombbarmalina-min.jpg", prices: { "1шт": 130 } },
-                { name: "Bombbar Кокос", image: "bombbarcocos-min.jpg", prices: { "1шт": 130 } },
-                { name: "Snaqer Орех", image: "snaqerfunduk-min.jpg", prices: { "1шт": 130 } },
-                { name: "Cookie Смородина", image: "chikabiscuitblackcurrant-min.jpg", prices: { "1шт": 170 } },
-                { name: "Cookie Банан", image: "chikabiscuitbanan-min.jpg", prices: { "1шт": 170 } }
-            ]
-        },
-        {
-            category: "Газировка",
-            items: [
-                { name: "Cola", image: "colachernogo-min.jpg", prices: { "140р": 140 } },
-                { name: "Байкал", image: "baikalchernogo-min.jpg", prices: { "140р": 140 } },
-                { name: "Лимонад", image: "lemonchernogo-min.jpg", prices: { "140р": 140 } },
-                { name: "Вода", image: "negazcernogo-min.jpg", prices: { "70р": 70 } }
-            ]
-        },
-        {
-            category: "Сезонные",
-            items: [
-                { name: "Латте Халва", image: "lattehalva-min.jpg", prices: { "350мл": 290, "450мл": 350 } },
-                { name: "Латте Тыква", image: "lattetikva-min.jpg", prices: { "350мл": 290, "450мл": 350 } },
-                { name: "Раф Сникерс", image: "rafsnikers-min.jpg", prices: { "350мл": 320, "450мл": 380 } },
-                { name: "Orange Christmas", image: "latteorangecristmas-min.jpg", prices: { "350мл": 320, "450мл": 380 } }
+                { name: "Облепиховый пунш", image: "oblepihapunch-min.jpg", prices: { "350мл": 230, "450мл": 270 } }
             ]
         }
     ];
 
     let cart = [];
-    const selectedOptions = {};
+    let currentItem = null;
+    let selectedSize = null;
 
     function renderMenu() {
-        const container = document.getElementById('app');
-        container.innerHTML = '';
-        
-        menuData.forEach((cat, cIdx) => {
-            const head = document.createElement('div');
-            head.className = 'category-title';
-            head.innerText = cat.category;
-            container.appendChild(head);
-            
-            cat.items.forEach((item, iIdx) => {
-                const id = `item-${cIdx}-${iIdx}`;
-                const sizes = Object.keys(item.prices);
-                selectedOptions[id] = { size: sizes[0], price: item.prices[sizes[0]] };
+        const app = document.getElementById('app');
+        menuData.forEach(cat => {
+            const title = document.createElement('div');
+            title.className = 'category-title';
+            title.innerText = cat.category;
+            app.appendChild(title);
 
+            cat.items.forEach(item => {
+                const minPrice = Object.values(item.prices)[0];
                 const card = document.createElement('div');
                 card.className = 'product-card';
+                card.onclick = () => openModal(item);
                 card.innerHTML = `
                     <div class="img-container"><img src="${item.image}" class="product-img"></div>
-                    <div class="product-content">
+                    <div class="product-info">
                         <div class="product-name">${item.name}</div>
-                        <div class="size-selector">
-                            ${sizes.map(s => `<button class="size-btn ${s===sizes[0]?'active':''}" onclick="sel('${id}','${s}',${item.prices[s]}, event)">${s}</button>`).join('')}
-                        </div>
-                        <div class="price-row">
-                            <div class="current-price" id="p-${id}">${item.prices[sizes[0]]} ₽</div>
-                            <button class="add-btn" onclick="add('${item.name}','${id}')">+</button>
-                        </div>
+                        <div class="product-price-from">от ${minPrice} ₽</div>
                     </div>
+                    <div style="color: var(--btn); font-size: 24px;">+</div>
                 `;
-                container.appendChild(card);
+                app.appendChild(card);
             });
         });
     }
 
-    window.sel = (id, size, price, e) => {
-        selectedOptions[id] = { size, price };
-        const btns = e.target.parentElement.querySelectorAll('.size-btn');
-        btns.forEach(b => b.classList.remove('active'));
-        e.target.classList.add('active');
-        document.getElementById(`p-${id}`).innerText = price + " ₽";
+    function openModal(item) {
+        currentItem = item;
+        selectedSize = Object.keys(item.prices)[0];
+        
+        const content = document.getElementById('modal-content');
+        content.innerHTML = `
+            <div class="modal-header">
+                <img src="${item.image}" class="modal-img">
+                <div>
+                    <div class="modal-title">${item.name}</div>
+                    <div style="color:var(--hint)">Выберите объём</div>
+                </div>
+            </div>
+            <div class="size-grid">
+                ${Object.entries(item.prices).map(([size, price]) => `
+                    <div class="size-option ${size === selectedSize ? 'selected' : ''}" onclick="selectModalSize('${size}', ${price}, this)">
+                        <span class="size-name">${size}</span>
+                        <span class="size-price">${price} ₽</span>
+                    </div>
+                `).join('')}
+            </div>
+            <button class="confirm-btn" onclick="addToCartFromModal()">Добавить в заказ</button>
+        `;
+        
+        document.getElementById('modal-overlay').style.display = 'block';
+        setTimeout(() => document.getElementById('modal').classList.add('open'), 10);
+    }
+
+    window.selectModalSize = (size, price, el) => {
+        selectedSize = size;
+        document.querySelectorAll('.size-option').forEach(opt => opt.classList.remove('selected'));
+        el.classList.add('selected');
+        tg.HapticFeedback.selectionChanged();
     };
 
-    window.add = (name, id) => {
-        const res = selectedOptions[id];
-        cart.push({ name, size: res.size, price: res.price });
-        const total = cart.reduce((a, b) => a + b.price, 0);
+    function closeModal() {
+        document.getElementById('modal').classList.remove('open');
+        setTimeout(() => {
+            document.getElementById('modal-overlay').style.display = 'none';
+        }, 300);
+    }
+
+    window.addToCartFromModal = () => {
+        const price = currentItem.prices[selectedSize];
+        cart.push({ name: currentItem.name, size: selectedSize, price: price });
+        
+        const total = cart.reduce((sum, i) => sum + i.price, 0);
         tg.MainButton.setText(`В КОРЗИНУ: ${total} ₽`).show();
+        tg.HapticFeedback.notificationOccurred('success');
+        closeModal();
     };
 
     tg.onEvent('mainButtonClicked', () => {
