@@ -274,20 +274,22 @@
     window.closeCart = () => { document.getElementById('cart-view').classList.remove('open'); setTimeout(()=>document.getElementById('cart-overlay').style.display='none',300); };
     window.clearCart = () => { cart=[]; tg.MainButton.hide(); openCart(); };
     
-    // --- ИСПРАВЛЕННАЯ ФУНКЦИЯ ОТПРАВКИ ДАННЫХ В БОТА ---
+    // ФУНКЦИЯ ДЛЯ ПОЛНОГО ОТЧЕТА АДМИНУ
     window.sendOrder = () => {
         if (cart.length === 0) return;
         
-        // Преобразуем корзину в список товаров для оплаты
         const productsList = cart.map(i => {
-            // Создаем понятное описание (например: Капучино 350мл, Банановое)
-            let description = `${i.item.name} ${i.size}`;
-            if (i.milk !== 'Обычное') description += `, ${i.milk}`;
-            if (i.syrup !== 'Нет') description += `, ${i.syrup}`;
-            
+            let fullName = `${i.item.name} (${i.size})`;
+            let details = [];
+            if (i.milk !== 'Обычное') details.push(`Молоко: ${i.milk}`);
+            if (i.syrup !== 'Нет') details.push(`Сироп: ${i.syrup}`);
+            if (i.sugar !== '0г') details.push(`Сахар: ${i.sugar}`);
+            if (i.cinnamon === 'Да') details.push(`Корица`);
+
             return {
-                name: description,
-                price: i.finalPrice
+                name: fullName,
+                price: i.finalPrice,
+                description: details.join(', ') || 'Классический состав'
             };
         });
 
@@ -295,7 +297,6 @@
             products: productsList
         };
         
-        // Отправляем JSON строку боту
         tg.sendData(JSON.stringify(dataToSend));
         tg.close();
     };
