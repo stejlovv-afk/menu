@@ -6,32 +6,56 @@
     <title>Urban Lunch</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: sans-serif; padding: 20px; text-align: center; }
-        .item { border: 1px solid #ccc; padding: 10px; margin: 10px; border-radius: 10px; }
-        button { background: #000; color: #fff; border: none; padding: 15px; border-radius: 10px; width: 100%; font-weight: bold; }
+        :root { --bg: #ffffff; --text: #000; --btn-bg: #f2f2f7; }
+        body { font-family: -apple-system, sans-serif; margin: 0; padding: 15px; background: var(--bg); }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .card { background: var(--btn-bg); padding: 10px; border-radius: 15px; text-align: center; }
+        button { background: #000; color: #fff; border: none; padding: 10px; border-radius: 10px; width: 100%; margin-top: 5px; cursor: pointer; }
+        .header { font-weight: 800; font-size: 20px; text-align: center; margin-bottom: 20px; }
     </style>
 </head>
 <body>
-    <h2>URBAN LUNCH</h2>
-    <div class="item">
-        <p>Капучино - 190₽</p>
-        <button onclick="buy('Капучино', 190)">Выбрать</button>
-    </div>
+    <div class="header">URBAN LUNCH</div>
+    <div class="grid" id="menu"></div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        function buy(name, price) {
+        // Твое упрощенное меню для теста
+        const items = [
+            { name: "Капучино 250мл", price: 190 },
+            { name: "Латте 250мл", price: 190 },
+            { name: "Американо 250мл", price: 180 },
+            { name: "Глинтвейн 350мл", price: 230 },
+            { name: "Облепиховый пунш", price: 230 },
+            { name: "Bombbar орех", price: 130 }
+        ];
+
+        const menuDiv = document.getElementById('menu');
+        items.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'card';
+            div.innerHTML = `
+                <div style="font-size:14px; font-weight:bold">${item.name}</div>
+                <div>${item.price}₽</div>
+                <button onclick="order('${item.name}', ${item.price})">Выбрать</button>
+            `;
+            menuDiv.appendChild(div);
+        });
+
+        function order(name, price) {
             const data = {
                 products: [{ name: name, price: price }]
             };
             
-            // ПРОВЕРКА: Если ты увидишь это окно в Mini App - значит код работает
-            alert("Отправляю данные боту..."); 
-
-            tg.sendData(JSON.stringify(data));
-            tg.close();
+            // ПЕРЕДАЧА ДАННЫХ
+            try {
+                tg.sendData(JSON.stringify(data));
+                tg.close();
+            } catch (e) {
+                alert("Ошибка Telegram: " + e.message);
+            }
         }
     </script>
 </body>
