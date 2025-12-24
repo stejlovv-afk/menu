@@ -274,16 +274,25 @@
     window.closeCart = () => { document.getElementById('cart-view').classList.remove('open'); setTimeout(()=>document.getElementById('cart-overlay').style.display='none',300); };
     window.clearCart = () => { cart=[]; tg.MainButton.hide(); openCart(); };
     
-    // ИСПРАВЛЕННАЯ ФУНКЦИЯ ДЛЯ БОТА В TERMUX
+    // ОБНОВЛЕННАЯ ФУНКЦИЯ: Теперь собирает ВСЕ детали (сироп, сахар и т.д.)
     window.sendOrder = () => {
         if (cart.length === 0) return;
         
         const orderData = {
             title: "Заказ Urban Lunch",
-            prices: cart.map(i => ({
-                label: `${i.item.name} (${i.size}${i.milk !== 'Обычное' ? ', ' + i.milk : ''})`,
-                amount: i.finalPrice * 100 // Копейки
-            }))
+            prices: cart.map(i => {
+                let details = [];
+                details.push(i.size); 
+                if (i.milk !== 'Обычное') details.push(i.milk); 
+                if (i.syrup !== 'Нет') details.push('сироп: ' + i.syrup); 
+                if (i.sugar !== '0г') details.push('сахар: ' + i.sugar);
+                if (i.cinnamon !== 'Нет') details.push('корица');
+
+                return {
+                    label: `${i.item.name} (${details.join(', ')})`,
+                    amount: i.finalPrice * 100 
+                };
+            })
         };
         
         tg.sendData(JSON.stringify(orderData));
