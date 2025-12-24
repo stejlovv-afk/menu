@@ -26,9 +26,6 @@
 
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px; }
         .card { display: flex; flex-direction: column; position: relative; }
-        /* Если товар скрыт админом */
-        .card.hidden-item { display: none; }
-
         .img-box { width: 100%; aspect-ratio: 1/1; background: #f9f9f9; border-radius: 18px; overflow: hidden; position: relative; cursor: pointer; }
         .img-box img { width: 100%; height: 100%; object-fit: cover; }
         
@@ -60,9 +57,9 @@
         .cart-item { padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
         .empty-text { text-align: center; color: var(--hint); padding: 40px 0; }
 
-        /* Стили админки */
-        .admin-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; }
-        .admin-btn { padding: 5px 10px; border-radius: 8px; border: none; font-size: 12px; cursor: pointer; }
+        /* Админ-стили */
+        .admin-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #eee; }
+        .admin-btn { padding: 6px 12px; border-radius: 8px; border: none; font-size: 12px; font-weight: 600; cursor: pointer; }
         .btn-hide { background: #ff3b30; color: #fff; }
         .btn-show { background: #34c759; color: #fff; }
     </style>
@@ -102,7 +99,7 @@
 
 <div id="admin-overlay" onclick="closeAdmin()"></div>
 <div id="admin-view">
-    <h2 style="margin-top:0">Управление меню</h2>
+    <h2 style="margin-top:0">Управление стоп-листом</h2>
     <div id="admin-list"></div>
     <button class="main-add-btn" onclick="closeAdmin()">Закрыть</button>
 </div>
@@ -110,6 +107,10 @@
 <script>
     const tg = window.Telegram.WebApp;
     tg.expand();
+
+    // ПОЛУЧАЕМ СТОП-ЛИСТ ОТ БОТА
+    const urlParams = new URLSearchParams(window.location.search);
+    let hiddenItems = JSON.parse(urlParams.get('stops') || '[]');
 
     const milks = { "Обычное": 0, "Банановое": 70, "Кокосовое": 70, "Миндальное": 70, "Безлактозное": 70 };
     const syrups = ["Нет", "Фисташка", "Красный апельсин", "Лаванда", "Клубника", "Имбирный пряник", "Лесной орех", "Персик", "Дыня", "Слива", "Яблоко", "Лемонграсс", "Малина", "Попкорн", "Кокос", "Миндаль", "Вишня", "Баблгам", "Соленая карамель", "Карамель", "Ваниль"];
@@ -172,9 +173,6 @@
 
     let cart = [];
     let favorites = JSON.parse(localStorage.getItem('urban_favs') || '[]');
-    // Храним ID скрытых товаров
-    let hiddenItems = JSON.parse(localStorage.getItem('urban_hidden') || '[]');
-    let currentMode = 'home';
 
     function init() {
         const nav = document.getElementById('cat-nav');
@@ -185,15 +183,13 @@
     function renderProducts(data) {
         const app = document.getElementById('app');
         app.innerHTML = '';
-        if(data.length === 0) { app.innerHTML = '<div class="empty-text">Список пуст</div>'; return; }
-        
         data.forEach(cat => {
             cat.items.forEach(item => {
+                // Если ID товара в стоп-листе, не рисуем его
+                if (hiddenItems.includes(item.id)) return;
+
                 const isFav = favorites.includes(item.id);
-                const isHidden = hiddenItems.includes(item.id);
-                
-                const card = document.createElement('div'); 
-                card.className = `card ${isHidden ? 'hidden-item' : ''}`;
+                const card = document.createElement('div'); card.className = 'card';
                 card.innerHTML = `
                     <div class="fav-badge ${isFav?'active':''}" onclick="toggleFav(${item.id}, event)">${isFav?'❤️':'🤍'}</div>
                     <div class="img-box" onclick="openItem(${item.id})"><img src="${item.image}"></div>
@@ -204,21 +200,17 @@
                 app.appendChild(card);
             });
         });
+        if (app.innerHTML === '') app.innerHTML = '<div class="empty-text">В этой категории пусто</div>';
     }
 
-    // --- ЛОГИКА АДМИН-ПАНЕЛИ ---
+    // ЛОГИКА АДМИНКИ
     let pressTimer;
-    const adminTrigger = document.getElementById('admin-trigger');
-
-    adminTrigger.addEventListener('touchstart', () => {
+    document.getElementById('admin-trigger').addEventListener('touchstart', () => {
         pressTimer = window.setTimeout(() => {
-            const pass = prompt("Введите пароль администратора:");
-            if (pass === "7654") openAdmin();
-            else if (pass !== null) alert("Неверный пароль!");
+            if (prompt("Пароль:") === "7654") openAdmin();
         }, 2000);
     });
-
-    adminTrigger.addEventListener('touchend', () => clearTimeout(pressTimer));
+    document.getElementById('admin-trigger').addEventListener('touchend', () => clearTimeout(pressTimer));
 
     function openAdmin() {
         const list = document.getElementById('admin-list');
@@ -226,15 +218,12 @@
         menuData.forEach(cat => {
             cat.items.forEach(item => {
                 const isHidden = hiddenItems.includes(item.id);
-                const div = document.createElement('div');
-                div.className = 'admin-item';
-                div.innerHTML = `
-                    <span style="font-size:14px">${item.name}</span>
-                    <button class="admin-btn ${isHidden ? 'btn-show' : 'btn-hide'}" onclick="toggleVisibility(${item.id})">
-                        ${isHidden ? 'Показать' : 'Скрыть'}
+                list.innerHTML += `<div class="admin-item">
+                    <span>${item.name}</span>
+                    <button class="admin-btn ${isHidden?'btn-show':'btn-hide'}" onclick="toggleVisibility(${item.id})">
+                        ${isHidden?'Показать':'Скрыть'}
                     </button>
-                `;
-                list.appendChild(div);
+                </div>`;
             });
         });
         document.getElementById('admin-overlay').style.display = 'block';
@@ -242,19 +231,15 @@
     }
 
     function toggleVisibility(id) {
-        if (hiddenItems.includes(id)) hiddenItems = hiddenItems.filter(i => i !== id);
-        else hiddenItems.push(id);
-        localStorage.setItem('urban_hidden', JSON.stringify(hiddenItems));
-        openAdmin(); // Обновить список в админке
-        renderProducts(menuData); // Обновить витрину
+        const isHidden = hiddenItems.includes(id);
+        tg.sendData(JSON.stringify({
+            action: isHidden ? 'show' : 'hide',
+            itemId: id
+        }));
+        tg.close();
     }
 
-    window.closeAdmin = () => {
-        document.getElementById('admin-view').classList.remove('open');
-        setTimeout(() => document.getElementById('admin-overlay').style.display = 'none', 300);
-    };
-
-    // --- ОСТАЛЬНОЙ КОД БЕЗ ИЗМЕНЕНИЙ ---
+    // СТАНДАРТНЫЕ ФУНКЦИИ
     function switchTab(mode) {
         currentMode = mode;
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -271,15 +256,13 @@
         if(favorites.includes(id)) favorites = favorites.filter(f => f !== id);
         else favorites.push(id);
         localStorage.setItem('urban_favs', JSON.stringify(favorites));
-        if(currentMode === 'fav') switchTab('fav'); else {
-            const btn = e.currentTarget; btn.classList.toggle('active');
-            btn.innerText = favorites.includes(id) ? '❤️' : '🤍';
-        }
+        if(document.getElementById('tab-fav').classList.contains('active')) switchTab('fav');
+        else e.currentTarget.innerText = favorites.includes(id) ? '❤️' : '🤍';
     }
 
     function openItem(id) {
         let item; menuData.forEach(c => c.items.forEach(i => { if(i.id === id) item = i; }));
-        window.cur = { item, size: Object.keys(item.prices)[0], milk: "Обычное", syrup: "Нет", sugar: "0г", cinnamon: "Нет", juice: "Апельсин", lemonadeTaste: "Киви-Фейхоа", temp: "Холодная" };
+        window.cur = { item, size: Object.keys(item.prices)[0], milk: "Обычное", syrup: "Нет", sugar: "0г" };
         showModal();
     }
 
@@ -341,14 +324,9 @@
         renderProducts(res);
     }
 
-    window.closeModal = () => { document.getElementById('modal').classList.remove('open'); setTimeout(()=>document.getElementById('modal-overlay').style.display='none',300); };
-    window.closeCart = () => { document.getElementById('cart-view').classList.remove('open'); setTimeout(()=>document.getElementById('cart-overlay').style.display='none',300); };
-    window.clearCart = () => { cart=[]; tg.MainButton.hide(); openCart(); };
-    
-    window.sendOrder = () => {
+    function sendOrder() {
         if (cart.length === 0) return;
         const orderData = {
-            title: "Заказ Urban Lunch",
             prices: cart.map(i => {
                 let d = [i.size];
                 if(i.milk!=='Обычное') d.push(i.milk);
@@ -359,8 +337,13 @@
         };
         tg.sendData(JSON.stringify(orderData));
         tg.close();
-    };
-    
+    }
+
+    window.closeModal = () => { document.getElementById('modal').classList.remove('open'); setTimeout(()=>document.getElementById('modal-overlay').style.display='none',300); };
+    window.closeCart = () => { document.getElementById('cart-view').classList.remove('open'); setTimeout(()=>document.getElementById('cart-overlay').style.display='none',300); };
+    window.closeAdmin = () => { document.getElementById('admin-view').classList.remove('open'); setTimeout(()=>document.getElementById('admin-overlay').style.display='none',300); };
+    window.clearCart = () => { cart=[]; tg.MainButton.hide(); openCart(); };
+
     tg.onEvent('mainButtonClicked', openCart);
     init();
 </script>
