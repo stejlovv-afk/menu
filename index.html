@@ -93,7 +93,8 @@
 
 <script>
     const tg = window.Telegram.WebApp;
-    tg.expand();
+    tg.ready(); // Сообщаем Telegram, что приложение готово
+    tg.expand(); // Разворачиваем на все окно
 
     const milks = { "Обычное": 0, "Банановое": 70, "Кокосовое": 70, "Миндальное": 70, "Безлактозное": 70 };
     const syrups = ["Нет", "Фисташка", "Красный апельсин", "Лаванда", "Клубника", "Имбирный пряник", "Лесной орех", "Персик", "Дыня", "Слива", "Яблоко", "Лемонграсс", "Малина", "Попкорн", "Кокос", "Миндаль", "Вишня", "Баблгам", "Соленая карамель", "Карамель", "Ваниль"];
@@ -274,30 +275,25 @@
     window.closeCart = () => { document.getElementById('cart-view').classList.remove('open'); setTimeout(()=>document.getElementById('cart-overlay').style.display='none',300); };
     window.clearCart = () => { cart=[]; tg.MainButton.hide(); openCart(); };
     
-    // ФУНКЦИЯ ДЛЯ ПОЛНОГО ОТЧЕТА АДМИНУ
+    // ФУНКЦИЯ ДЛЯ ОТПРАВКИ ЗАКАЗА
     window.sendOrder = () => {
         if (cart.length === 0) return;
         
         const productsList = cart.map(i => {
-            let fullName = `${i.item.name} (${i.size})`;
             let details = [];
             if (i.milk !== 'Обычное') details.push(`Молоко: ${i.milk}`);
             if (i.syrup !== 'Нет') details.push(`Сироп: ${i.syrup}`);
             if (i.sugar !== '0г') details.push(`Сахар: ${i.sugar}`);
-            if (i.cinnamon === 'Да') details.push(`Корица`);
 
             return {
-                name: fullName,
+                name: `${i.item.name} (${i.size})`,
                 price: i.finalPrice,
-                description: details.join(', ') || 'Классический состав'
+                description: details.join(', ') || 'Классика'
             };
         });
 
-        const dataToSend = {
-            products: productsList
-        };
-        
-        tg.sendData(JSON.stringify(dataToSend));
+        // Прямая отправка данных в бота
+        tg.sendData(JSON.stringify({ products: productsList }));
         tg.close();
     };
     
