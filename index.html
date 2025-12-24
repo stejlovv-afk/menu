@@ -3,81 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Urban Lunch</title>
+    <title>Urban Lunch Menu</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --bg: #ffffff; --text: #000000; --hint: #8e8e93; --btn-bg: #f2f2f7; --accent: #ff3b30; }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 100px; user-select: none; }
+        :root { --bg: #ffffff; --text: #000000; --btn: #f2f2f7; --accent: #ff3b30; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding-bottom: 100px; user-select: none; }
+        .header { sticky; top: 0; background: #fff; padding: 15px; border-bottom: 1px solid #eee; z-index: 10; }
+        .categories { display: flex; overflow-x: auto; gap: 15px; padding: 10px 15px; background: #fff; }
+        .cat-btn { white-space: nowrap; padding: 8px 15px; border-radius: 20px; border: none; background: var(--btn); font-weight: bold; }
+        .cat-btn.active { background: #000; color: #fff; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px; }
-        .card { display: flex; flex-direction: column; background: #fff; border-radius: 18px; overflow: hidden; }
-        .img-box { width: 100%; aspect-ratio: 1/1; background: #f9f9f9; }
-        .img-box img { width: 100%; height: 100%; object-fit: cover; }
-        .card-info { padding: 10px; }
-        .price-tag { background: var(--btn-bg); border: none; border-radius: 10px; padding: 8px; width: 100%; font-weight: bold; cursor: pointer; }
-        .main-btn { position: fixed; bottom: 20px; left: 20px; right: 20px; background: #000; color: #fff; border: none; padding: 15px; border-radius: 15px; font-weight: bold; z-index: 100; }
-        #cart-view { position: fixed; inset: 0; background: #fff; z-index: 200; display: none; padding: 20px; }
+        .item-card { background: var(--btn); border-radius: 15px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; }
+        .item-name { font-size: 14px; font-weight: bold; margin-bottom: 8px; }
+        .size-btn { display: block; width: 100%; margin-top: 5px; padding: 6px; border: 1px solid #ddd; border-radius: 8px; background: #fff; font-size: 12px; }
+        .main-btn { position: fixed; bottom: 20px; left: 15px; right: 15px; background: #000; color: #fff; border: none; padding: 18px; border-radius: 15px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
     </style>
 </head>
 <body>
 
-<div id="app" class="grid"></div>
-<button class="main-btn" id="cart-btn" style="display:none;" onclick="showCart()">Корзина</button>
+<div class="header"><b>URBAN LUNCH</b></div>
+<div class="categories" id="cat-list"></div>
+<div id="items-grid" class="grid"></div>
 
-<div id="cart-view">
-    <h2>Ваш заказ</h2>
-    <div id="cart-items"></div>
-    <button class="main-btn" onclick="sendOrder()">Оформить и оплатить</button>
-    <button onclick="hideCart()" style="margin-top:70px; border:none; background:none; color:blue;">Назад в меню</button>
-</div>
+<button class="main-btn" id="order-btn" style="display:none;" onclick="sendOrder()">Оформить заказ: 0 ₽</button>
 
 <script>
     const tg = window.Telegram.WebApp;
     tg.expand();
 
-    const products = [
-        { id: 1, name: "Капучино", price: 190, img: "kapuchino-min.jpg" },
-        { id: 2, name: "Латте", price: 230, img: "latte-min.jpg" },
-        { id: 3, name: "Раф", price: 250, img: "latte-min.jpg" }
+    const menu = [
+        { cat: "Кофе", items: [
+            { name: "Капучино", p: {"250мл": 190, "350мл": 230, "450мл": 270} },
+            { name: "Латте", p: {"250мл": 190, "350мл": 230, "450мл": 270} },
+            { name: "Эспрессо", p: {"30мл": 110, "60мл": 150} },
+            { name: "Американо", p: {"250мл": 180, "350мл": 220, "450мл": 260} },
+            { name: "Флат Уайт", p: {"250мл": 220, "350мл": 260, "450мл": 360} },
+            { name: "Раф", p: {"250мл": 210, "350мл": 250, "450мл": 290} },
+            { name: "Бамбл Теплый", p: {"250мл": 270, "350мл": 270, "450мл": 300} }
+        ]},
+        { cat: "Чай", items: [
+            { name: "Чай Черный", p: {"250мл": 120, "350мл": 150, "450мл": 180} },
+            { name: "Чай Зеленый", p: {"250мл": 120, "350мл": 150, "450мл": 180} },
+            { name: "Чай Каркаде", p: {"250мл": 120, "350мл": 150, "450мл": 180} },
+            { name: "Зеленый Жасмин", p: {"250мл": 120, "350мл": 150, "450мл": 180} },
+            { name: "Травяной Чай", p: {"250мл": 120, "350мл": 150, "450мл": 180} },
+            { name: "Матча", p: {"250мл": 180, "350мл": 220, "450мл": 260} },
+            { name: "Какао", p: {"250мл": 180, "350мл": 220, "450мл": 260} },
+            { name: "Пряный Чай", p: {"250мл": 240, "350мл": 280, "450мл": 320} },
+            { name: "Горячий Шоколад", p: {"250мл": 180, "350мл": 220, "450мл": 260} }
+        ]},
+        { cat: "Холодные", items: [
+            { name: "Айс Латте", p: {"250мл": 240, "350мл": 280} },
+            { name: "Эспрессо Тоник", p: {"250мл": 250, "350мл": 290} },
+            { name: "Бамбл Холодный", p: {"250мл": 270, "350мл": 300} },
+            { name: "Айс Матча", p: {"250мл": 230, "350мл": 270} },
+            { name: "Лимонад", p: {"250мл": 260, "350мл": 290} }
+        ]},
+        { cat: "Пунши", items: [
+            { name: "Глинтвейн", p: {"350мл": 230, "450мл": 270} },
+            { name: "Облепиховый пунш", p: {"350мл": 230, "450мл": 270} },
+            { name: "Малиновый пунш", p: {"350мл": 230, "450мл": 270} }
+        ]},
+        { cat: "Сезонные", items: [
+            { name: "Латте Халва", p: {"350мл": 290, "450мл": 350} },
+            { name: "Латте Тыква", p: {"350мл": 290, "450мл": 350} },
+            { name: "Раф Сникерс", p: {"350мл": 320, "450мл": 380} },
+            { name: "Latte Orange Christmas", p: {"350мл": 320, "450мл": 380} }
+        ]},
+        { cat: "Сладости", items: [
+            { name: "Bombbar Лесной орех", p: {"1шт": 130} },
+            { name: "Bombbar Малиновый", p: {"1шт": 130} },
+            { name: "Bombbar Кокос", p: {"1шт": 130} },
+            { name: "Snaqer Орех/Карамель", p: {"1шт": 130} },
+            { name: "Cookie Смородина", p: {"1шт": 170} },
+            { name: "Cookie Банан", p: {"1шт": 170} }
+        ]},
+        { cat: "Газировка", items: [
+            { name: "Cola Черноголовка", p: {"0.5л": 140} },
+            { name: "Байкал", p: {"0.5л": 140} },
+            { name: "Лимонад", p: {"0.5л": 140} },
+            { name: "Вода Газ/Негаз", p: {"0.5л": 70} }
+        ]}
     ];
 
     let cart = [];
+    let total = 0;
 
-    function render() {
-        const app = document.getElementById('app');
-        app.innerHTML = products.map(p => `
-            <div class="card">
-                <div class="img-box"><img src="${p.img}"></div>
-                <div class="card-info">
-                    <div>${p.name}</div>
-                    <button class="price-tag" onclick="addToCart(${p.id})">${p.price} ₽ +</button>
-                </div>
+    function renderCats() {
+        const list = document.getElementById('cat-list');
+        list.innerHTML = menu.map((c, i) => `<button class="cat-btn ${i===0?'active':''}" onclick="showCat('${c.cat}', this)">${c.cat}</button>`).join('');
+        showCat(menu[0].cat);
+    }
+
+    function showCat(name, el) {
+        if(el) {
+            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+        }
+        const grid = document.getElementById('items-grid');
+        const catData = menu.find(c => c.cat === name);
+        grid.innerHTML = catData.items.map(i => `
+            <div class="item-card">
+                <div class="item-name">${i.name}</div>
+                ${Object.entries(i.p).map(([size, price]) => `
+                    <button class="size-btn" onclick="addToCart('${i.name}', '${size}', ${price})">${size} - ${price}₽</button>
+                `).join('')}
             </div>
         `).join('');
     }
 
-    function addToCart(id) {
-        const p = products.find(x => x.id === id);
-        cart.push(p);
-        document.getElementById('cart-btn').style.display = 'block';
-        document.getElementById('cart-btn').innerText = `В корзину (${cart.length})`;
+    function addToCart(name, size, price) {
+        cart.push({name: `${name} (${size})`, price: price});
+        total += price;
+        const btn = document.getElementById('order-btn');
+        btn.style.display = 'block';
+        btn.innerText = `Оформить заказ: ${total} ₽`;
     }
-
-    function showCart() {
-        document.getElementById('cart-view').style.display = 'block';
-        document.getElementById('cart-items').innerHTML = cart.map(i => `<p>${i.name} - ${i.price} ₽</p>`).join('');
-    }
-
-    function hideCart() { document.getElementById('cart-view').style.display = 'none'; }
 
     function sendOrder() {
-        if (cart.length === 0) return;
-        const data = {
-            products: cart.map(i => ({ name: i.name, price: i.price, description: "Классика" }))
-        };
-        tg.sendData(JSON.stringify(data));
+        if(cart.length === 0) return;
+        tg.sendData(JSON.stringify({products: cart.map(i => ({name: i.name, price: i.price, description: "Заказ Urban Lunch"}))}));
     }
 
-    render();
+    renderCats();
 </script>
 </body>
 </html>
