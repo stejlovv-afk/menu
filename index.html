@@ -100,12 +100,13 @@
 </div>
 
 <script>
-    // --- ТВОЙ АДРЕС VPS ---
-    const VPS_URL = "http://[2a03:6f01:1:2::1:26ea]:5000"; 
+    // --- ДАННЫЕ СЕРВЕРА (Твой актуальный IP) ---
+    const VPS_URL = "http://[2a03:6f01:1:2::1:26ea]:5000";
 
     const tg = window.Telegram.WebApp;
     tg.expand();
 
+    // Настройки напитков
     const milks = { "Обычное": 0, "Банановое": 70, "Кокосовое": 70, "Миндальное": 70, "Безлактозное": 70 };
     const syrups = ["Нет", "Фисташка", "Красный апельсин", "Лаванда", "Клубника", "Имбирный пряник", "Лесной орех", "Персик", "Дыня", "Слива", "Яблоко", "Лемонграсс", "Малина", "Попкорн", "Кокос", "Миндаль", "Вишня", "Баблгам", "Соленая карамель", "Карамель", "Ваниль"];
     const juices = ["Апельсиновый", "Гранатовый"];
@@ -113,6 +114,7 @@
     const temps = ["Холодная", "Без льда", "Теплая"];
     const sPrices = { "250мл": 25, "350мл": 35, "450мл": 60 };
 
+    // База меню
     const menuData = [
         { category: "Кофе", items: [
             { id: 1, name: "Капучино", image: "kapuchino-min.jpg", prices: {"250мл": 190, "350мл": 230, "450мл": 270}, hasMilk: true, hasSyrup: true, hasSugar: true, hasCinnamon: true },
@@ -173,7 +175,7 @@
     let hiddenIds = [];
     let currentMode = 'home';
 
-    // Секретный вход
+    // Админка по долгому нажатию на заголовок
     let logoTimer;
     const logo = document.getElementById('logo-title');
     logo.addEventListener('touchstart', () => {
@@ -184,6 +186,7 @@
     });
     logo.addEventListener('touchend', () => clearTimeout(logoTimer));
 
+    // Инициализация данных при загрузке
     async function init() {
         try {
             const res = await fetch(`${VPS_URL}/get-hidden`);
@@ -215,10 +218,10 @@
                 app.appendChild(card);
             });
         });
-        if(count === 0) app.innerHTML = '<div class="empty-text">Меню пусто</div>';
+        if(count === 0) app.innerHTML = '<div class="empty-text">Пусто</div>';
     }
 
-    // --- АДМИНКА ---
+    // --- УПРАВЛЕНИЕ АДМИНКОЙ ---
     function openAdmin() {
         const list = document.getElementById('admin-list');
         list.innerHTML = '';
@@ -251,7 +254,7 @@
             });
             hiddenIds = newHidden;
             tg.showAlert("Меню обновлено для всех!");
-        } catch(e) { alert("Ошибка сохранения на VPS"); }
+        } catch(e) { alert("Ошибка связи с сервером"); }
         
         closeAdmin();
         renderProducts(menuData);
@@ -262,7 +265,7 @@
         setTimeout(()=>document.getElementById('admin-overlay').style.display='none',300);
     }
 
-    // --- ОСТАЛЬНАЯ ЛОГИКА ---
+    // --- ЛОГИКА ПРИЛОЖЕНИЯ ---
     function switchTab(mode) {
         currentMode = mode;
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -356,6 +359,7 @@
         renderProducts(res);
     }
 
+    // Вспомогательные функции
     window.closeModal = () => { document.getElementById('modal').classList.remove('open'); setTimeout(()=>document.getElementById('modal-overlay').style.display='none',300); };
     window.closeCart = () => { document.getElementById('cart-view').classList.remove('open'); setTimeout(()=>document.getElementById('cart-overlay').style.display='none',300); };
     window.clearCart = () => { cart=[]; tg.MainButton.hide(); openCart(); };
@@ -365,6 +369,7 @@
         tg.sendData(JSON.stringify(orderData));
         tg.close();
     };
+
     tg.onEvent('mainButtonClicked', openCart);
     init();
 </script>
