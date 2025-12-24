@@ -13,7 +13,15 @@
             --btn-bg: #f2f2f7;
             --accent: #ff3b30;
         }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 110px; -webkit-tap-highlight-color: transparent; }
+        body { 
+            font-family: -apple-system, system-ui, sans-serif; 
+            background: var(--bg); 
+            color: var(--text); 
+            margin: 0; 
+            padding-bottom: 110px; 
+            -webkit-tap-highlight-color: transparent; 
+            user-select: none;
+        }
         
         .header-area { position: sticky; top: 0; background: #fff; z-index: 100; border-bottom: 1px solid #efefef; }
         .top-bar { display: flex; align-items: center; padding: 10px 15px; gap: 10px; }
@@ -66,7 +74,7 @@
         <div style="font-weight: 800; font-size: 18px; flex-grow: 1; text-align: center; margin-right: 40px;">URBAN LUNCH</div>
     </div>
     <div id="search-bar">
-        <input type="text" class="search-input" id="qInput" placeholder="Поиск напитков и сладостей..." oninput="search(this.value)">
+        <input type="text" class="search-input" id="qInput" placeholder="Поиск напитков..." oninput="search(this.value)">
     </div>
     <div class="cat-nav" id="cat-nav"></div>
 </div>
@@ -87,14 +95,14 @@
     <h2 style="margin-top:0">Мой заказ</h2>
     <div id="cart-list"></div>
     <div id="cart-total" style="font-weight:bold; margin: 20px 0; text-align:right; font-size: 18px;"></div>
-    <button class="main-add-btn" onclick="sendOrder()">Оформить заказ</button>
+    <button class="main-add-btn" id="final-order-btn" onclick="sendOrder()">Оформить заказ</button>
     <button style="width:100%; background:none; border:none; color:red; margin-top:15px; cursor:pointer" onclick="clearCart()">Очистить корзину</button>
 </div>
 
 <script>
     const tg = window.Telegram.WebApp;
-    tg.ready(); // Сообщаем Telegram, что приложение готово
-    tg.expand(); // Разворачиваем на все окно
+    tg.ready();
+    tg.expand();
 
     const milks = { "Обычное": 0, "Банановое": 70, "Кокосовое": 70, "Миндальное": 70, "Безлактозное": 70 };
     const syrups = ["Нет", "Фисташка", "Красный апельсин", "Лаванда", "Клубника", "Имбирный пряник", "Лесной орех", "Персик", "Дыня", "Слива", "Яблоко", "Лемонграсс", "Малина", "Попкорн", "Кокос", "Миндаль", "Вишня", "Баблгам", "Соленая карамель", "Карамель", "Ваниль"];
@@ -113,45 +121,12 @@
         { category: "Чай", items: [
             { id: 8, name: "Чай Черный", image: "teablack-min.jpg", prices: {"250мл": 120, "350мл": 150, "450мл": 180}, hasSugar: true, hasLemon: true },
             { id: 9, name: "Чай Зеленый", image: "greentea-min.jpg", prices: {"250мл": 120, "350мл": 150, "450мл": 180}, hasSugar: true, hasLemon: true },
-            { id: 10, name: "Чай Каркаде", image: "karkadetea-min.jpg", prices: {"250мл": 120, "350мл": 150, "450мл": 180}, hasSugar: true },
-            { id: 11, name: "Зеленый Жасмин", image: "greenjasmin-min.jpg", prices: {"250мл": 120, "350мл": 150, "450мл": 180}, hasSugar: true },
-            { id: 12, name: "Травяной Чай", image: "travatea-min.jpg", prices: {"250мл": 120, "350мл": 150, "450мл": 180}, hasSugar: true },
-            { id: 13, name: "Матча", image: "matcha-min.jpg", prices: {"250мл": 180, "350мл": 220, "450мл": 260}, isMatcha: true, hasMilk: true, hasSyrup: true, hasSugar: true },
-            { id: 14, name: "Какао", image: "kakao-min.jpg", prices: {"250мл": 180, "350мл": 220, "450мл": 260}, hasMilk: true, hasSyrup: true, hasSugar: true },
-            { id: 15, name: "Пряный Чай", image: "pryanytea-min.jpg", prices: {"250мл": 240, "350мл": 280, "450мл": 320}, hasMilk: true, hasSyrup: true, hasSugar: true },
-            { id: 16, name: "Горячий Шоколад", image: "kakao-min.jpg", prices: {"250мл": 180, "350мл": 220, "450мл": 260}, hasSugar: true }
-        ]},
-        { category: "Пунши", items: [
-            { id: 17, name: "Глинтвейн", image: "glintveinpunch-min.jpg", prices: {"350мл": 230, "450мл": 270} },
-            { id: 18, name: "Облепиховый пунш", image: "oblepihapunch-min.jpg", prices: {"350мл": 230, "450мл": 270}, hasHoney: true },
-            { id: 19, name: "Малиновый пунш", image: "malinapunsh-min.jpg", prices: {"350мл": 230, "450мл": 270} }
-        ]},
-        { category: "Холодные", items: [
-            { id: 20, name: "Айс Латте", image: "latte-min.jpg", prices: {"350мл": 240, "450мл": 280}, hasMilk: true, hasSyrup: true, hasSugar: true },
-            { id: 21, name: "Эспрессо Тоник", image: "granattonic-min.jpg", prices: {"350мл": 250, "450мл": 290}, hasSugar: true },
-            { id: 22, name: "Бамбл Холодный", image: "granattonic-min.jpg", prices: {"350мл": 270, "450мл": 300}, hasJuice: true, hasSyrup: true, hasSugar: true },
-            { id: 23, name: "Айс Матча", image: "matcha-min.jpg", prices: {"350мл": 230, "450мл": 270}, isMatcha: true, hasMilk: true, hasSyrup: true, hasSugar: true },
-            { id: 24, name: "Лимонад", image: "lemonchernogo-min.jpg", prices: {"350мл": 260, "450мл": 290}, hasLemonadeTaste: true }
-        ]},
-        { category: "Сезонные", items: [
-            { id: 25, name: "Латте Халва", image: "lattehalva-min.jpg", prices: {"350мл": 290, "450мл": 350}, hasMilk: true, hasCinnamon: true },
-            { id: 26, name: "Латте Тыква", image: "lattetikva-min.jpg", prices: {"350мл": 290, "450мл": 350}, hasMilk: true, hasCinnamon: true },
-            { id: 27, name: "Раф Сникерс", image: "rafsnikers-min.jpg", prices: {"350мл": 320, "450мл": 380}, hasMilk: true, hasCinnamon: true },
-            { id: 28, name: "Latte Orange Christmas", image: "latteorangecristmas-min.jpg", prices: {"350мл": 320, "450мл": 380}, hasMilk: true, hasCinnamon: true }
+            { id: 13, name: "Матча", image: "matcha-min.jpg", prices: {"250мл": 180, "350мл": 220, "450мл": 260}, hasMilk: true, hasSyrup: true, hasSugar: true },
+            { id: 14, name: "Какао", image: "kakao-min.jpg", prices: {"250мл": 180, "350мл": 220, "450мл": 260}, hasMilk: true, hasSyrup: true, hasSugar: true }
         ]},
         { category: "Сладости", items: [
             { id: 29, name: "Bombbar лесной орех", image: "bombbarfunduk-min.jpg", prices: {"1шт": 130} },
-            { id: 30, name: "Bombbar малиновый", image: "bombbarmalina-min.jpg", prices: {"1шт": 130} },
-            { id: 31, name: "Bombbar кокос", image: "bombbarcocos-min.jpg", prices: {"1шт": 130} },
-            { id: 32, name: "Snaqer орех/карамель", image: "snaqerfunduk-min.jpg", prices: {"1шт": 130} },
-            { id: 33, name: "Cookie смородина", image: "chikabiscuitblackcurrant-min.jpg", prices: {"1шт": 170} },
-            { id: 34, name: "Cookie банан", image: "chikabiscuitbanan-min.jpg", prices: {"1шт": 170} }
-        ]},
-        { category: "Газировка", items: [
-            { id: 35, name: "Cola Черноголовка", image: "colachernogo-min.jpg", prices: {"0.5л": 140}, hasTemp: true },
-            { id: 36, name: "Байкал Черноголовка", image: "baikalchernogo-min.jpg", prices: {"0.5л": 140}, hasTemp: true },
-            { id: 37, name: "Лимонад Черноголовка", image: "lemonchernogo-min.jpg", prices: {"0.5л": 140}, hasTemp: true },
-            { id: 38, name: "Вода Газ/Негаз", image: "negazcernogo-min.jpg", prices: {"0.5л": 70}, hasTemp: true }
+            { id: 32, name: "Snaqer орех/карамель", image: "snaqerfunduk-min.jpg", prices: {"1шт": 130} }
         ]}
     ];
 
@@ -168,7 +143,6 @@
     function renderProducts(data) {
         const app = document.getElementById('app');
         app.innerHTML = '';
-        if(data.length === 0) { app.innerHTML = '<div class="empty-text">Список пуст</div>'; return; }
         data.forEach(cat => {
             cat.items.forEach(item => {
                 const isFav = favorites.includes(item.id);
@@ -201,15 +175,13 @@
         if(favorites.includes(id)) favorites = favorites.filter(f => f !== id);
         else favorites.push(id);
         localStorage.setItem('urban_favs', JSON.stringify(favorites));
-        if(currentMode === 'fav') switchTab('fav'); else {
-            const btn = e.currentTarget; btn.classList.toggle('active');
-            btn.innerText = favorites.includes(id) ? '❤️' : '🤍';
-        }
+        if(currentMode === 'fav') switchTab('fav'); 
+        else { e.currentTarget.innerText = favorites.includes(id) ? '❤️' : '🤍'; }
     }
 
     function openItem(id) {
         let item; menuData.forEach(c => c.items.forEach(i => { if(i.id === id) item = i; }));
-        window.cur = { item, size: Object.keys(item.prices)[0], milk: "Обычное", syrup: "Нет", sugar: "0г", cinnamon: "Нет", juice: "Апельсин", lemonadeTaste: "Киви-Фейхоа", temp: "Холодная" };
+        window.cur = { item, size: Object.keys(item.prices)[0], milk: "Обычное", syrup: "Нет", sugar: "0г" };
         showModal();
     }
 
@@ -217,13 +189,13 @@
         const i = window.cur.item;
         const cont = document.getElementById('modal-content');
         cont.innerHTML = `
-            <div style="text-align:center; margin-bottom:15px"><img src="${i.image}" style="width:140px; border-radius:20px"></div>
-            <h2 style="margin:0; text-align:center">${i.name}</h2>
+            <div style="text-align:center"><img src="${i.image}" style="width:120px; border-radius:15px"></div>
+            <h2 style="text-align:center; margin:10px 0">${i.name}</h2>
             <div class="label">Размер</div>
             <div class="opts">${Object.keys(i.prices).map(s=>`<div class="opt ${s==cur.size?'active':''}" onclick="cur.size='${s}';showModal()">${s}</div>`).join('')}</div>
             ${i.hasMilk ? `<div class="label">Молоко (+70₽)</div><div class="opts">${Object.keys(milks).map(m=>`<div class="opt ${m==cur.milk?'active':''}" onclick="cur.milk='${m}';showModal()">${m}</div>`).join('')}</div>` : ''}
             ${i.hasSyrup ? `<div class="label">Сироп</div><div class="opts">${syrups.map(s=>`<div class="opt ${s==cur.syrup?'active':''}" onclick="cur.syrup='${s}';showModal()">${s}</div>`).join('')}</div>` : ''}
-            ${i.hasSugar ? `<div class="label">Сахар</div><div class="opts">${['0г','5г','10г','15г','20г'].map(g=>`<div class="opt ${cur.sugar==g?'active':''}" onclick="cur.sugar='${g}';showModal()">${g}</div>`).join('')}</div>` : ''}
+            ${i.hasSugar ? `<div class="label">Сахар</div><div class="opts">${['0г','5г','10г'].map(g=>`<div class="opt ${cur.sugar==g?'active':''}" onclick="cur.sugar='${g}';showModal()">${g}</div>`).join('')}</div>` : ''}
             <button class="main-add-btn" onclick="addToCart()">Добавить — ${calcP()} ₽</button>
         `;
         document.getElementById('modal-overlay').style.display = 'block';
@@ -245,10 +217,10 @@
 
     function openCart() {
         const list = document.getElementById('cart-list');
-        list.innerHTML = cart.length === 0 ? '<div class="empty-text">Вы еще ничего не добавили</div>' : cart.map(i => `
+        list.innerHTML = cart.length === 0 ? '<div class="empty-text">Корзина пуста</div>' : cart.map(i => `
             <div class="cart-item">
                 <div style="display:flex; justify-content:space-between"><b>${i.item.name}</b> <span>${i.finalPrice} ₽</span></div>
-                <div style="font-size:11px; color:#888; margin-top:4px">${i.size}${i.milk!=='Обычное'?', '+i.milk:''}${i.syrup!=='Нет'?', '+i.syrup:''}${i.sugar!=='0г'?', сах: '+i.sugar:''}</div>
+                <div style="font-size:12px; color:#888">${i.size}${i.milk!=='Обычное'?', '+i.milk:''}${i.syrup!=='Нет'?', '+i.syrup:''}</div>
             </div>`).join('');
         document.getElementById('cart-total').innerText = `Итого: ${cart.reduce((a,b)=>a+b.finalPrice,0)} ₽`;
         document.getElementById('cart-overlay').style.display = 'block';
@@ -275,15 +247,19 @@
     window.closeCart = () => { document.getElementById('cart-view').classList.remove('open'); setTimeout(()=>document.getElementById('cart-overlay').style.display='none',300); };
     window.clearCart = () => { cart=[]; tg.MainButton.hide(); openCart(); };
     
-    // ФУНКЦИЯ ДЛЯ ОТПРАВКИ ЗАКАЗА
+    // --- ГЛАВНАЯ ФУНКЦИЯ ОТПРАВКИ ---
     window.sendOrder = () => {
+        const btn = document.getElementById('final-order-btn');
         if (cart.length === 0) return;
         
+        btn.disabled = true;
+        btn.innerText = "Отправка...";
+
         const productsList = cart.map(i => {
             let details = [];
-            if (i.milk !== 'Обычное') details.push(`Молоко: ${i.milk}`);
-            if (i.syrup !== 'Нет') details.push(`Сироп: ${i.syrup}`);
-            if (i.sugar !== '0г') details.push(`Сахар: ${i.sugar}`);
+            if (i.milk !== 'Обычное') details.push(`Мол: ${i.milk}`);
+            if (i.syrup !== 'Нет') details.push(`Сир: ${i.syrup}`);
+            if (i.sugar !== '0г') details.push(`Сах: ${i.sugar}`);
 
             return {
                 name: `${i.item.name} (${i.size})`,
@@ -292,9 +268,17 @@
             };
         });
 
-        // Прямая отправка данных в бота
-        tg.sendData(JSON.stringify({ products: productsList }));
-        tg.close();
+        // Формируем JSON
+        const data = JSON.stringify({ products: productsList });
+
+        // Отправляем данные в бота
+        try {
+            tg.sendData(data);
+        } catch (e) {
+            alert("Ошибка Telegram: " + e.message);
+            btn.disabled = false;
+            btn.innerText = "Оформить заказ";
+        }
     };
     
     tg.onEvent('mainButtonClicked', openCart);
