@@ -1,3 +1,4 @@
+Виктор:
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -6,57 +7,295 @@
     <title>Urban Lunch</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --bg: #ffffff; --text: #000; --btn-bg: #f2f2f7; }
-        body { font-family: -apple-system, sans-serif; margin: 0; padding: 15px; background: var(--bg); }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .card { background: var(--btn-bg); padding: 10px; border-radius: 15px; text-align: center; }
-        button { background: #000; color: #fff; border: none; padding: 10px; border-radius: 10px; width: 100%; margin-top: 5px; cursor: pointer; }
-        .header { font-weight: 800; font-size: 20px; text-align: center; margin-bottom: 20px; }
+        :root {
+            --bg: #ffffff;
+            --text: #000000;
+            --hint: #8e8e93;
+            --btn-bg: #f2f2f7;
+            --accent: #ff3b30;
+        }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 110px; -webkit-tap-highlight-color: transparent; }
+        
+        .header-area { position: sticky; top: 0; background: #fff; z-index: 100; border-bottom: 1px solid #efefef; }
+        .top-bar { display: flex; align-items: center; padding: 10px 15px; gap: 10px; }
+        .search-btn { background: var(--btn-bg); border: none; border-radius: 10px; padding: 8px 12px; font-size: 18px; cursor: pointer; }
+        
+        .cat-nav { display: flex; overflow-x: auto; padding: 5px 15px 15px; gap: 20px; scrollbar-width: none; }
+        .cat-nav::-webkit-scrollbar { display: none; }
+        .cat-link { white-space: nowrap; font-size: 14px; font-weight: 500; color: var(--hint); cursor: pointer; transition: 0.2s; }
+        .cat-link.active { color: #000; border-bottom: 2px solid #000; padding-bottom: 2px; }
+
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px; }
+        .card { display: flex; flex-direction: column; position: relative; }
+        .img-box { width: 100%; aspect-ratio: 1/1; background: #f9f9f9; border-radius: 18px; overflow: hidden; position: relative; cursor: pointer; }
+        .img-box img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .fav-badge { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.8); width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; z-index: 5; transition: 0.2s; }
+        .fav-badge.active { color: var(--accent); }
+
+        .card-info { padding: 8px 0; cursor: pointer; }
+        .card-name { font-size: 14px; font-weight: 500; height: 34px; overflow: hidden; margin-bottom: 6px; line-height: 1.2; }
+        .price-tag { background: var(--btn-bg); border: none; border-radius: 12px; padding: 10px 12px; width: 100%; display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 14px; cursor: pointer; }
+
+        #modal-overlay, #cart-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; z-index: 1000; backdrop-filter: blur(4px); }
+        #modal, #cart-view { position: fixed; bottom: -100%; left: 0; width: 100%; background: #fff; border-radius: 25px 25px 0 0; padding: 20px; box-sizing: border-box; z-index: 1001; transition: 0.3s cubic-bezier(0.25, 0.1, 0.25, 1); max-height: 85vh; overflow-y: auto; }
+        #modal.open, #cart-view.open { bottom: 0; }
+        
+        .label { font-size: 11px; font-weight: 800; text-transform: uppercase; color: #999; margin: 15px 0 8px; letter-spacing: 0.5px; }
+        .opts { display: flex; flex-wrap: wrap; gap: 8px; }
+        .opt { background: var(--btn-bg); padding: 10px 14px; border-radius: 10px; font-size: 13px; font-weight: 500; cursor: pointer; border: 2px solid transparent; }
+        .opt.active { border-color: #000; background: #fff; }
+        .main-add-btn { width: 100%; background: #000; color: #fff; border: none; padding: 18px; border-radius: 16px; font-weight: 700; font-size: 16px; margin-top: 20px; cursor: pointer; }
+
+        #search-bar { padding: 0 15px 10px; display: none; }
+        .search-input { width: 100%; padding: 12px; border-radius: 10px; border: none; background: var(--btn-bg); outline: none; }
+
+.tab-bar { position: fixed; bottom: 0; width: 100%; background: rgba(255,255,255,0.95); border-top: 1px solid #eee; display: flex; padding: 10px 0 25px; z-index: 500; }
+        .tab { flex: 1; text-align: center; font-size: 11px; color: var(--hint); cursor: pointer; border: none; background: none; outline: none; }
+        .tab.active { color: #000; font-weight: 600; }
+        .tab-icon { font-size: 22px; display: block; margin-bottom: 4px; }
+
+        .cart-item { padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
+        .empty-text { text-align: center; color: var(--hint); padding: 40px 0; }
     </style>
 </head>
 <body>
-    <div class="header">URBAN LUNCH</div>
-    <div class="grid" id="menu"></div>
 
-    <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
+<div class="header-area">
+    <div class="top-bar">
+        <button class="search-btn" onclick="toggleSearch()">🔍</button>
+        <div style="font-weight: 800; font-size: 18px; flex-grow: 1; text-align: center; margin-right: 40px;">URBAN LUNCH</div>
+    </div>
+    <div id="search-bar">
+        <input type="text" class="search-input" id="qInput" placeholder="Поиск напитков и сладостей..." oninput="search(this.value)">
+    </div>
+    <div class="cat-nav" id="cat-nav"></div>
+</div>
 
-        // Твое упрощенное меню для теста
-        const items = [
-            { name: "Капучино 250мл", price: 190 },
-            { name: "Латте 250мл", price: 190 },
-            { name: "Американо 250мл", price: 180 },
-            { name: "Глинтвейн 350мл", price: 230 },
-            { name: "Облепиховый пунш", price: 230 },
-            { name: "Bombbar орех", price: 130 }
-        ];
+<div id="app" class="grid"></div>
 
-        const menuDiv = document.getElementById('menu');
-        items.forEach(item => {
-            const div = document.createElement('div');
-            div.className = 'card';
-            div.innerHTML = `
-                <div style="font-size:14px; font-weight:bold">${item.name}</div>
-                <div>${item.price}₽</div>
-                <button onclick="order('${item.name}', ${item.price})">Выбрать</button>
-            `;
-            menuDiv.appendChild(div);
+<div class="tab-bar">
+    <button class="tab active" id="tab-home" onclick="switchTab('home')"><span class="tab-icon">🏠</span>Меню</button>
+    <button class="tab" id="tab-fav" onclick="switchTab('fav')"><span class="tab-icon">❤️</span>Любимое</button>
+    <button class="tab" id="tab-cart" onclick="openCart()"><span class="tab-icon">🛒</span>Корзина</button>
+</div>
+
+<div id="modal-overlay" onclick="closeModal()"></div>
+<div id="modal"><div id="modal-content"></div></div>
+
+<div id="cart-overlay" onclick="closeCart()"></div>
+<div id="cart-view">
+    <h2 style="margin-top:0">Мой заказ</h2>
+    <div id="cart-list"></div>
+    <div id="cart-total" style="font-weight:bold; margin: 20px 0; text-align:right; font-size: 18px;"></div>
+    <button class="main-add-btn" onclick="sendOrder()">Оформить заказ</button>
+    <button style="width:100%; background:none; border:none; color:red; margin-top:15px; cursor:pointer" onclick="clearCart()">Очистить корзину</button>
+</div>
+
+<script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+
+    const milks = { "Обычное": 0, "Банановое": 70, "Кокосовое": 70, "Миндальное": 70, "Безлактозное": 70 };
+    const syrups = ["Нет", "Фисташка", "Красный апельсин", "Лаванда", "Клубника", "Имбирный пряник", "Лесной орех", "Персик", "Дыня", "Слива", "Яблоко", "Лемонграсс", "Малина", "Попкорн", "Кокос", "Миндаль", "Вишня", "Баблгам", "Соленая карамель", "Карамель", "Ваниль"];
+    const sPrices = { "250мл": 25, "350мл": 35, "450мл": 60 };
+
+const menuData = [
+        { category: "Кофе", items: [
+            { id: 1, name: "Капучино", image: "kapuchino-min.jpg", prices: {"250мл": 190, "350мл": 230, "450мл": 270}, hasMilk: true, hasSyrup: true, hasSugar: true, hasCinnamon: true },
+            { id: 2, name: "Латте", image: "latte-min.jpg", prices: {"250мл": 190, "350мл": 230, "450мл": 270}, hasMilk: true, hasSyrup: true, hasSugar: true, hasCinnamon: true },
+            { id: 3, name: "Эспрессо", image: "espresso1-min.jpg", prices: {"30мл": 110, "60мл": 150}, hasSugar: true },
+            { id: 4, name: "Американо", image: "americano-min.jpg", prices: {"250мл": 180, "350мл": 220, "450мл": 260}, hasSyrup: true, hasSugar: true, hasCinnamon: true },
+            { id: 5, name: "Флат Уайт", image: "latte-min.jpg", prices: {"250мл": 220, "350мл": 260, "450мл": 360}, hasMilk: true, hasSyrup: true, hasSugar: true, hasCinnamon: true },
+            { id: 6, name: "Раф", image: "latte-min.jpg", prices: {"250мл": 210, "350мл": 250, "450мл": 290}, hasMilk: true, hasSyrup: true, hasSugar: true, hasCinnamon: true },
+            { id: 7, name: "Бамбл Теплый", image: "oblepihapunch-min.jpg", prices: {"250мл": 270, "350мл": 270, "450мл": 300}, hasJuice: true, hasSyrup: true, hasSugar: true }
+        ]},
+        { category: "Чай", items: [
+            { id: 8, name: "Чай Черный", image: "teablack-min.jpg", prices: {"250мл": 120, "350мл": 150, "450мл": 180}, hasSugar: true, hasLemon: true },
+            { id: 9, name: "Чай Зеленый", image: "greentea-min.jpg", prices: {"250мл": 120, "350мл": 150, "450мл": 180}, hasSugar: true, hasLemon: true },
+            { id: 10, name: "Чай Каркаде", image: "karkadetea-min.jpg", prices: {"250мл": 120, "350мл": 150, "450мл": 180}, hasSugar: true },
+            { id: 11, name: "Зеленый Жасмин", image: "greenjasmin-min.jpg", prices: {"250мл": 120, "350мл": 150, "450мл": 180}, hasSugar: true },
+            { id: 12, name: "Травяной Чай", image: "travatea-min.jpg", prices: {"250мл": 120, "350мл": 150, "450мл": 180}, hasSugar: true },
+            { id: 13, name: "Матча", image: "matcha-min.jpg", prices: {"250мл": 180, "350мл": 220, "450мл": 260}, isMatcha: true, hasMilk: true, hasSyrup: true, hasSugar: true },
+            { id: 14, name: "Какао", image: "kakao-min.jpg", prices: {"250мл": 180, "350мл": 220, "450мл": 260}, hasMilk: true, hasSyrup: true, hasSugar: true },
+            { id: 15, name: "Пряный Чай", image: "pryanytea-min.jpg", prices: {"250мл": 240, "350мл": 280, "450мл": 320}, hasMilk: true, hasSyrup: true, hasSugar: true },
+            { id: 16, name: "Горячий Шоколад", image: "kakao-min.jpg", prices: {"250мл": 180, "350мл": 220, "450мл": 260}, hasSugar: true }
+        ]},
+        { category: "Пунши", items: [
+            { id: 17, name: "Глинтвейн", image: "glintveinpunch-min.jpg", prices: {"350мл": 230, "450мл": 270} },
+            { id: 18, name: "Облепиховый пунш", image: "oblepihapunch-min.jpg", prices: {"350мл": 230, "450мл": 270}, hasHoney: true },
+            { id: 19, name: "Малиновый пунш", image: "malinapunsh-min.jpg", prices: {"350мл": 230, "450мл": 270} }
+        ]},
+        { category: "Холодные", items: [
+            { id: 20, name: "Айс Латте", image: "latte-min.jpg", prices: {"350мл": 240, "450мл": 280}, hasMilk: true, hasSyrup: true, hasSugar: true },
+            { id: 21, name: "Эспрессо Тоник", image: "granattonic-min.jpg", prices: {"350мл": 250, "450мл": 290}, hasSugar: true },
+            { id: 22, name: "Бамбл Холодный", image: "granattonic-min.jpg", prices: {"350мл": 270, "450мл": 300}, hasJuice: true, hasSyrup: true, hasSugar: true },
+            { id: 23, name: "Айс Матча", image: "matcha-min.jpg", prices: {"350мл": 230, "450мл": 270}, isMatcha: true, hasMilk: true, hasSyrup: true, hasSugar: true },
+            { id: 24, name: "Лимонад", image: "lemonchernogo-min.jpg", prices: {"350мл": 260, "450мл": 290}, hasLemonadeTaste: true }
+        ]},
+        { category: "Сезонные", items: [
+
+{ id: 25, name: "Латте Халва", image: "lattehalva-min.jpg", prices: {"350мл": 290, "450мл": 350}, hasMilk: true, hasCinnamon: true },
+            { id: 26, name: "Латте Тыква", image: "lattetikva-min.jpg", prices: {"350мл": 290, "450мл": 350}, hasMilk: true, hasCinnamon: true },
+            { id: 27, name: "Раф Сникерс", image: "rafsnikers-min.jpg", prices: {"350мл": 320, "450мл": 380}, hasMilk: true, hasCinnamon: true },
+            { id: 28, name: "Latte Orange Christmas", image: "latteorangecristmas-min.jpg", prices: {"350мл": 320, "450мл": 380}, hasMilk: true, hasCinnamon: true }
+        ]},
+        { category: "Сладости", items: [
+            { id: 29, name: "Bombbar лесной орех", image: "bombbarfunduk-min.jpg", prices: {"1шт": 130} },
+            { id: 30, name: "Bombbar малиновый", image: "bombbarmalina-min.jpg", prices: {"1шт": 130} },
+            { id: 31, name: "Bombbar кокос", image: "bombbarcocos-min.jpg", prices: {"1шт": 130} },
+            { id: 32, name: "Snaqer орех/карамель", image: "snaqerfunduk-min.jpg", prices: {"1шт": 130} },
+            { id: 33, name: "Cookie смородина", image: "chikabiscuitblackcurrant-min.jpg", prices: {"1шт": 170} },
+            { id: 34, name: "Cookie банан", image: "chikabiscuitbanan-min.jpg", prices: {"1шт": 170} }
+        ]},
+        { category: "Газировка", items: [
+            { id: 35, name: "Cola Черноголовка", image: "colachernogo-min.jpg", prices: {"0.5л": 140}, hasTemp: true },
+            { id: 36, name: "Байкал Черноголовка", image: "baikalchernogo-min.jpg", prices: {"0.5л": 140}, hasTemp: true },
+            { id: 37, name: "Лимонад Черноголовка", image: "lemonchernogo-min.jpg", prices: {"0.5л": 140}, hasTemp: true },
+            { id: 38, name: "Вода Газ/Негаз", image: "negazcernogo-min.jpg", prices: {"0.5л": 70}, hasTemp: true }
+        ]}
+    ];
+
+    let cart = [];
+    let favorites = JSON.parse(localStorage.getItem('urban_favs')  '[]');
+    let currentMode = 'home';
+
+    function init() {
+        const nav = document.getElementById('cat-nav');
+        nav.innerHTML = menuData.map((c, i) => `<div class="cat-link ${i===0?'active':''}" onclick="filterByCat('${c.category}', this)">${c.category}</div>`).join('');
+        renderProducts(menuData);
+    }
+
+    function renderProducts(data) {
+        const app = document.getElementById('app');
+        app.innerHTML = '';
+        if(data.length === 0) { app.innerHTML = '<div class="empty-text">Список пуст</div>'; return; }
+        data.forEach(cat => {
+            cat.items.forEach(item => {
+                const isFav = favorites.includes(item.id);
+                const card = document.createElement('div'); card.className = 'card';
+                card.innerHTML = `
+                    <div class="fav-badge ${isFav?'active':''}" onclick="toggleFav(${item.id}, event)">${isFav?'❤️':'🤍'}</div>
+                    <div class="img-box" onclick="openItem(${item.id})"><img src="${item.image}"></div>
+                    <div class="card-info" onclick="openItem(${item.id})">
+                        <div class="card-name">${item.name}</div>
+                        <button class="price-tag">${Object.values(item.prices)[0]} ₽ <span>+</span></button>
+                    </div>`;
+                app.appendChild(card);
+            });
         });
+    }
 
-        function order(name, price) {
-            const data = {
-                products: [{ name: name, price: price }]
-            };
-            
-            // ПЕРЕДАЧА ДАННЫХ
-            try {
-                tg.sendData(JSON.stringify(data));
-                tg.close();
-            } catch (e) {
-                alert("Ошибка Telegram: " + e.message);
-            }
+    function switchTab(mode) {
+        currentMode = mode;
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.getElementById('tab-' + (mode==='home'?'home':'fav')).classList.add('active');
+        if(mode === 'home') init();
+        else {
+            const favData = menuData.map(c => ({ category: c.category, items: c.items.filter(i => favorites.includes(i.id)) })).filter(c => c.items.length > 0);
+            renderProducts(favData);
         }
-    </script>
+    }
+
+    function toggleFav(id, e) {
+        e.stopPropagation();
+        if(favorites.includes(id)) favorites = favorites.filter(f => f !== id);
+        else favorites.push(id);
+        localStorage.setItem('urban_favs', JSON.stringify(favorites));
+        if(currentMode === 'fav') switchTab(
+
+'fav'); else {
+            const btn = e.currentTarget; btn.classList.toggle('active');
+            btn.innerText = favorites.includes(id) ? '❤️' : '🤍';
+        }
+    }
+
+    function openItem(id) {
+        let item; menuData.forEach(c => c.items.forEach(i => { if(i.id === id) item = i; }));
+        window.cur = { item, size: Object.keys(item.prices)[0], milk: "Обычное", syrup: "Нет", sugar: "0г", cinnamon: "Нет", juice: "Апельсин", lemonadeTaste: "Киви-Фейхоа", temp: "Холодная" };
+        showModal();
+    }
+
+    function showModal() {
+        const i = window.cur.item;
+        const cont = document.getElementById('modal-content');
+        cont.innerHTML = `
+            <div style="text-align:center; margin-bottom:15px"><img src="${i.image}" style="width:140px; border-radius:20px"></div>
+            <h2 style="margin:0; text-align:center">${i.name}</h2>
+            <div class="label">Размер</div>
+            <div class="opts">${Object.keys(i.prices).map(s=>`<div class="opt ${s==cur.size?'active':''}" onclick="cur.size='${s}';showModal()">${s}</div>`).join('')}</div>
+            ${i.hasMilk ? `<div class="label">Молоко (+70₽)</div><div class="opts">${Object.keys(milks).map(m=>`<div class="opt ${m==cur.milk?'active':''}" onclick="cur.milk='${m}';showModal()">${m}</div>`).join('')}</div>` : ''}
+            ${i.hasSyrup ? `<div class="label">Сироп</div><div class="opts">${syrups.map(s=>`<div class="opt ${s==cur.syrup?'active':''}" onclick="cur.syrup='${s}';showModal()">${s}</div>`).join('')}</div>` : ''}
+            ${i.hasSugar ? `<div class="label">Сахар</div><div class="opts">${['0г','5г','10г','15г','20г'].map(g=>`<div class="opt ${cur.sugar==g?'active':''}" onclick="cur.sugar='${g}';showModal()">${g}</div>`).join('')}</div>` : ''}
+            <button class="main-add-btn" onclick="addToCart()">Добавить — ${calcP()} ₽</button>
+        `;
+        document.getElementById('modal-overlay').style.display = 'block';
+        document.getElementById('modal').classList.add('open');
+    }
+
+    function calcP() {
+        let p = cur.item.prices[cur.size];
+        if(cur.item.hasMilk && cur.milk !== 'Обычное') p += 70;
+        if(cur.item.hasSyrup && cur.syrup !== 'Нет') p += (sPrices[cur.size]  0);
+        return p;
+    }
+
+    function addToCart() {
+        cart.push({...window.cur, finalPrice: calcP()});
+        tg.MainButton.setText(`КОРЗИНА: ${cart.reduce((a,b)=>a+b.finalPrice,0)} ₽`).show();
+        closeModal();
+    }
+
+    function openCart() {
+        const list = document.getElementById('cart-list');
+        list.innerHTML = cart.length === 0 ? '<div class="empty-text">Вы еще ничего не добавили</div>' : cart.map(i => `
+            <div class="cart-item">
+                <div style="display:flex; justify-content:space-between"><b>${i.item.name}</b> <span>${i.finalPrice} ₽</span></div>
+                <div style="font-size:11px; color:#888; margin-top:4px">${i.size}${i.milk!=='Обычное'?', '+i.milk:''}${i.syrup!=='Нет'?', '+i.syrup:''}${i.sugar!=='0г'?', сах: '+i.sugar:''}</div>
+            </div>`).join('');
+        document.getElementById('cart-total').innerText = `Итого: ${cart.reduce((a,b)=>a+b.finalPrice,0)} ₽`;
+        document.getElementById('cart-overlay').style.display = 'block';
+        document.getElementById('cart-view').classList.add('open');
+    }
+
+    function filterByCat(name, el) {
+        document.querySelectorAll('.cat-link').forEach(l => l.classList.remove('active'));
+        el.classList.add('active');
+        renderProducts(menuData.filter(c => c.category === name));
+    }
+
+    function toggleSearch() {
+        const b = document.getElementById('search-bar');
+        b.style.display = b.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function search(q) {
+        const res = menuData.map(c => ({ category: c.category, items: c.items.filter(i => i.name.toLowerCase().includes(q.toLowerCase())) })).filter(c => c.items.length > 0);
+        renderProducts(res);
+    }
+
+window.closeModal = () => { document.getElementById('modal').classList.remove('open'); setTimeout(()=>document.getElementById('modal-overlay').style.display='none',300); };
+    window.closeCart = () => { document.getElementById('cart-view').classList.remove('open'); setTimeout(()=>document.getElementById('cart-overlay').style.display='none',300); };
+    window.clearCart = () => { cart=[]; tg.MainButton.hide(); openCart(); };
+    
+    // ИСПРАВЛЕННАЯ ФУНКЦИЯ ДЛЯ БОТА В TERMUX
+    window.sendOrder = () => {
+        if (cart.length === 0) return;
+        
+        const orderData = {
+            title: "Заказ Urban Lunch",
+            prices: cart.map(i => ({
+                label: ${i.item.name} (${i.size}${i.milk !== 'Обычное' ? ', ' + i.milk : ''}),
+                amount: i.finalPrice * 100 // Копейки
+            }))
+        };
+        
+        tg.sendData(JSON.stringify(orderData));
+        tg.close();
+    };
+    
+    tg.onEvent('mainButtonClicked', openCart);
+    init();
+</script>
 </body>
 </html>
