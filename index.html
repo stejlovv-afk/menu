@@ -185,9 +185,7 @@
         app.innerHTML = '';
         data.forEach(cat => {
             cat.items.forEach(item => {
-                // Если ID товара в стоп-листе, не рисуем его
                 if (hiddenItems.includes(item.id)) return;
-
                 const isFav = favorites.includes(item.id);
                 const card = document.createElement('div'); card.className = 'card';
                 card.innerHTML = `
@@ -203,7 +201,6 @@
         if (app.innerHTML === '') app.innerHTML = '<div class="empty-text">В этой категории пусто</div>';
     }
 
-    // ЛОГИКА АДМИНКИ
     let pressTimer;
     document.getElementById('admin-trigger').addEventListener('touchstart', () => {
         pressTimer = window.setTimeout(() => {
@@ -232,16 +229,21 @@
 
     function toggleVisibility(id) {
         const isHidden = hiddenItems.includes(id);
+        if (isHidden) hiddenItems = hiddenItems.filter(i => i !== id);
+        else hiddenItems.push(id);
+
+        renderProducts(menuData);
+        openAdmin();
+
         tg.sendData(JSON.stringify({
             action: isHidden ? 'show' : 'hide',
             itemId: id
         }));
-        tg.close();
+        
+        setTimeout(() => tg.close(), 500);
     }
 
-    // СТАНДАРТНЫЕ ФУНКЦИИ
     function switchTab(mode) {
-        currentMode = mode;
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         document.getElementById('tab-' + (mode==='home'?'home':'fav')).classList.add('active');
         if(mode === 'home') init();
@@ -327,13 +329,7 @@
     function sendOrder() {
         if (cart.length === 0) return;
         const orderData = {
-            prices: cart.map(i => {
-                let d = [i.size];
-                if(i.milk!=='Обычное') d.push(i.milk);
-                if(i.syrup!=='Нет') d.push('сироп: '+i.syrup);
-                if(i.sugar!=='0г') d.push('сахар: '+i.sugar);
-                return { label: `${i.item.name} (${d.join(', ')})`, amount: i.finalPrice * 100 };
-            })
+            prices: cart.map(i => ({ label: `${i.item.name} (${i.size})`, amount: i.finalPrice * 100 }))
         };
         tg.sendData(JSON.stringify(orderData));
         tg.close();
