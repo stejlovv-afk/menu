@@ -6,22 +6,21 @@
     <title>Urban Lunch</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --bg: #ffffff; --text: #000000; --hint: #8e8e93; --accent: #000000; }
-        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 100px; -webkit-tap-highlight-color: transparent; }
-        .header { text-align: center; padding: 20px; font-weight: 900; font-size: 20px; border-bottom: 1px solid #f0f0f0; letter-spacing: 1px; }
+        :root { --bg: #ffffff; --text: #000000; --accent: #000000; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 100px; }
+        .header { text-align: center; padding: 20px; font-weight: 900; font-size: 20px; border-bottom: 1px solid #f0f0f0; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px; }
-        .card { background: #fff; border-radius: 20px; border: 1px solid #eee; padding: 12px; display: flex; flex-direction: column; transition: 0.2s; }
-        .card:active { transform: scale(0.97); }
+        .card { background: #fff; border-radius: 20px; border: 1px solid #eee; padding: 12px; display: flex; flex-direction: column; }
         .img-placeholder { width: 100%; aspect-ratio: 1/1; background: #f5f5f7; border-radius: 15px; margin-bottom: 10px; }
-        .item-name { font-size: 14px; font-weight: 600; margin-bottom: 8px; height: 34px; overflow: hidden; }
-        .price-btn { background: #f2f2f7; border: none; border-radius: 12px; padding: 10px; width: 100%; font-weight: 700; font-size: 14px; cursor: pointer; display: flex; justify-content: space-between; }
+        .price-btn { background: #f2f2f7; border: none; border-radius: 12px; padding: 10px; width: 100%; font-weight: 700; cursor: pointer; display: flex; justify-content: space-between; }
         
-        #cart-view { position: fixed; bottom: -100%; left: 0; width: 100%; background: #fff; border-radius: 25px 25px 0 0; padding: 25px; box-sizing: border-box; z-index: 1000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 -10px 30px rgba(0,0,0,0.1); }
+        #cart-view { position: fixed; bottom: -100%; left: 0; width: 100%; background: #fff; border-radius: 25px 25px 0 0; padding: 20px; box-sizing: border-box; z-index: 1000; transition: 0.4s; box-shadow: 0 -10px 30px rgba(0,0,0,0.1); }
         #cart-view.open { bottom: 0; }
-        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; z-index: 999; backdrop-filter: blur(2px); }
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; z-index: 999; }
         
-        .main-btn { width: 100%; background: var(--accent); color: #fff; border: none; padding: 20px; border-radius: 18px; font-weight: 700; font-size: 16px; margin-top: 15px; cursor: pointer; }
-        .cart-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f5f5f5; }
+        .input-group { display: flex; gap: 10px; margin: 15px 0; }
+        input { width: 100%; padding: 12px; border: 1px solid #eee; border-radius: 10px; font-size: 16px; outline: none; }
+        .main-btn { width: 100%; background: var(--accent); color: #fff; border: none; padding: 18px; border-radius: 15px; font-weight: 700; font-size: 16px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -31,62 +30,56 @@
 
 <div class="overlay" id="overlay" onclick="closeCart()"></div>
 <div id="cart-view">
-    <h2 style="margin-top:0">Корзина</h2>
+    <h3 style="margin-top:0">Ваш заказ</h3>
     <div id="cart-list"></div>
-    <div id="total" style="text-align:right; margin: 20px 0; font-weight:800; font-size:22px;">0 ₽</div>
-    <button class="main-btn" onclick="sendOrder()">Оформить заказ</button>
+    
+    <div class="input-group">
+        <input type="number" id="floor" placeholder="Этаж" inputmode="numeric">
+        <input type="text" id="office" placeholder="Офис/Кабинет">
+    </div>
+
+    <div id="total" style="text-align:right; margin: 10px 0; font-weight:800; font-size:20px;">0 ₽</div>
+    <button class="main-btn" onclick="sendOrder()">Заказать доставку</button>
 </div>
 
 <script>
     const tg = window.Telegram.WebApp;
     tg.expand();
-    tg.MainButton.setParams({color: '#000000', text_color: '#ffffff'});
 
     const menu = [
         { id: 1, name: "Капучино", price: 190 },
         { id: 2, name: "Латте", price: 190 },
         { id: 3, name: "Американо", price: 150 },
-        { id: 4, name: "Эспрессо", price: 110 },
-        { id: 5, name: "Чай Черный", price: 120 }
+        { id: 4, name: "Чай Черный", price: 120 }
     ];
 
     let cart = [];
 
     function render() {
-        const app = document.getElementById('app');
-        app.innerHTML = menu.map(item => `
+        document.getElementById('app').innerHTML = menu.map(item => `
             <div class="card" onclick="addToCart(${item.id})">
                 <div class="img-placeholder"></div>
-                <div class="item-name">${item.name}</div>
-                <button class="price-btn">
-                    <span>${item.price} ₽</span>
-                    <span>+</span>
-                </button>
+                <div style="font-weight:600; margin-bottom:8px;">${item.name}</div>
+                <button class="price-btn"><span>${item.price} ₽</span><span>+</span></button>
             </div>
         `).join('');
     }
 
     function addToCart(id) {
-        const item = menu.find(i => i.id === id);
-        cart.push(item);
+        cart.push(menu.find(i => i.id === id));
         const total = cart.reduce((a,b) => a + b.price, 0);
-        tg.MainButton.setText(`ПОСМОТРЕТЬ КОРЗИНУ: ${total} ₽`).show();
+        tg.MainButton.setText(`КОРЗИНА: ${total} ₽`).show();
     }
 
-    tg.MainButton.onClick(() => {
-        openCart();
-    });
+    tg.MainButton.onClick(() => openCart());
 
     function openCart() {
-        const list = document.getElementById('cart-list');
-        list.innerHTML = cart.map((i, index) => `
-            <div class="cart-item">
-                <span>${i.name}</span>
-                <b>${i.price} ₽</b>
+        document.getElementById('cart-list').innerHTML = cart.map(i => `
+            <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #f5f5f5;">
+                <span>${i.name}</span><b>${i.price} ₽</b>
             </div>
         `).join('');
-        const total = cart.reduce((a,b) => a + b.price, 0);
-        document.getElementById('total').innerText = total + ' ₽';
+        document.getElementById('total').innerText = cart.reduce((a,b) => a + b.price, 0) + ' ₽';
         document.getElementById('overlay').style.display = 'block';
         document.getElementById('cart-view').classList.add('open');
     }
@@ -97,9 +90,17 @@
     }
 
     function sendOrder() {
-        if (cart.length === 0) return;
+        const floor = document.getElementById('floor').value;
+        const office = document.getElementById('office').value;
+
+        if (!floor || !office) {
+            alert("Пожалуйста, укажите этаж и офис для доставки");
+            return;
+        }
+
         const data = {
-            items: cart.map(i => ({ label: i.name, amount: i.price * 100 }))
+            items: cart.map(i => ({ label: i.name, amount: i.price * 100 })),
+            address: `Этаж: ${floor}, Офис: ${office}`
         };
         tg.sendData(JSON.stringify(data)); 
     }
