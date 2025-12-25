@@ -7,38 +7,38 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { --bg: #ffffff; --text: #000000; --accent: #000000; --gray: #f2f2f7; }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 100px; user-select: none; }
-        .header { text-align: center; padding: 20px; font-weight: 900; font-size: 20px; border-bottom: 1px solid #f0f0f0; cursor: pointer; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 100px; }
+        .header { text-align: center; padding: 20px; font-weight: 900; font-size: 20px; border-bottom: 1px solid #f0f0f0; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px; }
-        .card { background: #fff; border-radius: 20px; border: 1px solid #eee; padding: 12px; position: relative; }
-        .card.disabled { opacity: 0.5; filter: grayscale(1); pointer-events: none; }
-        .card.admin-mode { pointer-events: auto; border: 2px dashed #ff3b30; }
+        .card { background: #fff; border-radius: 20px; border: 1px solid #eee; padding: 12px; transition: 0.2s; position: relative; }
+        .card.selected-to-hide { border: 2px solid #ff3b30; background: #fff0f0; }
         .img-placeholder { width: 100%; aspect-ratio: 1/1; background: var(--gray); border-radius: 15px; margin-bottom: 10px; }
         .price-btn { background: var(--gray); border: none; border-radius: 12px; padding: 10px; width: 100%; font-weight: 700; cursor: pointer; }
         
+        #admin-panel { position: fixed; top: 0; left: 0; width: 100%; background: #ff3b30; color: #fff; padding: 10px; text-align: center; display: none; z-index: 2000; font-weight: bold; }
         #cart-view { position: fixed; bottom: -100%; left: 0; width: 100%; background: #fff; border-radius: 25px 25px 0 0; padding: 20px; box-sizing: border-box; z-index: 1000; transition: 0.4s; box-shadow: 0 -10px 30px rgba(0,0,0,0.1); }
         #cart-view.open { bottom: 0; }
         .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; z-index: 999; }
         input { width: 100%; padding: 12px; border: 1px solid #eee; border-radius: 10px; font-size: 16px; margin-bottom: 10px; box-sizing: border-box; }
         .main-btn { width: 100%; background: var(--accent); color: #fff; border: none; padding: 18px; border-radius: 15px; font-weight: 700; font-size: 16px; }
-        .admin-label { color: red; font-size: 10px; display: block; margin-top: 5px; }
     </style>
 </head>
 <body>
 
+<div id="admin-panel" onclick="saveAdminChanges()">РЕЖИМ АДМИНА: Нажмите сюда, чтобы СОХРАНИТЬ</div>
 <div class="header" id="main-header">URBAN LUNCH</div>
 <div id="app" class="grid"></div>
 
 <div class="overlay" id="overlay" onclick="closeCart()"></div>
 <div id="cart-view">
-    <h3 style="margin-top:0">Оформление заказа</h3>
+    <h3 style="margin-top:0">Оформление</h3>
     <div id="cart-list"></div>
-    <div style="margin-top:15px;">
+    <div style="margin: 15px 0;">
         <input type="number" id="floor" placeholder="Этаж" inputmode="numeric">
-        <input type="text" id="office" placeholder="Офис/Кабинет">
+        <input type="text" id="office" placeholder="Офис">
     </div>
-    <div id="total" style="text-align:right; margin: 10px 0; font-weight:800; font-size:20px;">0 ₽</div>
-    <button class="main-btn" onclick="sendOrder()">Заказать доставку</button>
+    <div id="total" style="text-align:right; margin-bottom: 10px; font-weight:800; font-size:20px;">0 ₽</div>
+    <button class="main-btn" onclick="sendOrder()">Заказать</button>
 </div>
 
 <script>
@@ -46,87 +46,81 @@
     tg.expand();
 
     let isAdmin = false;
-    let menu = [
-        { id: 1, name: "Капучино", price: 190, available: true },
-        { id: 2, name: "Латте", price: 190, available: true },
-        { id: 3, name: "Американо", price: 150, available: true },
-        { id: 4, name: "Чай Черный", price: 120, available: true }
+    let stopList = []; // Массив ID выключенных товаров
+    const menu = [
+        { id: 1, name: "Капучино", price: 190 },
+        { id: 2, name: "Латте", price: 190 },
+        { id: 3, name: "Американо", price: 150 },
+        { id: 4, name: "Чай Черный", price: 120 }
     ];
     let cart = [];
 
-    // Логика долгого нажатия
+    // Долгое нажатие для входа
     let pressTimer;
-    const header = document.getElementById('main-header');
-
-    header.addEventListener('mousedown', startPress);
-    header.addEventListener('touchstart', startPress);
-    header.addEventListener('mouseup', cancelPress);
-    header.addEventListener('touchend', cancelPress);
-
-    function startPress() {
+    document.getElementById('main-header').addEventListener('touchstart', () => {
         pressTimer = window.setTimeout(() => {
-            const pass = prompt("Введите пароль администратора:");
-            if (pass === "7654") {
-                isAdmin = !isAdmin;
-                tg.showAlert(isAdmin ? "Режим админа ВКЛ" : "Режим админа ВЫКЛ");
+            if (prompt("Пароль:") === "7654") {
+                isAdmin = true;
+                document.getElementById('admin-panel').style.display = 'block';
                 render();
             }
         }, 1500);
-    }
-
-    function cancelPress() { clearTimeout(pressTimer); }
+    });
+    document.getElementById('main-header').addEventListener('touchend', () => clearTimeout(pressTimer));
 
     function render() {
         const app = document.getElementById('app');
-        app.innerHTML = menu.map(item => `
-            <div class="card ${!item.available ? 'disabled' : ''} ${isAdmin ? 'admin-mode' : ''}" 
-                 onclick="${isAdmin ? `toggleItem(${item.id})` : `addToCart(${item.id})`}">
-                <div class="img-placeholder"></div>
-                <div style="font-weight:600">${item.name}</div>
-                <div style="font-size:14px">${item.price} ₽</div>
-                ${isAdmin ? `<span class="admin-label">${item.available ? '✅ Вкл' : '❌ Выкл'}</span>` : ''}
-            </div>
-        `).join('');
+        // Если не админ — фильтруем (скрываем) товары из стоп-листа
+        const visibleMenu = isAdmin ? menu : menu.filter(item => !stopList.includes(item.id));
+        
+        app.innerHTML = visibleMenu.map(item => {
+            const isHidden = stopList.includes(item.id);
+            return `
+                <div class="card ${isAdmin && isHidden ? 'selected-to-hide' : ''}" 
+                     onclick="${isAdmin ? `toggleAdminSelection(${item.id})` : `addToCart(${item.id})`}">
+                    <div class="img-placeholder"></div>
+                    <div style="font-weight:600">${item.name}</div>
+                    <div>${item.price} ₽</div>
+                    ${isAdmin ? `<div style="color:red; font-size:10px">${isHidden ? 'СКРЫТО' : 'ВИДИМО'}</div>` : ''}
+                </div>
+            `;
+        }).join('');
     }
 
-    function toggleItem(id) {
-        const item = menu.find(i => i.id === id);
-        item.available = !item.available;
-        // Отправляем сигнал боту, чтобы он запомнил стоп-лист
-        tg.sendData(JSON.stringify({ type: 'admin_update', menu: menu }));
+    function toggleAdminSelection(id) {
+        if (stopList.includes(id)) {
+            stopList = stopList.filter(item => item !== id);
+        } else {
+            stopList.push(id);
+        }
+        render();
+    }
+
+    function saveAdminChanges() {
+        tg.sendData(JSON.stringify({ type: 'admin_update', stop_list: stopList }));
+        isAdmin = false;
+        document.getElementById('admin-panel').style.display = 'none';
         render();
     }
 
     function addToCart(id) {
-        const item = menu.find(i => i.id === id);
-        if(!item.available) return;
-        cart.push(item);
+        cart.push(menu.find(i => i.id === id));
         tg.MainButton.setText(`КОРЗИНА: ${cart.reduce((a,b)=>a+b.price,0)} ₽`).show();
     }
 
-    tg.MainButton.onClick(() => openCart());
-
-    function openCart() {
+    tg.MainButton.onClick(() => {
         document.getElementById('cart-list').innerHTML = cart.map(i => `
-            <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #eee;">
-                <span>${i.name}</span><b>${i.price} ₽</b>
-            </div>
+            <div style="display:flex; justify-content:space-between; padding:5px 0;"><span>${i.name}</span><b>${i.price} ₽</b></div>
         `).join('');
         document.getElementById('total').innerText = cart.reduce((a,b)=>a+b.price,0) + ' ₽';
         document.getElementById('overlay').style.display = 'block';
         document.getElementById('cart-view').classList.add('open');
-    }
-
-    function closeCart() {
-        document.getElementById('overlay').style.display = 'none';
-        document.getElementById('cart-view').classList.remove('open');
-    }
+    });
 
     function sendOrder() {
         const floor = document.getElementById('floor').value;
         const office = document.getElementById('office').value;
-        if (!floor || !office) { tg.showAlert("Укажите этаж и офис!"); return; }
-        
+        if(!floor || !office) return alert("Укажите этаж и офис!");
         tg.sendData(JSON.stringify({
             type: 'order',
             items: cart.map(i => ({ label: i.name, amount: i.price * 100 })),
