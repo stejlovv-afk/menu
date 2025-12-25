@@ -19,14 +19,12 @@
         .card-img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 15px; margin-bottom: 10px; background: var(--gray); }
         .card-name { font-weight: 700; font-size: 13px; margin-bottom: 4px; height: 32px; overflow: hidden; line-height: 1.2; }
         .card-price { font-size: 14px; color: #666; font-weight: 600; }
-        
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; z-index: 1000; align-items: flex-end; }
         .modal-content { background: #fff; width: 100%; border-radius: 30px 30px 0 0; padding: 25px; box-sizing: border-box; max-height: 90vh; overflow-y: auto; }
         .option-group { margin-bottom: 20px; }
         .option-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
         .opt-btn { padding: 10px 14px; border: 1.5px solid #eee; border-radius: 12px; font-size: 13px; font-weight: 600; cursor: pointer; background: #fff; }
         .opt-btn.active { border-color: var(--accent); background: var(--accent); color: #fff; }
-        
         .live-price-bar { background: var(--accent); color: #fff; padding: 18px; border-radius: 16px; display: flex; justify-content: space-between; width: 100%; border: none; font-weight: 700; font-size: 16px; margin-top: 10px; }
         input { width: 100%; padding: 15px; background: var(--gray); border: none; border-radius: 12px; font-size: 16px; margin-bottom: 12px; box-sizing: border-box; outline: none; }
         #admin-panel { display: none; position: fixed; bottom: 20px; left: 10px; right: 10px; z-index: 2000; }
@@ -86,7 +84,7 @@
     tg.expand();
     const IMG_BASE = "https://raw.githubusercontent.com/stejlovv-afk/menu/main/";
 
-    // ВЕСЬ ВАШ СПИСОК ТОВАРОВ (БЕЗ ИЗМЕНЕНИЙ)
+    // ВЕСЬ ВАШ СПИСОК ТОВАРОВ И ЦЕН (БЕЗ ИЗМЕНЕНИЙ)
     let menu = [
         { id: 1, cat: 'coffee', name: "Капучино", img: "kapuchino-min.jpg", sizes: {250:190, 350:230, 450:270} },
         { id: 2, cat: 'coffee', name: "Латте", img: "latte-min.jpg", sizes: {250:190, 350:230, 450:270} },
