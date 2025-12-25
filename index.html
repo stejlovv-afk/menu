@@ -15,7 +15,7 @@
         .tab.active { background: var(--accent); color: #fff; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; }
         .card { background: #fff; border-radius: 20px; border: 1px solid #f0f0f0; padding: 10px; transition: 0.2s; position: relative; }
-        .card.hidden-item { opacity: 0.4; filter: grayscale(1); border: 1px dashed #ccc; }
+        .card.hidden-item { opacity: 0.3; filter: grayscale(1); border: 1px dashed #ccc; }
         .card-img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 15px; margin-bottom: 10px; background: var(--gray); }
         .card-name { font-weight: 700; font-size: 13px; margin-bottom: 4px; height: 32px; overflow: hidden; line-height: 1.2; }
         .card-price { font-size: 14px; color: #666; font-weight: 600; }
@@ -27,14 +27,14 @@
         .opt-btn { padding: 10px 14px; border: 1.5px solid #eee; border-radius: 12px; font-size: 13px; font-weight: 600; cursor: pointer; background: #fff; }
         .opt-btn.active { border-color: var(--accent); background: var(--accent); color: #fff; }
         
-        .cart-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #f0f0f0; }
-        .delete-btn { color: var(--red); font-weight: bold; padding: 5px 10px; font-size: 18px; cursor: pointer; }
-        
         .live-price-bar { background: var(--accent); color: #fff; padding: 18px; border-radius: 16px; display: flex; justify-content: space-between; width: 100%; border: none; font-weight: 700; font-size: 16px; margin-top: 10px; }
         input { width: 100%; padding: 15px; background: var(--gray); border: none; border-radius: 12px; font-size: 16px; margin-bottom: 12px; box-sizing: border-box; outline: none; }
 
         #admin-panel { display: none; position: fixed; bottom: 20px; left: 10px; right: 10px; z-index: 2000; }
         .admin-btn { padding: 18px; border-radius: 16px; text-align: center; font-weight: 800; color: white; background: var(--blue); border: none; width: 100%; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+        
+        .cart-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #f0f0f0; }
+        .delete-btn { color: var(--red); font-weight: bold; padding: 5px 10px; font-size: 18px; }
     </style>
 </head>
 <body>
@@ -53,7 +53,7 @@
 <div id="app" class="grid"></div>
 
 <div id="admin-panel">
-    <button class="admin-btn" onclick="saveAdminChanges()">✅ Применить изменения</button>
+    <button class="admin-btn" onclick="saveAdminChanges()">✅ Обновить наличие</button>
 </div>
 
 <div class="modal" id="opt-modal">
@@ -172,7 +172,6 @@
     let urlParams = new URLSearchParams(window.location.search);
     let stopList = (urlParams.get('stop') || "").split(',').map(id => parseInt(id)).filter(id => !isNaN(id));
 
-    // АДМИН ПАНЕЛЬ (по зажатию названия)
     const titleEl = document.getElementById('main-title');
     titleEl.addEventListener('touchstart', () => {
         titleTimer = setTimeout(() => {
@@ -198,13 +197,7 @@
         const items = menu.filter(i => i.cat === currentCat && (isAdmin || !stopList.includes(i.id)));
         app.innerHTML = items.map(i => {
             const isHidden = stopList.includes(i.id);
-            return `
-                <div class="card ${isHidden ? 'hidden-item' : ''}" onclick="itemClick(${i.id})">
-                    <img src="${IMG_BASE + i.img}" class="card-img" onerror="this.src='https://via.placeholder.com/150'">
-                    <div class="card-name">${i.name} ${isHidden ? '🛑' : ''}</div>
-                    <div class="card-price">${i.price ? i.price+' ₽' : 'от '+Object.values(i.sizes)[0]+' ₽'}</div>
-                </div>
-            `;
+            return `<div class="card ${isHidden ? 'hidden-item' : ''}" onclick="itemClick(${i.id})"><img src="${IMG_BASE + i.img}" class="card-img" onerror="this.src='https://via.placeholder.com/150'"><div class="card-name">${i.name} ${isHidden ? '🛑' : ''}</div><div class="card-price">${i.price ? i.price+' ₽' : 'от '+Object.values(i.sizes)[0]+' ₽'}</div></div>`;
         }).join('');
     }
 
@@ -216,19 +209,15 @@
             render();
             return;
         }
-
         activeItem = menu.find(x => x.id === id);
         selSize = null; selMilk = null; selSyrup = null; selTemp = null;
         document.getElementById('m-title').innerText = activeItem.name;
         document.getElementById('temp-group').style.display = (activeItem.cat === 'food') ? 'none' : 'block';
-        
         if(!activeItem.sizes) {
-            document.getElementById('size-group').style.display = 'none';
-            document.getElementById('coffee-extras').style.display = 'none';
+            document.getElementById('size-group').style.display = 'none'; document.getElementById('coffee-extras').style.display = 'none';
             document.getElementById('live-price').innerText = activeItem.price + ' ₽';
         } else {
-            document.getElementById('size-group').style.display = 'block';
-            document.getElementById('coffee-extras').style.display = (activeItem.cat === 'coffee') ? 'block' : 'none';
+            document.getElementById('size-group').style.display = 'block'; document.getElementById('coffee-extras').style.display = (activeItem.cat === 'coffee') ? 'block' : 'none';
             document.getElementById('m-sizes').innerHTML = Object.entries(activeItem.sizes).map(([s,p]) => `<div class="opt-btn" onclick="setSize(this,${s},${p})">${s}мл</div>`).join('');
             document.getElementById('m-milk').innerHTML = milks.map(m => `<div class="opt-btn" onclick="setMilk(this,'${m}')">${m}</div>`).join('');
             document.getElementById('m-syrups').innerHTML = syrups.map(s => `<div class="opt-btn" onclick="setSyrup(this,'${s}')">${s}</div>`).join('');
@@ -255,10 +244,8 @@
         if(activeItem.sizes && !selSize) return tg.showAlert("Выберите объем!");
         let p = activeItem.sizes ? parseInt(document.getElementById('live-price').innerText) : activeItem.price;
         let desc = activeItem.name + (activeItem.sizes ? ` ${selSize.ml}мл` : '') + (selTemp ? ` (${selTemp})` : '');
-        if(selMilk) desc += ` +${selMilk}`;
-        if(selSyrup) desc += ` +${selSyrup}`;
-        cart.push({name: desc, price: p});
-        closeModal(); updateMainBtn();
+        if(selMilk) desc += ` +${selMilk}`; if(selSyrup) desc += ` +${selSyrup}`;
+        cart.push({name: desc, price: p}); closeModal(); updateMainBtn();
     }
 
     function updateMainBtn() {
