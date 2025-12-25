@@ -7,8 +7,8 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { --bg: #ffffff; --text: #1a1a1a; --accent: #000000; --gray: #f5f5f7; --red: #ff3b30; --blue: #007aff; }
-        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 120px; }
-        .header { text-align: center; padding: 20px; font-weight: 900; font-size: 22px; border-bottom: 1px solid #eee; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 120px; -webkit-tap-highlight-color: transparent; }
+        .header { text-align: center; padding: 20px; font-weight: 900; font-size: 22px; border-bottom: 1px solid #eee; user-select: none; }
         .tabs { display: flex; overflow-x: auto; padding: 12px; gap: 8px; position: sticky; top: 0; background: #fff; z-index: 100; border-bottom: 1px solid #f0f0f0; }
         .tabs::-webkit-scrollbar { display: none; }
         .tab { padding: 10px 18px; background: var(--gray); border-radius: 25px; white-space: nowrap; font-size: 14px; font-weight: 600; cursor: pointer; }
@@ -16,14 +16,23 @@
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; }
         .card { background: #fff; border-radius: 20px; border: 1px solid #f0f0f0; padding: 10px; transition: 0.2s; position: relative; }
         .card.hidden-item { opacity: 0.4; filter: grayscale(1); border: 1px dashed #ccc; }
-        .card.selected-to-change { border: 2px solid var(--blue); background: #f0f7ff; }
-        .card-img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 15px; margin-bottom: 10px; }
-        .card-name { font-weight: 700; font-size: 13px; margin-bottom: 4px; height: 32px; overflow: hidden; }
+        .card-img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 15px; margin-bottom: 10px; background: var(--gray); }
+        .card-name { font-weight: 700; font-size: 13px; margin-bottom: 4px; height: 32px; overflow: hidden; line-height: 1.2; }
         .card-price { font-size: 14px; color: #666; font-weight: 600; }
         
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; z-index: 1000; align-items: flex-end; }
-        .modal-content { background: #fff; width: 100%; border-radius: 30px 30px 0 0; padding: 25px; box-sizing: border-box; }
+        .modal-content { background: #fff; width: 100%; border-radius: 30px 30px 0 0; padding: 25px; box-sizing: border-box; max-height: 90vh; overflow-y: auto; }
+        .option-group { margin-bottom: 20px; }
+        .option-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .opt-btn { padding: 10px 14px; border: 1.5px solid #eee; border-radius: 12px; font-size: 13px; font-weight: 600; cursor: pointer; background: #fff; }
+        .opt-btn.active { border-color: var(--accent); background: var(--accent); color: #fff; }
         
+        .cart-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #f0f0f0; }
+        .delete-btn { color: var(--red); font-weight: bold; padding: 5px 10px; font-size: 18px; cursor: pointer; }
+        
+        .live-price-bar { background: var(--accent); color: #fff; padding: 18px; border-radius: 16px; display: flex; justify-content: space-between; width: 100%; border: none; font-weight: 700; font-size: 16px; margin-top: 10px; }
+        input { width: 100%; padding: 15px; background: var(--gray); border: none; border-radius: 12px; font-size: 16px; margin-bottom: 12px; box-sizing: border-box; outline: none; }
+
         #admin-panel { display: none; position: fixed; bottom: 20px; left: 10px; right: 10px; z-index: 2000; }
         .admin-btn { padding: 18px; border-radius: 16px; text-align: center; font-weight: 800; color: white; background: var(--blue); border: none; width: 100%; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
     </style>
@@ -47,7 +56,49 @@
     <button class="admin-btn" onclick="saveAdminChanges()">✅ Применить изменения</button>
 </div>
 
-<div class="modal" id="opt-modal"><div class="modal-content"><h2 id="m-title"></h2><div id="size-group"></div><button class="admin-btn" onclick="confirmItem()">Добавить</button></div></div>
+<div class="modal" id="opt-modal">
+    <div class="modal-content">
+        <h2 id="m-title" style="margin:0 0 15px 0"></h2>
+        <div id="temp-group" class="option-group">
+            <b>Температура</b>
+            <div class="option-list">
+                <div class="opt-btn" onclick="setTemp(this, 'Теплый')">Теплый 🌡</div>
+                <div class="opt-btn" onclick="setTemp(this, 'Холодный')">Холодный 🧊</div>
+            </div>
+        </div>
+        <div id="size-group" class="option-group">
+            <b>Выберите объем</b>
+            <div class="option-list" id="m-sizes"></div>
+        </div>
+        <div id="coffee-extras">
+            <div class="option-group">
+                <b>Альтернативное молоко</b>
+                <div class="option-list" id="m-milk"></div>
+            </div>
+            <div class="option-group">
+                <b>Добавить сироп</b>
+                <div class="option-list" id="m-syrups"></div>
+            </div>
+        </div>
+        <button class="live-price-bar" onclick="confirmItem()">
+            <span>Добавить</span><span id="live-price">0 ₽</span>
+        </button>
+        <button onclick="closeModal()" style="width:100%;border:none;background:none;margin-top:15px;color:#999;font-weight:600;">Отмена</button>
+    </div>
+</div>
+
+<div class="modal" id="checkout-modal">
+    <div class="modal-content">
+        <h2 style="margin:0 0 20px 0">Ваш заказ</h2>
+        <div id="checkout-list" style="margin-bottom:20px;"></div>
+        <input type="number" id="floor" placeholder="Ваш этаж" inputmode="numeric">
+        <input type="text" id="office" placeholder="Офис / Кабинет">
+        <button class="live-price-bar" onclick="finalSend()">
+            <span>Заказать доставку</span><span id="final-total">0 ₽</span>
+        </button>
+        <button onclick="closeCheckout()" style="width:100%;border:none;background:none;margin-top:15px;color:#999;font-weight:600;">Назад в меню</button>
+    </div>
+</div>
 
 <script>
     const tg = window.Telegram.WebApp;
@@ -112,10 +163,16 @@
         { id: 213, cat: 'drinks', name: "Апельсин-Юдзу", img: "chernogolovkaorange.jpg", price: 110 }
     ];
 
-    let currentCat = 'coffee', isAdmin = false, titleTimer;
+    const milks = ["Кокосовое", "Банановое", "Миндальное", "Безлактозное"];
+    const syrups = ["Фисташка", "Лесной орех", "Кокос", "Миндаль", "Лаванда", "Малина", "Соленая карамель", "Карамель"];
+
+    let cart = [], currentCat = 'coffee', activeItem = null;
+    let selSize = null, selMilk = null, selSyrup = null, selTemp = null;
+    let isAdmin = false, titleTimer;
     let urlParams = new URLSearchParams(window.location.search);
     let stopList = (urlParams.get('stop') || "").split(',').map(id => parseInt(id)).filter(id => !isNaN(id));
 
+    // АДМИН ПАНЕЛЬ (по зажатию названия)
     const titleEl = document.getElementById('main-title');
     titleEl.addEventListener('touchstart', () => {
         titleTimer = setTimeout(() => {
@@ -138,15 +195,13 @@
 
     function render() {
         const app = document.getElementById('app');
-        // Если НЕ админ - фильтруем скрытые. Если админ - показываем ВСЁ.
         const items = menu.filter(i => i.cat === currentCat && (isAdmin || !stopList.includes(i.id)));
-        
         app.innerHTML = items.map(i => {
             const isHidden = stopList.includes(i.id);
             return `
                 <div class="card ${isHidden ? 'hidden-item' : ''}" onclick="itemClick(${i.id})">
                     <img src="${IMG_BASE + i.img}" class="card-img" onerror="this.src='https://via.placeholder.com/150'">
-                    <div class="card-name">${i.name} ${isHidden ? '(СКРЫТ)' : ''}</div>
+                    <div class="card-name">${i.name} ${isHidden ? '🛑' : ''}</div>
                     <div class="card-price">${i.price ? i.price+' ₽' : 'от '+Object.values(i.sizes)[0]+' ₽'}</div>
                 </div>
             `;
@@ -155,26 +210,84 @@
 
     function itemClick(id) {
         if(isAdmin) {
-            // Если админ нажал на товар - переключаем его статус в stopList
-            if(stopList.includes(id)) {
-                stopList = stopList.filter(x => x !== id); // Возвращаем
-            } else {
-                stopList.push(id); // Скрываем
-            }
+            if(stopList.includes(id)) stopList = stopList.filter(x => x !== id);
+            else stopList.push(id);
             tg.HapticFeedback.selectionChanged();
             render();
             return;
         }
-        // Обычный клик (открытие модалки заказа) - код пропущен для краткости, он остается прежним
+
+        activeItem = menu.find(x => x.id === id);
+        selSize = null; selMilk = null; selSyrup = null; selTemp = null;
+        document.getElementById('m-title').innerText = activeItem.name;
+        document.getElementById('temp-group').style.display = (activeItem.cat === 'food') ? 'none' : 'block';
+        
+        if(!activeItem.sizes) {
+            document.getElementById('size-group').style.display = 'none';
+            document.getElementById('coffee-extras').style.display = 'none';
+            document.getElementById('live-price').innerText = activeItem.price + ' ₽';
+        } else {
+            document.getElementById('size-group').style.display = 'block';
+            document.getElementById('coffee-extras').style.display = (activeItem.cat === 'coffee') ? 'block' : 'none';
+            document.getElementById('m-sizes').innerHTML = Object.entries(activeItem.sizes).map(([s,p]) => `<div class="opt-btn" onclick="setSize(this,${s},${p})">${s}мл</div>`).join('');
+            document.getElementById('m-milk').innerHTML = milks.map(m => `<div class="opt-btn" onclick="setMilk(this,'${m}')">${m}</div>`).join('');
+            document.getElementById('m-syrups').innerHTML = syrups.map(s => `<div class="opt-btn" onclick="setSyrup(this,'${s}')">${s}</div>`).join('');
+            updateLivePrice();
+        }
+        document.getElementById('opt-modal').style.display = 'flex';
+    }
+
+    function setTemp(el, t) { selTemp = t; document.querySelectorAll('#temp-group .opt-btn').forEach(b => b.classList.remove('active')); el.classList.add('active'); }
+    function setSize(el, s, p) { selSize = {ml: s, price: p}; document.querySelectorAll('#m-sizes .opt-btn').forEach(b => b.classList.remove('active')); el.classList.add('active'); updateLivePrice(); }
+    function setMilk(el, m) { selMilk = (selMilk === m) ? null : m; document.querySelectorAll('#m-milk .opt-btn').forEach(b => b.classList.remove('active')); if(selMilk) el.classList.add('active'); updateLivePrice(); }
+    function setSyrup(el, s) { selSyrup = (selSyrup === s) ? null : s; document.querySelectorAll('#m-syrups .opt-btn').forEach(b => b.classList.remove('active')); if(selSyrup) el.classList.add('active'); updateLivePrice(); }
+    
+    function updateLivePrice() {
+        if(!activeItem.sizes) return;
+        let p = selSize ? selSize.price : 0;
+        if(selSize && selMilk) p += (selSize.ml <= 250 ? 70 : (selSize.ml <= 350 ? 80 : 90));
+        if(selSize && selSyrup) p += (selSize.ml <= 250 ? 30 : (selSize.ml <= 350 ? 40 : 50));
+        document.getElementById('live-price').innerText = p + ' ₽';
+    }
+
+    function confirmItem() {
+        if(activeItem.cat !== 'food' && !selTemp) return tg.showAlert("Выберите температуру!");
+        if(activeItem.sizes && !selSize) return tg.showAlert("Выберите объем!");
+        let p = activeItem.sizes ? parseInt(document.getElementById('live-price').innerText) : activeItem.price;
+        let desc = activeItem.name + (activeItem.sizes ? ` ${selSize.ml}мл` : '') + (selTemp ? ` (${selTemp})` : '');
+        if(selMilk) desc += ` +${selMilk}`;
+        if(selSyrup) desc += ` +${selSyrup}`;
+        cart.push({name: desc, price: p});
+        closeModal(); updateMainBtn();
+    }
+
+    function updateMainBtn() {
+        const total = cart.reduce((s,i) => s + i.price, 0);
+        if(cart.length > 0) { tg.MainButton.setText(`ОФОРМИТЬ (${total} ₽)`).show(); }
+        else { tg.MainButton.hide(); }
+    }
+
+    tg.MainButton.onClick(() => { renderCheckout(); document.getElementById('checkout-modal').style.display = 'flex'; });
+
+    function renderCheckout() {
+        const total = cart.reduce((s,i) => s + i.price, 0);
+        document.getElementById('checkout-list').innerHTML = cart.map((i, idx) => `<div class="cart-item"><div style="flex:1"><b>${i.name}</b><div>${i.price} ₽</div></div><div class="delete-btn" onclick="removeFromCart(${idx})">✕</div></div>`).join('');
+        document.getElementById('final-total').innerText = total + ' ₽';
+    }
+
+    function removeFromCart(idx) { cart.splice(idx,1); renderCheckout(); updateMainBtn(); if(!cart.length) closeCheckout(); }
+    function finalSend() {
+        const f = document.getElementById('floor').value, o = document.getElementById('office').value;
+        if(!f || !o) return tg.showAlert("Заполните адрес!");
+        tg.sendData(JSON.stringify({ type: 'order', items: cart.map(i => ({ label: i.name, amount: i.price * 100 })), address: `Этаж: ${f}, Офис: ${o}` }));
     }
 
     function saveAdminChanges() {
-        tg.sendData(JSON.stringify({
-            type: 'admin_sync',
-            stop_list: stopList
-        }));
+        tg.sendData(JSON.stringify({ type: 'admin_sync', stop_list: stopList }));
     }
 
+    function closeModal() { document.getElementById('opt-modal').style.display = 'none'; }
+    function closeCheckout() { document.getElementById('checkout-modal').style.display = 'none'; }
     render();
 </script>
 </body>
