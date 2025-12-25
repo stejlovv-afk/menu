@@ -47,12 +47,11 @@
     <div class="tab" onclick="filterCat(event, 'seasonal')">Сезонные</div>
     <div class="tab" onclick="filterCat(event, 'ice')">Холодные</div>
     <div class="tab" onclick="filterCat(event, 'food')">Сладости</div>
-    <div class="tab" onclick="filterCat(event, 'drinks')">Напитки</div>
+    <div class="tab" onclick="filterCat(event, 'drinks')">Газировка</div>
 </div>
 
 <div id="app" class="grid"></div>
-
-<div id="admin-panel"><button class="admin-btn" onclick="saveAdminChanges()">✅ Подтвердить изменение</button></div>
+<div id="admin-panel"><button class="admin-btn" onclick="saveAdminChanges()">✅ Сохранить Стоп-Лист</button></div>
 
 <div class="bottom-nav">
     <div class="nav-item active" onclick="location.reload()"><span class="nav-icon">☕</span>Меню</div>
@@ -62,20 +61,36 @@
 <div class="modal" id="opt-modal">
     <div class="modal-content">
         <h2 id="m-title" style="margin:0 0 15px 0"></h2>
-        <div id="temp-section" class="option-group" style="display:none;"><b>Температура</b>
-            <div class="option-list"><div class="opt-btn" onclick="setOpt(this,'temp','Теплый')">Теплый 🌡</div><div class="opt-btn" onclick="setOpt(this,'temp','Холодный')">Холодный 🧊</div></div>
+        
+        <div id="temp-section" class="option-group"><b>Температура</b>
+            <div class="option-list">
+                <div class="opt-btn" onclick="setOpt(this,'temp','Теплый')">Теплый 🌡</div>
+                <div class="opt-btn" onclick="setOpt(this,'temp','Холодный')">Холодный 🧊</div>
+            </div>
         </div>
+
         <div id="size-section" class="option-group"><b>Объем</b><div class="option-list" id="m-sizes"></div></div>
         <div id="milk-section" class="option-group"><b>Молоко</b><div class="option-list" id="m-milk"></div></div>
+        
         <div id="juice-section" class="option-group" style="display:none;"><b>Выбор сока</b>
-            <div class="option-list"><div class="opt-btn" onclick="setOpt(this,'juice','Апельсиновый')">Апельсиновый 🍊</div><div class="opt-btn" onclick="setOpt(this,'juice','Вишневый')">Вишневый 🍒</div></div>
+            <div class="option-list">
+                <div class="opt-btn" onclick="setOpt(this,'juice','Апельсиновый')">Апельсиновый</div>
+                <div class="opt-btn" onclick="setOpt(this,'juice','Вишневый')">Вишневый</div>
+            </div>
         </div>
+
         <div id="syrup-section" class="option-group"><b>Сироп</b><div class="option-list" id="m-syrups"></div></div>
+
         <div id="extras-section" class="option-group"><b>Добавки</b>
             <div class="option-list"><div class="opt-btn" onclick="setOpt(this,'cinnamon','Корица')">Корица</div></div>
             <div style="margin-top:10px;"><b>Сахар</b></div>
-            <div class="option-list"><div class="opt-btn" onclick="setOpt(this,'sugar','5г')">5г</div><div class="opt-btn" onclick="setOpt(this,'sugar','10г')">10г</div><div class="opt-btn" onclick="setOpt(this,'sugar','15г')">15г</div></div>
+            <div class="option-list">
+                <div class="opt-btn" onclick="setOpt(this,'sugar','5г')">5г</div>
+                <div class="opt-btn" onclick="setOpt(this,'sugar','10г')">10г</div>
+                <div class="opt-btn" onclick="setOpt(this,'sugar','15г')">15г</div>
+            </div>
         </div>
+
         <button class="live-price-bar" onclick="confirmItem()"><span>Добавить</span><span id="live-price">0 ₽</span></button>
         <button onclick="closeModal()" style="width:100%;border:none;background:none;margin-top:15px;color:#999;">Отмена</button>
     </div>
@@ -96,6 +111,7 @@
     const IMG_BASE = "https://raw.githubusercontent.com/stejlovv-afk/menu/main/";
     
     let menu = [
+        // КОФЕ
         { id: 1, cat: 'coffee', name: "Капучино", sizes: {250:190, 350:230, 450:270}, img: "kapuchino-min.jpg" },
         { id: 2, cat: 'coffee', name: "Латте", sizes: {250:190, 350:230, 450:270}, img: "latte-min.jpg" },
         { id: 3, cat: 'coffee', name: "Эспрессо", sizes: {30:110, 60:150}, img: "espresso1-min.jpg", noMilk: true },
@@ -103,6 +119,7 @@
         { id: 5, cat: 'coffee', name: "Флат Уайт", sizes: {250:220, 350:260, 450:360}, img: "kapuchino-min.jpg" },
         { id: 6, cat: 'coffee', name: "Раф", sizes: {250:210, 350:250, 450:290}, img: "latte-min.jpg" },
         { id: 7, cat: 'coffee', name: "Бамбл Теплый", sizes: {250:270, 350:270, 450:300}, img: "kapuchino-min.jpg", isBumble: true },
+        // ЧАЙ
         { id: 20, cat: 'tea', name: "Чай Черный", sizes: {350:120, 450:180}, img: "teablack-min.jpg" },
         { id: 21, cat: 'tea', name: "Чай Зеленый", sizes: {350:120, 450:180}, img: "greentea-min.jpg" },
         { id: 22, cat: 'tea', name: "Чай Каркаде", sizes: {350:120, 450:180}, img: "karkadetea-min.jpg" },
@@ -113,42 +130,59 @@
         { id: 27, cat: 'tea', name: "Пряный чай", sizes: {250:240, 350:280, 450:320}, img: "kakao-min.jpg" },
         { id: 28, cat: 'tea', name: "Горячий шоколад", price: 180, img: "kakao-min.jpg" },
         { id: 29, cat: 'tea', name: "Глинтвейн", sizes: {350:230, 450:270}, img: "glintveinpunch-min.jpg" },
+        // ПУНШИ
         { id: 50, cat: 'punsh', name: "Облепиховый пунш", sizes: {350:230, 450:270}, img: "oblepihapunch-min.jpg" },
         { id: 51, cat: 'punsh', name: "Малиновый пунш", sizes: {350:230, 450:270}, img: "malinapunsh-min.jpg" },
+        // СЕЗОННЫЕ
         { id: 80, cat: 'seasonal', name: "Латте Халва", sizes: {350:290, 450:350}, img: "lattehalva-min.jpg", noSyrup: true },
         { id: 81, cat: 'seasonal', name: "Латте Тыква", sizes: {350:290, 450:350}, img: "lattetikva-min.jpg", noSyrup: true },
         { id: 82, cat: 'seasonal', name: "Раф Сникерс", sizes: {350:320, 450:380}, img: "rafsnikers-min.jpg", noSyrup: true },
         { id: 83, cat: 'seasonal', name: "Латте Orange Christmas", sizes: {350:320, 450:380}, img: "latteorangecristmas-min.jpg", noSyrup: true },
-        { id: 60, cat: 'ice', name: "Айс Латте", sizes: {250:240, 350:280}, img: "latte-min.jpg", needT: true },
-        { id: 61, cat: 'ice', name: "Эспрессо Тоник", sizes: {250:250, 350:290}, img: "granattonic-min.jpg", needT: true },
-        { id: 62, cat: 'ice', name: "Бамбл Холодный", sizes: {270:270, 300:300}, img: "kapuchino-min.jpg", isBumble: true, needT: true },
-        { id: 63, cat: 'ice', name: "Айс Матча", sizes: {230:230, 270:270}, img: "matcha-min.jpg", needT: true },
-        { id: 64, cat: 'ice', name: "Лимонад (Киви/Манго/Смор)", sizes: {260:260, 290:290}, img: "lemonchernogo-min.jpg", needT: true },
-        { id: 100, cat: 'food', name: "Bombbar Орех/Малина/Кокос", price: 130, img: "bombbarfunduk-min.jpg" },
-        { id: 101, cat: 'food', name: "Snaqer Орех/Карамель", price: 130, img: "snaqerfunduk-min.jpg" },
-        { id: 102, cat: 'food', name: "Печенье Chika Смород/Банан", price: 170, img: "chikabiscuitbanan-min.jpg" },
-        { id: 103, cat: 'food', name: "Жвачка Эклипс", price: 80, img: "eclipce.jpg" },
-        { id: 104, cat: 'food', name: "Шоколад Горьк/Мол", price: 80, img: "chokolatgorkiy.jpg" },
-        { id: 105, cat: 'food', name: "Choco Pie / Чудо", price: 60, img: "chudo.jpg" },
-        { id: 106, cat: 'food', name: "Бабаевский батончик", price: 100, img: "babka.jpg" },
-        { id: 200, cat: 'drinks', name: "Черноголовка Cola/Байкал", price: 140, img: "colachernogo-min.jpg", needT: true },
-        { id: 201, cat: 'drinks', name: "Черноголовка газ/негаз", price: 70, img: "negazcernogo-min.jpg", needT: true },
-        { id: 202, cat: 'drinks', name: "Cosmos Троп/Ориг", price: 130, img: "cosmos.jpg", needT: true },
-        { id: 203, cat: 'drinks', name: "Adrenaline Ориг/No Sugar", price: 200, img: "adrenalin.jpg", needT: true },
-        { id: 204, cat: 'drinks', name: "Сок Il Primo Том/Ябл/Ап", price: 120, img: "iltomato.jpg", needT: true },
-        { id: 205, cat: 'drinks', name: "Lipton Персик", price: 130, img: "lipton.jpg", needT: true },
-        { id: 206, cat: 'drinks', name: "Дикий апельсин-Юдзу", price: 110, img: "chernogolovkaorange.jpg", needT: true }
+        // ХОЛОДНЫЕ
+        { id: 60, cat: 'ice', name: "Айс Латте", sizes: {250:240, 350:280}, img: "latte-min.jpg" },
+        { id: 61, cat: 'ice', name: "Эспрессо Тоник (Гранат/Обыч)", sizes: {250:250, 350:290}, img: "granattonic-min.jpg" },
+        { id: 62, cat: 'ice', name: "Бамбл Холодный", sizes: {270:270, 300:300}, img: "kapuchino-min.jpg", isBumble: true },
+        { id: 63, cat: 'ice', name: "Айс Матча", sizes: {230:230, 270:270}, img: "matcha-min.jpg" },
+        { id: 64, cat: 'ice', name: "Лимонад (Киви/Манго/Смор)", sizes: {260:260, 290:290}, img: "lemonchernogo-min.jpg" },
+        // СЛАДОСТИ
+        { id: 100, cat: 'food', name: "Bombbar Лесной орех", price: 130, img: "bombbarfunduk-min.jpg", isFood: true },
+        { id: 101, cat: 'food', name: "Bombbar Малиновый", price: 130, img: "bombbarfunduk-min.jpg", isFood: true },
+        { id: 102, cat: 'food', name: "Bombbar Кокос", price: 130, img: "bombbarfunduk-min.jpg", isFood: true },
+        { id: 103, cat: 'food', name: "Snaqer Орех/Карамель", price: 130, img: "snaqerfunduk-min.jpg", isFood: true },
+        { id: 104, cat: 'food', name: "Печенье Chika Смородина", price: 170, img: "chikabiscuitbanan-min.jpg", isFood: true },
+        { id: 105, cat: 'food', name: "Печенье Chika Банан", price: 170, img: "chikabiscuitbanan-min.jpg", isFood: true },
+        { id: 106, cat: 'food', name: "Жвачка Эклипс", price: 80, img: "eclipce.jpg", isFood: true },
+        { id: 107, cat: 'food', name: "Горький шоколад", price: 80, img: "chokolatgorkiy.jpg", isFood: true },
+        { id: 108, cat: 'food', name: "Молочный шоколад", price: 80, img: "chokolatgorkiy.jpg", isFood: true },
+        { id: 109, cat: 'food', name: "Choco Pie", price: 30, img: "chudo.jpg", isFood: true },
+        { id: 110, cat: 'food', name: "Батончик Чудо", price: 60, img: "chudo.jpg", isFood: true },
+        { id: 111, cat: 'food', name: "Бабаевский батончик", price: 100, img: "babka.jpg", isFood: true },
+        // ГАЗИРОВКА / НАПИТКИ
+        { id: 200, cat: 'drinks', name: "Черноголовка Cola", price: 140, img: "colachernogo-min.jpg" },
+        { id: 201, cat: 'drinks', name: "Черноголовка Байкал", price: 140, img: "colachernogo-min.jpg" },
+        { id: 202, cat: 'drinks', name: "Черноголовка газ/негаз", price: 70, img: "negazcernogo-min.jpg" },
+        { id: 203, cat: 'drinks', name: "Черноголовка лимонад", price: 140, img: "colachernogo-min.jpg" },
+        { id: 204, cat: 'drinks', name: "Cosmos Тропический", price: 130, img: "cosmos.jpg" },
+        { id: 205, cat: 'drinks', name: "Cosmos Оригинальный", price: 130, img: "cosmos.jpg" },
+        { id: 206, cat: 'drinks', name: "Adrenaline Без сахара", price: 200, img: "adrenalin.jpg" },
+        { id: 207, cat: 'drinks', name: "Adrenaline Оригинальный", price: 200, img: "adrenalin.jpg" },
+        { id: 208, cat: 'drinks', name: "Сок Il Primo Томат", price: 120, img: "iltomato.jpg" },
+        { id: 209, cat: 'drinks', name: "Сок Il Primo Яблоко", price: 120, img: "iltomato.jpg" },
+        { id: 210, cat: 'drinks', name: "Сок Il Primo Апельсин", price: 120, img: "iltomato.jpg" },
+        { id: 211, cat: 'drinks', name: "Lipton Персик", price: 130, img: "lipton.jpg" },
+        { id: 212, cat: 'drinks', name: "Дикий апельсин-Юдзу", price: 110, img: "chernogolovkaorange.jpg" }
     ];
 
     const milks = ["Обычное", "Кокосовое", "Банановое", "Миндальное", "Безлактозное"];
     const syrups = ["Фисташка", "Лесной орех", "Кокос", "Миндаль", "Лаванда", "Малина", "Соленая карамель"];
 
-    let cart = [], currentCat = 'coffee', activeItem = null, isAdmin = false, titleTimer;
+    let cart = [], currentCat = 'coffee', activeItem = null, isAdmin = false;
     let sel = { size: null, milk: null, syrup: null, temp: null, sugar: null, cinnamon: false, juice: null };
     let urlParams = new URLSearchParams(window.location.search);
     let stopList = (urlParams.get('stop') || "").split(',').map(id => parseInt(id)).filter(id => !isNaN(id));
 
     const titleEl = document.getElementById('main-title');
+    let titleTimer;
     titleEl.addEventListener('touchstart', () => { titleTimer = setTimeout(() => { if(prompt("Пароль:") === "7654") { isAdmin = true; document.getElementById('admin-panel').style.display='block'; render(); } }, 2000); });
     titleEl.addEventListener('touchend', () => clearTimeout(titleTimer));
 
@@ -173,14 +207,16 @@
         activeItem = menu.find(x => x.id === id);
         sel = { size: null, milk: null, syrup: null, temp: null, sugar: null, cinnamon: false, juice: null };
         document.getElementById('m-title').innerText = activeItem.name;
-        document.getElementById('temp-section').style.display = activeItem.needT ? 'block' : 'none';
+        
+        // Температура всем КРОМЕ еды
+        document.getElementById('temp-section').style.display = activeItem.isFood ? 'none' : 'block';
         
         if(activeItem.sizes) {
             document.getElementById('size-section').style.display = 'block';
-            document.getElementById('m-sizes').innerHTML = Object.entries(activeItem.sizes).map(([s,p]) => `<div class="opt-btn" onclick="setOpt(this,'size',{ml:${s}, p:${p}})">${s}мл</div>`).join('');
+            document.getElementById('m-sizes').innerHTML = Object.entries(activeItem.sizes).map(([s,p]) => `<div class="opt-btn" onclick="setOpt(this,'size',{ml:s, p:p})">${s}мл</div>`).join('');
         } else { document.getElementById('size-section').style.display = 'none'; }
 
-        document.getElementById('milk-section').style.display = (activeItem.noMilk || !activeItem.sizes || activeItem.cat==='tea') ? 'none' : 'block';
+        document.getElementById('milk-section').style.display = (activeItem.noMilk || !activeItem.sizes || activeItem.cat==='tea' || activeItem.cat==='punsh') ? 'none' : 'block';
         if(activeItem.isBumble) {
             document.getElementById('milk-section').style.display = 'none';
             document.getElementById('juice-section').style.display = 'block';
@@ -188,7 +224,7 @@
             document.getElementById('juice-section').style.display = 'none';
             document.getElementById('m-milk').innerHTML = milks.map(m => `<div class="opt-btn" onclick="setOpt(this,'milk','${m}')">${m}</div>`).join('');
         }
-        document.getElementById('syrup-section').style.display = (activeItem.noSyrup || !activeItem.sizes) ? 'none' : 'block';
+        document.getElementById('syrup-section').style.display = (activeItem.noSyrup || !activeItem.sizes || activeItem.cat==='punsh') ? 'none' : 'block';
         document.getElementById('m-syrups').innerHTML = syrups.map(s => `<div class="opt-btn" onclick="setOpt(this,'syrup','${s}')">${s}</div>`).join('');
         document.getElementById('extras-section').style.display = activeItem.sizes ? 'block' : 'none';
         document.getElementById('opt-modal').style.display = 'flex';
@@ -207,8 +243,8 @@
 
     function updatePrice() {
         let p = activeItem.price || (sel.size ? sel.size.p : 0);
-        if(sel.milk && sel.milk !== "Обычное") p += (sel.size && sel.size.ml > 300) ? 90 : 70;
-        if(sel.syrup) p += (sel.size && sel.size.ml > 300) ? 50 : 30;
+        if(sel.milk && sel.milk !== "Обычное") p += (sel.size && parseInt(sel.size.ml) > 300) ? 90 : 70;
+        if(sel.syrup) p += (sel.size && parseInt(sel.size.ml) > 300) ? 50 : 30;
         document.getElementById('live-price').innerText = p + ' ₽';
     }
 
