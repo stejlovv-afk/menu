@@ -7,7 +7,7 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { --bg: #ffffff; --text: #1a1a1a; --accent: #000000; --gray: #f5f5f7; --red: #ff3b30; --blue: #007aff; }
-        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 120px; -webkit-tap-highlight-color: transparent; overflow-x: hidden; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 120px; -webkit-tap-highlight-color: transparent; }
         .header { text-align: center; padding: 20px; font-weight: 900; font-size: 22px; border-bottom: 1px solid #eee; user-select: none; }
         .tabs { display: flex; overflow-x: auto; padding: 12px; gap: 8px; position: sticky; top: 0; background: #fff; z-index: 100; border-bottom: 1px solid #f0f0f0; }
         .tabs::-webkit-scrollbar { display: none; }
@@ -29,10 +29,8 @@
         
         .live-price-bar { background: var(--accent); color: #fff; padding: 18px; border-radius: 16px; display: flex; justify-content: space-between; width: 100%; border: none; font-weight: 700; font-size: 16px; margin-top: 10px; }
         input { width: 100%; padding: 15px; background: var(--gray); border: none; border-radius: 12px; font-size: 16px; margin-bottom: 12px; box-sizing: border-box; outline: none; }
-
         #admin-panel { display: none; position: fixed; bottom: 20px; left: 10px; right: 10px; z-index: 2000; }
         .admin-btn { padding: 18px; border-radius: 16px; text-align: center; font-weight: 800; color: white; background: var(--blue); border: none; width: 100%; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
-        
         .cart-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #f0f0f0; }
         .delete-btn { color: var(--red); font-weight: bold; padding: 5px 10px; font-size: 18px; }
     </style>
@@ -40,7 +38,6 @@
 <body>
 
 <div class="header" id="main-title">URBAN LUNCH</div>
-
 <div class="tabs">
     <div class="tab active" onclick="filterCat(event, 'coffee')">Кофе</div>
     <div class="tab" onclick="filterCat(event, 'tea')">Чай</div>
@@ -53,37 +50,23 @@
 <div id="app" class="grid"></div>
 
 <div id="admin-panel">
-    <button class="admin-btn" onclick="saveAdminChanges()">✅ Подтвердить наличие</button>
+    <button class="admin-btn" onclick="saveAdminChanges()">✅ Подтвердить изменение</button>
 </div>
 
 <div class="modal" id="opt-modal">
     <div class="modal-content">
         <h2 id="m-title" style="margin:0 0 15px 0"></h2>
-        <div id="temp-group" class="option-group">
-            <b>Температура</b>
-            <div class="option-list">
-                <div class="opt-btn" onclick="setTemp(this, 'Теплый')">Теплый 🌡</div>
-                <div class="opt-btn" onclick="setTemp(this, 'Холодный')">Холодный 🧊</div>
-            </div>
-        </div>
-        <div id="size-group" class="option-group">
-            <b>Выберите объем</b>
-            <div class="option-list" id="m-sizes"></div>
-        </div>
+        <div id="temp-group" class="option-group"><b>Температура</b><div class="option-list">
+            <div class="opt-btn" onclick="setTemp(this,'Теплый')">Теплый 🌡</div>
+            <div class="opt-btn" onclick="setTemp(this,'Холодный')">Холодный 🧊</div>
+        </div></div>
+        <div id="size-group" class="option-group"><b>Объем</b><div class="option-list" id="m-sizes"></div></div>
         <div id="coffee-extras">
-            <div class="option-group">
-                <b>Альтернативное молоко</b>
-                <div class="option-list" id="m-milk"></div>
-            </div>
-            <div class="option-group">
-                <b>Добавить сироп</b>
-                <div class="option-list" id="m-syrups"></div>
-            </div>
+            <div class="option-group"><b>Молоко</b><div class="option-list" id="m-milk"></div></div>
+            <div class="option-group"><b>Сироп</b><div class="option-list" id="m-syrups"></div></div>
         </div>
-        <button class="live-price-bar" onclick="confirmItem()">
-            <span>Добавить</span><span id="live-price">0 ₽</span>
-        </button>
-        <button onclick="closeModal()" style="width:100%;border:none;background:none;margin-top:15px;color:#999;font-weight:600;">Отмена</button>
+        <button class="live-price-bar" onclick="confirmItem()"><span>Добавить</span><span id="live-price">0 ₽</span></button>
+        <button onclick="closeModal()" style="width:100%;border:none;background:none;margin-top:15px;color:#999;">Отмена</button>
     </div>
 </div>
 
@@ -93,10 +76,8 @@
         <div id="checkout-list" style="margin-bottom:20px;"></div>
         <input type="number" id="floor" placeholder="Ваш этаж" inputmode="numeric">
         <input type="text" id="office" placeholder="Офис / Кабинет">
-        <button class="live-price-bar" onclick="finalSend()">
-            <span>Заказать доставку</span><span id="final-total">0 ₽</span>
-        </button>
-        <button onclick="closeCheckout()" style="width:100%;border:none;background:none;margin-top:15px;color:#999;font-weight:600;">Назад в меню</button>
+        <button class="live-price-bar" onclick="finalSend()"><span>Заказать доставку</span><span id="final-total">0 ₽</span></button>
+        <button onclick="closeCheckout()" style="width:100%;border:none;background:none;margin-top:15px;color:#999;">Назад</button>
     </div>
 </div>
 
@@ -178,7 +159,6 @@
             if(prompt("Пароль:") === "7654") {
                 isAdmin = true;
                 document.getElementById('admin-panel').style.display = 'block';
-                tg.HapticFeedback.impactOccurred('medium');
                 render();
             }
         }, 2000);
@@ -197,7 +177,7 @@
         const items = menu.filter(i => i.cat === currentCat && (isAdmin || !stopList.includes(i.id)));
         app.innerHTML = items.map(i => {
             const isHidden = stopList.includes(i.id);
-            return `<div class="card ${isHidden ? 'hidden-item' : ''}" onclick="itemClick(${i.id})"><img src="${IMG_BASE + i.img}" class="card-img" onerror="this.src='https://via.placeholder.com/150'"><div class="card-name">${i.name} ${isHidden ? '🛑' : ''}</div><div class="card-price">${i.price ? i.price+' ₽' : 'от '+Object.values(i.sizes)[0]+' ₽'}</div></div>`;
+            return `<div class="card ${isHidden ? 'hidden-item' : ''}" onclick="itemClick(${i.id})"><img src="${IMG_BASE + i.img}" class="card-img"><div class="card-name">${i.name} ${isHidden ? '🛑' : ''}</div><div class="card-price">${i.price ? i.price+' ₽' : 'от '+Object.values(i.sizes)[0]+' ₽'}</div></div>`;
         }).join('');
     }
 
@@ -205,7 +185,6 @@
         if(isAdmin) {
             if(stopList.includes(id)) stopList = stopList.filter(x => x !== id);
             else stopList.push(id);
-            tg.HapticFeedback.selectionChanged();
             render();
             return;
         }
@@ -258,11 +237,12 @@
 
     function renderCheckout() {
         const total = cart.reduce((s,i) => s + i.price, 0);
-        document.getElementById('checkout-list').innerHTML = cart.map((i, idx) => `<div class="cart-item"><div style="flex:1"><b>${i.name}</b><div>${i.price} ₽</div></div><div class="delete-btn" onclick="removeFromCart(${idx})">✕</div></div>`).join('');
+        document.getElementById('checkout-list').innerHTML = cart.map((i, idx) => `<div class="cart-item"><div><b>${i.name}</b><br>${i.price}₽</div><div class="delete-btn" onclick="removeFromCart(${idx})">✕</div></div>`).join('');
         document.getElementById('final-total').innerText = total + ' ₽';
     }
 
     function removeFromCart(idx) { cart.splice(idx,1); renderCheckout(); updateMainBtn(); if(!cart.length) closeCheckout(); }
+    
     function finalSend() {
         const f = document.getElementById('floor').value, o = document.getElementById('office').value;
         if(!f || !o) return tg.showAlert("Заполните адрес!");
