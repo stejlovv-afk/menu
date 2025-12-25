@@ -37,7 +37,7 @@
 <div class="tabs">
     <div class="tab active" onclick="filterCat(event, 'coffee')">Кофе</div>
     <div class="tab" onclick="filterCat(event, 'tea')">Чай & Пунши</div>
-    <div class="tab" onclick="filterCat(event, 'ice')">Айс-напитки</div>
+    <div class="tab" onclick="filterCat(event, 'ice')">Холодные</div>
     <div class="tab" onclick="filterCat(event, 'food')">Сладости</div>
     <div class="tab" onclick="filterCat(event, 'drinks')">Газировка</div>
 </div>
@@ -51,15 +51,13 @@
             <b>Выберите объем</b>
             <div class="option-list" id="m-sizes"></div>
         </div>
-        <div id="extra-features">
-            <div class="option-group">
-                <b>Альтернативное молоко</b>
-                <div class="option-list" id="m-milk"></div>
-            </div>
-            <div class="option-group">
-                <b>Добавить сироп</b>
-                <div class="option-list" id="m-syrups"></div>
-            </div>
+        <div class="option-group">
+            <b>Альтернативное молоко</b>
+            <div class="option-list" id="m-milk"></div>
+        </div>
+        <div class="option-group">
+            <b>Добавить сироп</b>
+            <div class="option-list" id="m-syrups"></div>
         </div>
         <button class="live-price-bar" onclick="confirmItem()">
             <span>Добавить</span><span id="live-price">0 ₽</span>
@@ -77,49 +75,53 @@
         <button class="live-price-bar" onclick="finalSend()">
             <span>Заказать доставку</span><span id="final-total">0 ₽</span>
         </button>
-        <button onclick="closeCheckout()" style="width:100%;border:none;background:none;margin-top:15px;color:#999;font-weight:600;">Назад в меню</button>
+        <button onclick="closeCheckout()" style="width:100%;border:none;background:none;margin-top:15px;color:#999;font-weight:600;">Назад</button>
     </div>
 </div>
 
 <script>
     const tg = window.Telegram.WebApp;
     tg.expand();
-    const IMG_BASE = "https://raw.githubusercontent.com/stejlovv-afk/menu24/main/";
+    const IMG_BASE = "https://raw.githubusercontent.com/stejlovv-afk/menu/main/";
 
     const menu = [
-        { id: 1, cat: 'coffee', name: "Капучино", img: "kapuchino.jpg", sizes: {250:190, 350:230, 450:270} },
-        { id: 2, cat: 'coffee', name: "Латте", img: "latte.jpg", sizes: {250:190, 350:230, 450:270} },
-        { id: 3, cat: 'coffee', name: "Американо", img: "americano.jpg", sizes: {250:180, 350:220, 450:260} },
-        { id: 4, cat: 'coffee', name: "Эспрессо", img: "espresso1.jpg", sizes: {30:110, 60:150} },
-        { id: 5, cat: 'coffee', name: "Латте Халва", img: "lattehalva.jpg", sizes: {350:290, 450:350} },
-        { id: 6, cat: 'coffee', name: "Латте Тыква", img: "lattetikva.jpg", sizes: {350:290, 450:350} },
-        { id: 7, cat: 'coffee', name: "Раф Сникерс", img: "rafsnikers.jpg", sizes: {350:320, 450:380} },
-        { id: 8, cat: 'coffee', name: "Эспрессо 2", img: "эспрессо2.jpg", sizes: {30:110, 60:150} },
+        { id: 1, cat: 'coffee', name: "Капучино", img: "kapuchino-min.jpg", sizes: {250:190, 350:230, 450:270} },
+        { id: 2, cat: 'coffee', name: "Латте", img: "latte-min.jpg", sizes: {250:190, 350:230, 450:270} },
+        { id: 3, cat: 'coffee', name: "Американо", img: "americano-min.jpg", sizes: {250:180, 350:220, 450:260} },
+        { id: 4, cat: 'coffee', name: "Эспрессо", img: "espresso1-min.jpg", sizes: {30:110, 60:150} },
+        { id: 5, cat: 'coffee', name: "Латте Халва", img: "lattehalva-min.jpg", sizes: {350:290, 450:350} },
+        { id: 6, cat: 'coffee', name: "Латте Тыква", img: "lattetikva-min.jpg", sizes: {350:290, 450:350} },
+        { id: 7, cat: 'coffee', name: "Латте Christmas", img: "latteorangecristmas-min.jpg", sizes: {350:320, 450:380} },
+        { id: 8, cat: 'coffee', name: "Раф Сникерс", img: "rafsnikers-min.jpg", sizes: {350:320, 450:380} },
+        { id: 9, cat: 'coffee', name: "Эспрессо 2", img: "эспрессо2-min.jpg", sizes: {30:110, 60:150} },
         
-        { id: 20, cat: 'tea', name: "Чай Черный", img: "teablack.jpg", sizes: {250:120, 350:150, 450:180} },
-        { id: 21, cat: 'tea', name: "Чай Зеленый", img: "greentea.jpg", sizes: {250:120, 350:150, 450:180} },
-        { id: 22, cat: 'tea', name: "Глинтвейн", img: "glintveinpunch.jpg", sizes: {350:230, 450:270} },
-        { id: 23, cat: 'tea', name: "Облепиховый пунш", img: "oblepihapunch.jpg", sizes: {350:230, 450:270} },
-        { id: 24, cat: 'tea', name: "Малиновый пунш", img: "malinapunsh.jpg", sizes: {350:230, 450:270} },
+        { id: 20, cat: 'tea', name: "Чай Черный", img: "teablack-min.jpg", sizes: {250:120, 350:150, 450:180} },
+        { id: 21, cat: 'tea', name: "Чай Зеленый", img: "greentea-min.jpg", sizes: {250:120, 350:150, 450:180} },
+        { id: 22, cat: 'tea', name: "Зеленый Жасмин", img: "greenjasmin-min.jpg", sizes: {250:120, 350:150, 450:180} },
+        { id: 23, cat: 'tea', name: "Чай Травяной", img: "travatea-min.jpg", sizes: {250:120, 350:150, 450:180} },
+        { id: 24, cat: 'tea', name: "Чай Каркаде", img: "karkadetea-min.jpg", sizes: {250:120, 350:150, 450:180} },
+        { id: 25, cat: 'tea', name: "Глинтвейн", img: "glintveinpunch-min.jpg", sizes: {350:230, 450:270} },
+        { id: 26, cat: 'tea', name: "Облепиховый пунш", img: "oblepihapunch-min.jpg", sizes: {350:230, 450:270} },
+        { id: 27, cat: 'tea', name: "Малиновый пунш", img: "malinapunsh-min.jpg", sizes: {350:230, 450:270} },
+        { id: 28, cat: 'tea', name: "Какао", img: "kakao-min.jpg", sizes: {250:180, 350:220, 450:260} },
 
-        { id: 40, cat: 'ice', name: "Эспрессо Тоник", img: "granattonic.jpg", sizes: {250:250, 350:290} },
-        { id: 41, cat: 'ice', name: "Матча", img: "matcha.jpg", sizes: {250:180, 350:220, 450:260} },
+        { id: 40, cat: 'ice', name: "Эспрессо Тоник", img: "granattonic-min.jpg", sizes: {250:250, 350:290} },
 
-        { id: 100, cat: 'food', name: "Bombbar Кокос", img: "bombbarcocos.jpg", price: 130 },
-        { id: 101, cat: 'food', name: "Bombbar Фундук", img: "bombbarfunduk.jpg", price: 130 },
-        { id: 102, cat: 'food', name: "Bombbar Малина", img: "bombbarmalina.jpg", price: 130 },
-        { id: 103, cat: 'food', name: "Snaqer Фундук", img: "snaqerfunduk.jpg", price: 130 },
-        { id: 104, cat: 'food', name: "Chika Смородина", img: "chikabiscuitblackcurrant.jpg", price: 170 },
-        { id: 105, cat: 'food', name: "Chika Банан", img: "chikabiscuitbanan.jpg", price: 170 },
+        { id: 100, cat: 'food', name: "Bombbar Кокос", img: "bombbarcocos-min.jpg", price: 130 },
+        { id: 101, cat: 'food', name: "Bombbar Фундук", img: "bombbarfunduk-min.jpg", price: 130 },
+        { id: 102, cat: 'food', name: "Bombbar Малина", img: "bombbarmalina-min.jpg", price: 130 },
+        { id: 103, cat: 'food', name: "Snaqer Фундук", img: "snaqerfunduk-min.jpg", price: 130 },
+        { id: 104, cat: 'food', name: "Chika Смородина", img: "chikabiscuitblackcurrant-min.jpg", price: 170 },
+        { id: 105, cat: 'food', name: "Chika Банан", img: "chikabiscuitbanan-min.jpg", price: 170 },
 
-        { id: 200, cat: 'drinks', name: "Cola", img: "colachernogo.jpg", price: 140 },
-        { id: 201, cat: 'drinks', name: "Байкал", img: "baikalchernogo.jpg", price: 140 },
-        { id: 202, cat: 'drinks', name: "Лимонад", img: "lemonchernogo.jpg", price: 140 },
-        { id: 203, cat: 'drinks', name: "Вода", img: "negazcernogo.jpg", price: 70 }
+        { id: 200, cat: 'drinks', name: "Cola", img: "colachernogo-min.jpg", price: 140 },
+        { id: 201, cat: 'drinks', name: "Байкал", img: "baikalchernogo-min.jpg", price: 140 },
+        { id: 202, cat: 'drinks', name: "Лимонад", img: "lemonchernogo-min.jpg", price: 140 },
+        { id: 203, cat: 'drinks', name: "Вода", img: "negazcernogo-min.jpg", price: 70 }
     ];
 
     const milks = ["Кокосовое", "Банановое", "Миндальное", "Безлактозное"];
-    const syrups = ["Фисташка", "Лесной орех", "Кокос", "Миндаль", "Красный апельсин", "Лаванда", "Клубника", "Имбирный пряник", "Персик", "Дыня", "Сливка", "Яблоко", "Лемонграсс", "Малина", "Попкорн", "Вишня", "Баблгам", "Соленая карамель", "Карамель", "Бурбон ваниль"];
+    const syrups = ["Фисташка", "Лесной орех", "Кокос", "Миндаль", "Лаванда", "Малина", "Соленая карамель", "Карамель"];
 
     let cart = [], isAdmin = false, currentCat = 'coffee', activeItem = null;
     let selSize = null, selMilk = null, selSyrup = null;
@@ -138,7 +140,7 @@
         const items = isAdmin ? menu : menu.filter(i => i.cat === currentCat && !stopList.includes(i.id));
         app.innerHTML = items.map(i => `
             <div class="card ${isAdmin && stopList.includes(i.id) ? 'selected-to-hide' : ''}" onclick="itemClick(${i.id})">
-                <img src="${IMG_BASE + encodeURIComponent(i.img)}" class="card-img" onerror="this.src='https://via.placeholder.com/150?text=Urban+Lunch'">
+                <img src="${IMG_BASE + encodeURIComponent(i.img)}" class="card-img" onerror="this.src='https://via.placeholder.com/150?text=No+Photo'">
                 <div class="card-name">${i.name}</div>
                 <div class="card-price">${i.price ? i.price+' ₽' : 'от '+Object.values(i.sizes)[0]+' ₽'}</div>
             </div>
@@ -203,7 +205,7 @@
 
     function updateMainBtn() {
         const total = cart.reduce((s,i) => s + i.price, 0);
-        tg.MainButton.setText(`ОФОРМИТЬ ЗАКАЗ (${total} ₽)`).show();
+        tg.MainButton.setText(`КОРЗИНА (${total} ₽)`).show();
     }
 
     tg.MainButton.onClick(() => {
@@ -215,7 +217,7 @@
 
     function finalSend() {
         const f = document.getElementById('floor').value, o = document.getElementById('office').value;
-        if(!f || !o) return tg.showAlert("Укажите этаж и офис!");
+        if(!f || !o) return tg.showAlert("Заполните этаж и офис!");
         tg.sendData(JSON.stringify({
             type: 'order',
             items: cart.map(i => ({ label: i.name, amount: i.price * 100 })),
