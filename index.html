@@ -15,17 +15,12 @@
         .tab.active { background: var(--accent); color: #fff; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; }
         .card { background: #fff; border-radius: 20px; border: 1px solid #f0f0f0; padding: 10px; transition: 0.2s; overflow: hidden; position: relative; }
+        .card.selected-del { border: 2px solid var(--red); background: #fff0f0; }
         .card-img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 15px; margin-bottom: 10px; background: var(--gray); }
         .card-name { font-weight: 700; font-size: 13px; margin-bottom: 4px; height: 32px; overflow: hidden; line-height: 1.2; }
         .card-price { font-size: 14px; color: #666; font-weight: 600; }
         
-        /* Админ-стили */
-        .admin-badge { position: absolute; top: 5px; right: 5px; background: var(--red); color: #fff; padding: 5px 10px; border-radius: 10px; font-size: 10px; font-weight: bold; display: none; z-index: 10; cursor: pointer; }
-        .admin-mode .admin-badge { display: block; }
-        .admin-controls { display: none; padding: 10px; background: #fff; border-top: 1px solid #eee; position: fixed; bottom: 0; width: 100%; box-sizing: border-box; z-index: 2000; }
-        .admin-mode .admin-controls { display: flex; gap: 10px; }
-        .btn-red { background: var(--red); color: #fff; border: none; padding: 12px; border-radius: 12px; font-weight: bold; flex: 1; }
-
+        /* Модальные окна */
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; z-index: 1000; align-items: flex-end; }
         .modal-content { background: #fff; width: 100%; border-radius: 30px 30px 0 0; padding: 25px; box-sizing: border-box; max-height: 90vh; overflow-y: auto; }
         .option-group { margin-bottom: 20px; }
@@ -38,11 +33,13 @@
         
         .live-price-bar { background: var(--accent); color: #fff; padding: 18px; border-radius: 16px; display: flex; justify-content: space-between; width: 100%; border: none; font-weight: 700; font-size: 16px; margin-top: 10px; }
         input { width: 100%; padding: 15px; background: var(--gray); border: none; border-radius: 12px; font-size: 16px; margin-bottom: 12px; box-sizing: border-box; outline: none; }
+
+        #admin-panel { display: none; position: fixed; bottom: 20px; left: 10px; right: 10px; background: var(--red); color: white; padding: 15px; border-radius: 15px; text-align: center; font-weight: bold; z-index: 2000; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
     </style>
 </head>
-<body id="main-body">
+<body>
 
-<div class="header" id="admin-trigger">URBAN LUNCH</div>
+<div class="header" id="main-title">URBAN LUNCH</div>
 
 <div class="tabs">
     <div class="tab active" onclick="filterCat(event, 'coffee')">Кофе</div>
@@ -55,10 +52,7 @@
 
 <div id="app" class="grid"></div>
 
-<div class="admin-controls">
-    <button class="btn-red" onclick="deleteSelected()">Удалить выбранные</button>
-    <button style="border:none; background:var(--gray); border-radius:12px; padding:12px; font-weight:600" onclick="exitAdminMode()">Выход</button>
-</div>
+<div id="admin-panel" onclick="deleteSelected()">Удалить выбранные (<span id="del-count">0</span>)</div>
 
 <div class="modal" id="opt-modal">
     <div class="modal-content">
@@ -75,8 +69,14 @@
             <div class="option-list" id="m-sizes"></div>
         </div>
         <div id="coffee-extras">
-            <div class="option-group"><b>Альтернативное молоко</b><div class="option-list" id="m-milk"></div></div>
-            <div class="option-group"><b>Добавить сироп</b><div class="option-list" id="m-syrups"></div></div>
+            <div class="option-group">
+                <b>Альтернативное молоко</b>
+                <div class="option-list" id="m-milk"></div>
+            </div>
+            <div class="option-group">
+                <b>Добавить сироп</b>
+                <div class="option-list" id="m-syrups"></div>
+            </div>
         </div>
         <button class="live-price-bar" onclick="confirmItem()">
             <span>Добавить</span><span id="live-price">0 ₽</span>
@@ -103,7 +103,6 @@
     tg.expand();
     const IMG_BASE = "https://raw.githubusercontent.com/stejlovv-afk/menu/main/";
 
-    // Основной массив меню (теперь let, чтобы можно было удалять)
     let menu = [
         { id: 1, cat: 'coffee', name: "Капучино", img: "kapuchino-min.jpg", sizes: {250:190, 350:230, 450:270} },
         { id: 2, cat: 'coffee', name: "Латте", img: "latte-min.jpg", sizes: {250:190, 350:230, 450:270} },
@@ -166,54 +165,29 @@
     const syrups = ["Фисташка", "Лесной орех", "Кокос", "Миндаль", "Лаванда", "Малина", "Соленая карамель", "Карамель"];
 
     let cart = [], currentCat = 'coffee', activeItem = null;
-    let isAdmin = false, selectedForDelete = [];
     let selSize = null, selMilk = null, selSyrup = null, selTemp = null;
+    
+    // Переменные админа
+    let isAdmin = false;
+    let selectedForDelete = [];
+    let titleTimer;
 
-    /* ЛОГИКА АДМИНА */
-    let timer;
-    const trigger = document.getElementById('admin-trigger');
-    trigger.addEventListener('touchstart', () => timer = setTimeout(askAdmin, 2000));
-    trigger.addEventListener('touchend', () => clearTimeout(timer));
+    // Секретный вход для админа
+    const titleEl = document.getElementById('main-title');
+    titleEl.addEventListener('touchstart', () => {
+        titleTimer = setTimeout(() => {
+            let pass = prompt("Введите пароль:");
+            if(pass === "7654") {
+                isAdmin = true;
+                document.getElementById('admin-panel').style.display = 'block';
+                tg.HapticFeedback.notificationOccurred('success');
+                alert("Режим администратора включен!");
+                render();
+            }
+        }, 2000);
+    });
+    titleEl.addEventListener('touchend', () => clearTimeout(titleTimer));
 
-    function askAdmin() {
-        const p = prompt("Введите пароль администратора:");
-        if(p === '7654') {
-            isAdmin = true;
-            document.body.classList.add('admin-mode');
-            tg.showAlert("Режим администратора активирован!");
-            render();
-        } else if(p !== null) {
-            tg.showAlert("Неверный пароль!");
-        }
-    }
-
-    function toggleSelect(id) {
-        if(!isAdmin) return;
-        const idx = selectedForDelete.indexOf(id);
-        if(idx > -1) selectedForDelete.splice(idx, 1);
-        else selectedForDelete.push(id);
-        render();
-    }
-
-    function deleteSelected() {
-        if(selectedForDelete.length === 0) return;
-        if(confirm(`Удалить ${selectedForDelete.length} поз.?`)) {
-            menu = menu.filter(item => !selectedForDelete.includes(item.id));
-            selectedForDelete = [];
-            render();
-            // Отправка данных боту, чтобы он обновил базу (если нужно)
-            tg.sendData(JSON.stringify({type: 'admin_delete', ids: selectedForDelete}));
-        }
-    }
-
-    function exitAdminMode() {
-        isAdmin = false;
-        document.body.classList.remove('admin-mode');
-        selectedForDelete = [];
-        render();
-    }
-
-    /* ОСНОВНАЯ ЛОГИКА */
     function filterCat(e, cat) {
         currentCat = cat;
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -224,21 +198,36 @@
     function render() {
         const app = document.getElementById('app');
         const items = menu.filter(i => i.cat === currentCat);
-        app.innerHTML = items.map(i => `
-            <div class="card" onclick="${isAdmin ? `toggleSelect(${i.id})` : `itemClick(${i.id})`}" style="${selectedForDelete.includes(i.id) ? 'border-color:var(--red); background:#fff5f5' : ''}">
-                <div class="admin-badge">${selectedForDelete.includes(i.id) ? 'ОТМЕЧЕНО' : 'УДАЛИТЬ'}</div>
-                <img src="${IMG_BASE + i.img}" class="card-img" onerror="this.src='https://via.placeholder.com/150?text=Wait+Photo'">
-                <div class="card-name">${i.name}</div>
-                <div class="card-price">${i.price ? i.price+' ₽' : 'от '+Object.values(i.sizes)[0]+' ₽'}</div>
-            </div>
-        `).join('');
+        app.innerHTML = items.map(i => {
+            const isSel = selectedForDelete.includes(i.id);
+            return `
+                <div class="card ${isSel ? 'selected-del' : ''}" onclick="itemClick(${i.id})">
+                    <img src="${IMG_BASE + i.img}" class="card-img" onerror="this.src='https://via.placeholder.com/150?text=Wait+Photo'">
+                    <div class="card-name">${i.name}</div>
+                    <div class="card-price">${i.price ? i.price+' ₽' : 'от '+Object.values(i.sizes)[0]+' ₽'}</div>
+                </div>
+            `;
+        }).join('');
     }
 
     function itemClick(id) {
+        // Если админ - выбираем для удаления
+        if(isAdmin) {
+            if(selectedForDelete.includes(id)) {
+                selectedForDelete = selectedForDelete.filter(x => x !== id);
+            } else {
+                selectedForDelete.push(id);
+            }
+            document.getElementById('del-count').innerText = selectedForDelete.length;
+            render();
+            return;
+        }
+
         activeItem = menu.find(x => x.id === id);
         selSize = null; selMilk = null; selSyrup = null; selTemp = null;
         document.getElementById('m-title').innerText = activeItem.name;
-        document.getElementById('temp-group').style.display = (activeItem.cat === 'food' || activeItem.cat === 'drinks') ? 'none' : 'block';
+        document.getElementById('temp-group').style.display = (activeItem.cat === 'food') ? 'none' : 'block';
+        document.querySelectorAll('#temp-group .opt-btn').forEach(b => b.classList.remove('active'));
         
         if(!activeItem.sizes) {
             document.getElementById('size-group').style.display = 'none';
@@ -253,6 +242,16 @@
             updateLivePrice();
         }
         document.getElementById('opt-modal').style.display = 'flex';
+    }
+
+    function deleteSelected() {
+        if(selectedForDelete.length === 0) return;
+        if(confirm(`Удалить выбранные товары (${selectedForDelete.length})?`)) {
+            tg.sendData(JSON.stringify({
+                type: 'admin_delete',
+                ids: selectedForDelete
+            }));
+        }
     }
 
     function setTemp(el, t) {
@@ -291,7 +290,7 @@
     }
 
     function confirmItem() {
-        if(activeItem.cat !== 'food' && activeItem.cat !== 'drinks' && !selTemp) return tg.showAlert("Выберите температуру!");
+        if(activeItem.cat !== 'food' && !selTemp) return tg.showAlert("Выберите температуру!");
         if(activeItem.sizes && !selSize) return tg.showAlert("Выберите объем!");
         
         let p = activeItem.sizes ? parseInt(document.getElementById('live-price').innerText) : activeItem.price;
@@ -306,7 +305,7 @@
 
     function updateMainBtn() {
         const total = cart.reduce((s,i) => s + i.price, 0);
-        if(cart.length > 0 && !isAdmin) {
+        if(cart.length > 0) {
             tg.MainButton.setText(`ОФОРМИТЬ (${total} ₽)`).show();
         } else {
             tg.MainButton.hide();
