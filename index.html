@@ -9,51 +9,82 @@
         :root { --bg: #ffffff; --text: #1a1a1a; --accent: #000000; --gray: #f5f5f7; --red: #ff3b30; }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 100px; -webkit-tap-highlight-color: transparent; }
         .header { text-align: center; padding: 20px; font-weight: 900; font-size: 22px; border-bottom: 1px solid #eee; }
-        .tabs { display: flex; overflow-x: auto; padding: 12px; gap: 8px; sticky: top; background: #fff; z-index: 100; }
+        .tabs { display: flex; overflow-x: auto; padding: 12px; gap: 8px; position: sticky; top: 0; background: #fff; z-index: 100; border-bottom: 1px solid #f0f0f0; }
         .tabs::-webkit-scrollbar { display: none; }
         .tab { padding: 10px 18px; background: var(--gray); border-radius: 25px; white-space: nowrap; font-size: 14px; font-weight: 600; cursor: pointer; }
         .tab.active { background: var(--accent); color: #fff; }
-
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; }
         .card { background: #fff; border-radius: 20px; border: 1px solid #f0f0f0; padding: 10px; transition: 0.2s; overflow: hidden; }
         .card.selected-to-hide { border: 2px solid var(--red); background: #fff5f5; }
-        
-        /* Стили для фото */
         .card-img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 15px; margin-bottom: 10px; background: var(--gray); }
-        
-        .card-name { font-weight: 700; font-size: 14px; margin-bottom: 4px; height: 34px; overflow: hidden; }
+        .card-name { font-weight: 700; font-size: 14px; margin-bottom: 4px; height: 34px; overflow: hidden; line-height: 1.2; }
         .card-price { font-size: 14px; color: #666; font-weight: 600; }
-
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; z-index: 1000; align-items: flex-end; }
         .modal-content { background: #fff; width: 100%; border-radius: 30px 30px 0 0; padding: 25px; box-sizing: border-box; max-height: 90vh; overflow-y: auto; }
         .option-group { margin-bottom: 20px; }
+        .option-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
         .opt-btn { padding: 10px 14px; border: 1.5px solid #eee; border-radius: 12px; font-size: 13px; font-weight: 600; cursor: pointer; background: #fff; }
         .opt-btn.active { border-color: var(--accent); background: var(--accent); color: #fff; }
-        .live-price-bar { background: var(--accent); color: #fff; padding: 18px; border-radius: 16px; display: flex; justify-content: space-between; width: 100%; border: none; font-weight: 700; font-size: 16px; }
-        input { width: 100%; padding: 15px; background: var(--gray); border: none; border-radius: 12px; font-size: 16px; margin-bottom: 10px; box-sizing: border-box; }
+        .live-price-bar { background: var(--accent); color: #fff; padding: 18px; border-radius: 16px; display: flex; justify-content: space-between; width: 100%; border: none; font-weight: 700; font-size: 16px; margin-top: 10px; }
+        input { width: 100%; padding: 15px; background: var(--gray); border: none; border-radius: 12px; font-size: 16px; margin-bottom: 12px; box-sizing: border-box; outline: none; }
     </style>
 </head>
 <body>
 
-<div id="admin-panel" onclick="saveAdminChanges()" style="position:fixed;top:0;width:100%;background:red;color:#fff;padding:10px;text-align:center;display:none;z-index:2000;">АДМИН: СОХРАНИТЬ</div>
+<div id="admin-panel" onclick="saveAdminChanges()" style="position:fixed;top:0;width:100%;background:red;color:#fff;padding:12px;text-align:center;display:none;z-index:2000;font-weight:bold;">АДМИН: СОХРАНИТЬ</div>
 <div class="header" id="main-header">URBAN LUNCH</div>
 
 <div class="tabs">
     <div class="tab active" onclick="filterCat(event, 'coffee')">Кофе</div>
     <div class="tab" onclick="filterCat(event, 'tea')">Чай & Пунши</div>
-    <div class="tab" onclick="filterCat(event, 'ice')">Холодные</div>
+    <div class="tab" onclick="filterCat(event, 'ice')">Айс-напитки</div>
     <div class="tab" onclick="filterCat(event, 'food')">Сладости</div>
     <div class="tab" onclick="filterCat(event, 'drinks')">Газировка</div>
 </div>
 
 <div id="app" class="grid"></div>
 
-<div class="modal" id="opt-modal"><div class="modal-content"><h2 id="m-title"></h2><div class="option-group"><b>Объем</b><div class="option-list" id="m-sizes" style="display:flex;gap:8px;margin-top:10px;"></div></div><div class="option-group"><b>Молоко</b><div class="option-list" id="m-milk" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;"></div></div><div class="option-group"><b>Сироп</b><div class="option-list" id="m-syrups" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;"></div></div><button class="live-price-bar" onclick="confirmItem()"><span>Добавить</span><span id="live-price">0 ₽</span></button><button onclick="closeModal()" style="width:100%;border:none;background:none;margin-top:10px;color:#999;">Отмена</button></div></div>
-<div class="modal" id="checkout-modal"><div class="modal-content"><h2>Оформление</h2><input type="number" id="floor" placeholder="Этаж"><input type="text" id="office" placeholder="Офис"><button class="live-price-bar" onclick="finalSend()"><span>Оплатить</span><span id="final-total">0 ₽</span></button></div></div>
+<div class="modal" id="opt-modal">
+    <div class="modal-content">
+        <h2 id="m-title" style="margin:0 0 15px 0"></h2>
+        <div class="option-group">
+            <b>Выберите объем</b>
+            <div class="option-list" id="m-sizes"></div>
+        </div>
+        <div id="extra-features">
+            <div class="option-group">
+                <b>Альтернативное молоко</b>
+                <div class="option-list" id="m-milk"></div>
+            </div>
+            <div class="option-group">
+                <b>Добавить сироп</b>
+                <div class="option-list" id="m-syrups"></div>
+            </div>
+        </div>
+        <button class="live-price-bar" onclick="confirmItem()">
+            <span>Добавить</span><span id="live-price">0 ₽</span>
+        </button>
+        <button onclick="closeModal()" style="width:100%;border:none;background:none;margin-top:15px;color:#999;font-weight:600;">Отмена</button>
+    </div>
+</div>
+
+<div class="modal" id="checkout-modal">
+    <div class="modal-content">
+        <h2 style="margin:0 0 20px 0">Оформление заказа</h2>
+        <div id="checkout-list" style="margin-bottom:20px; border-bottom:1px solid #eee; padding-bottom:10px;"></div>
+        <input type="number" id="floor" placeholder="Ваш этаж" inputmode="numeric">
+        <input type="text" id="office" placeholder="Офис / Кабинет">
+        <button class="live-price-bar" onclick="finalSend()">
+            <span>Заказать доставку</span><span id="final-total">0 ₽</span>
+        </button>
+        <button onclick="closeCheckout()" style="width:100%;border:none;background:none;margin-top:15px;color:#999;font-weight:600;">Назад в меню</button>
+    </div>
+</div>
 
 <script>
     const tg = window.Telegram.WebApp;
-    const IMG_BASE = "https://raw.githubusercontent.com/stejlovv-afk/menu24/main/"; // Путь к твоим фото
+    tg.expand();
+    const IMG_BASE = "https://raw.githubusercontent.com/stejlovv-afk/menu24/main/";
 
     const menu = [
         { id: 1, cat: 'coffee', name: "Капучино", img: "kapuchino.jpg", sizes: {250:190, 350:230, 450:270} },
@@ -63,44 +94,149 @@
         { id: 5, cat: 'coffee', name: "Латте Халва", img: "lattehalva.jpg", sizes: {350:290, 450:350} },
         { id: 6, cat: 'coffee', name: "Латте Тыква", img: "lattetikva.jpg", sizes: {350:290, 450:350} },
         { id: 7, cat: 'coffee', name: "Раф Сникерс", img: "rafsnikers.jpg", sizes: {350:320, 450:380} },
+        { id: 8, cat: 'coffee', name: "Эспрессо 2", img: "эспрессо2.jpg", sizes: {30:110, 60:150} },
         
-        { id: 20, cat: 'tea', name: "Чай Черный", img: "teablack.jpg", sizes: {250:120, 450:180} },
-        { id: 21, cat: 'tea', name: "Чай Зеленый", img: "greentea.jpg", sizes: {250:120, 450:180} },
-        { id: 22, cat: 'tea', name: "Матча", img: "matcha.jpg", sizes: {250:180, 450:260} },
-        { id: 23, cat: 'tea', name: "Глинтвейн", img: "glintveinpunch.jpg", sizes: {350:230, 450:270} },
-        { id: 24, cat: 'tea', name: "Облепиховый пунш", img: "oblepihapunch.jpg", sizes: {350:230, 450:270} },
-        { id: 25, cat: 'tea', name: "Малиновый пунш", img: "malinapunsh.jpg", sizes: {350:230, 450:270} },
+        { id: 20, cat: 'tea', name: "Чай Черный", img: "teablack.jpg", sizes: {250:120, 350:150, 450:180} },
+        { id: 21, cat: 'tea', name: "Чай Зеленый", img: "greentea.jpg", sizes: {250:120, 350:150, 450:180} },
+        { id: 22, cat: 'tea', name: "Глинтвейн", img: "glintveinpunch.jpg", sizes: {350:230, 450:270} },
+        { id: 23, cat: 'tea', name: "Облепиховый пунш", img: "oblepihapunch.jpg", sizes: {350:230, 450:270} },
+        { id: 24, cat: 'tea', name: "Малиновый пунш", img: "malinapunsh.jpg", sizes: {350:230, 450:270} },
+
+        { id: 40, cat: 'ice', name: "Эспрессо Тоник", img: "granattonic.jpg", sizes: {250:250, 350:290} },
+        { id: 41, cat: 'ice', name: "Матча", img: "matcha.jpg", sizes: {250:180, 350:220, 450:260} },
 
         { id: 100, cat: 'food', name: "Bombbar Кокос", img: "bombbarcocos.jpg", price: 130 },
         { id: 101, cat: 'food', name: "Bombbar Фундук", img: "bombbarfunduk.jpg", price: 130 },
-        { id: 102, cat: 'food', name: "Snaqer Фундук", img: "snaqerfunduk.jpg", price: 130 },
-        { id: 103, cat: 'food', name: "Chika Банан", img: "chikabiscuitbanan.jpg", price: 170 },
+        { id: 102, cat: 'food', name: "Bombbar Малина", img: "bombbarmalina.jpg", price: 130 },
+        { id: 103, cat: 'food', name: "Snaqer Фундук", img: "snaqerfunduk.jpg", price: 130 },
+        { id: 104, cat: 'food', name: "Chika Смородина", img: "chikabiscuitblackcurrant.jpg", price: 170 },
+        { id: 105, cat: 'food', name: "Chika Банан", img: "chikabiscuitbanan.jpg", price: 170 },
 
         { id: 200, cat: 'drinks', name: "Cola", img: "colachernogo.jpg", price: 140 },
         { id: 201, cat: 'drinks', name: "Байкал", img: "baikalchernogo.jpg", price: 140 },
-        { id: 202, cat: 'drinks', name: "Вода", img: "negazcernogo.jpg", price: 70 }
+        { id: 202, cat: 'drinks', name: "Лимонад", img: "lemonchernogo.jpg", price: 140 },
+        { id: 203, cat: 'drinks', name: "Вода", img: "negazcernogo.jpg", price: 70 }
     ];
 
-    let cart = [], isAdmin = false, stopList = [], activeItem = null, selSize = null, selMilk = null, selSyrup = null;
+    const milks = ["Кокосовое", "Банановое", "Миндальное", "Безлактозное"];
+    const syrups = ["Фисташка", "Лесной орех", "Кокос", "Миндаль", "Красный апельсин", "Лаванда", "Клубника", "Имбирный пряник", "Персик", "Дыня", "Сливка", "Яблоко", "Лемонграсс", "Малина", "Попкорн", "Вишня", "Баблгам", "Соленая карамель", "Карамель", "Бурбон ваниль"];
+
+    let cart = [], isAdmin = false, currentCat = 'coffee', activeItem = null;
+    let selSize = null, selMilk = null, selSyrup = null;
+    const urlParams = new URLSearchParams(window.location.search);
+    let stopList = urlParams.get('stop') ? urlParams.get('stop').split(',').map(Number) : [];
+
+    function filterCat(e, cat) {
+        currentCat = cat;
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        e.target.classList.add('active');
+        render();
+    }
 
     function render() {
         const app = document.getElementById('app');
-        const items = menu.filter(i => i.cat === (window.currentCat || 'coffee'));
+        const items = isAdmin ? menu : menu.filter(i => i.cat === currentCat && !stopList.includes(i.id));
         app.innerHTML = items.map(i => `
             <div class="card ${isAdmin && stopList.includes(i.id) ? 'selected-to-hide' : ''}" onclick="itemClick(${i.id})">
-                <img src="${IMG_BASE + i.img}" class="card-img" onerror="this.src='https://via.placeholder.com/150'">
+                <img src="${IMG_BASE + encodeURIComponent(i.img)}" class="card-img" onerror="this.src='https://via.placeholder.com/150?text=Urban+Lunch'">
                 <div class="card-name">${i.name}</div>
                 <div class="card-price">${i.price ? i.price+' ₽' : 'от '+Object.values(i.sizes)[0]+' ₽'}</div>
             </div>
         `).join('');
     }
 
-    // Вставь сюда остальные функции (filterCat, itemClick, setSize, confirmItem, finalSend) 
-    // из моего ПРЕДЫДУЩЕГО сообщения. Они не изменились.
-    
-    // ... (логика кликов и отправки данных)
-    
-    window.currentCat = 'coffee';
+    function itemClick(id) {
+        if(isAdmin) {
+            stopList.includes(id) ? stopList = stopList.filter(x => x!==id) : stopList.push(id);
+            render(); return;
+        }
+        activeItem = menu.find(x => x.id === id);
+        if(!activeItem.sizes) {
+            cart.push({name: activeItem.name, price: activeItem.price});
+            updateMainBtn(); return;
+        }
+        selSize = null; selMilk = null; selSyrup = null;
+        document.getElementById('m-title').innerText = activeItem.name;
+        document.getElementById('m-sizes').innerHTML = Object.entries(activeItem.sizes).map(([s,p]) => `<div class="opt-btn" onclick="setSize(this,${s},${p})">${s}мл</div>`).join('');
+        document.getElementById('m-milk').innerHTML = milks.map(m => `<div class="opt-btn" onclick="setMilk(this,'${m}')">${m}</div>`).join('');
+        document.getElementById('m-syrups').innerHTML = syrups.map(s => `<div class="opt-btn" onclick="setSyrup(this,'${s}')">${s}</div>`).join('');
+        document.getElementById('opt-modal').style.display = 'flex';
+        updateLivePrice();
+    }
+
+    function setSize(el, s, p) {
+        selSize = {ml: s, price: p};
+        document.querySelectorAll('#m-sizes .opt-btn').forEach(b => b.classList.remove('active'));
+        el.classList.add('active');
+        updateLivePrice();
+    }
+
+    function setMilk(el, m) {
+        selMilk = (selMilk === m) ? null : m;
+        document.querySelectorAll('#m-milk .opt-btn').forEach(b => b.classList.remove('active'));
+        if(selMilk) el.classList.add('active');
+        updateLivePrice();
+    }
+
+    function setSyrup(el, s) {
+        selSyrup = (selSyrup === s) ? null : s;
+        document.querySelectorAll('#m-syrups .opt-btn').forEach(b => b.classList.remove('active'));
+        if(selSyrup) el.classList.add('active');
+        updateLivePrice();
+    }
+
+    function updateLivePrice() {
+        let p = selSize ? selSize.price : 0;
+        if(selSize && selMilk) p += (selSize.ml == 250 ? 70 : (selSize.ml == 350 ? 80 : 90));
+        if(selSize && selSyrup) p += (selSize.ml == 250 ? 30 : (selSize.ml == 350 ? 40 : 50));
+        document.getElementById('live-price').innerText = p + ' ₽';
+    }
+
+    function confirmItem() {
+        if(!selSize) return tg.showAlert("Выберите объем!");
+        let p = parseInt(document.getElementById('live-price').innerText);
+        let desc = `${activeItem.name} ${selSize.ml}мл` + (selMilk ? ` +${selMilk}` : '') + (selSyrup ? ` +${selSyrup}` : '');
+        cart.push({name: desc, price: p});
+        closeModal();
+        updateMainBtn();
+    }
+
+    function updateMainBtn() {
+        const total = cart.reduce((s,i) => s + i.price, 0);
+        tg.MainButton.setText(`ОФОРМИТЬ ЗАКАЗ (${total} ₽)`).show();
+    }
+
+    tg.MainButton.onClick(() => {
+        const total = cart.reduce((s,i) => s + i.price, 0);
+        document.getElementById('checkout-list').innerHTML = cart.map(i => `<div style="display:flex; justify-content:space-between; margin-bottom:8px;"><span>${i.name}</span><b>${i.price} ₽</b></div>`).join('');
+        document.getElementById('final-total').innerText = total + ' ₽';
+        document.getElementById('checkout-modal').style.display = 'flex';
+    });
+
+    function finalSend() {
+        const f = document.getElementById('floor').value, o = document.getElementById('office').value;
+        if(!f || !o) return tg.showAlert("Укажите этаж и офис!");
+        tg.sendData(JSON.stringify({
+            type: 'order',
+            items: cart.map(i => ({ label: i.name, amount: i.price * 100 })),
+            address: `Этаж: ${f}, Офис: ${o}`
+        }));
+    }
+
+    function closeModal() { document.getElementById('opt-modal').style.display = 'none'; }
+    function closeCheckout() { document.getElementById('checkout-modal').style.display = 'none'; }
+
+    let pTimer;
+    document.getElementById('main-header').addEventListener('touchstart', () => {
+        pTimer = setTimeout(() => { if(prompt("Пароль:") === "7654") { isAdmin = true; document.getElementById('admin-panel').style.display='block'; render(); } }, 2000);
+    });
+    document.getElementById('main-header').addEventListener('touchend', () => clearTimeout(pTimer));
+
+    function saveAdminChanges() {
+        tg.sendData(JSON.stringify({ type: 'admin_update', stop_list: stopList }));
+        tg.close();
+    }
+
     render();
 </script>
 </body>
