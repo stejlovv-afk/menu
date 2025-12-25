@@ -86,6 +86,7 @@
     tg.expand();
     const IMG_BASE = "https://raw.githubusercontent.com/stejlovv-afk/menu/main/";
 
+    // ВЕСЬ ВАШ СПИСОК ТОВАРОВ (БЕЗ ИЗМЕНЕНИЙ)
     let menu = [
         { id: 1, cat: 'coffee', name: "Капучино", img: "kapuchino-min.jpg", sizes: {250:190, 350:230, 450:270} },
         { id: 2, cat: 'coffee', name: "Латте", img: "latte-min.jpg", sizes: {250:190, 350:230, 450:270} },
@@ -177,7 +178,7 @@
         const items = menu.filter(i => i.cat === currentCat && (isAdmin || !stopList.includes(i.id)));
         app.innerHTML = items.map(i => {
             const isHidden = stopList.includes(i.id);
-            return `<div class="card ${isHidden ? 'hidden-item' : ''}" onclick="itemClick(${i.id})"><img src="${IMG_BASE + i.img}" class="card-img"><div class="card-name">${i.name} ${isHidden ? '🛑' : ''}</div><div class="card-price">${i.price ? i.price+' ₽' : 'от '+Object.values(i.sizes)[0]+' ₽'}</div></div>`;
+            return `<div class="card ${isHidden ? 'hidden-item' : ''}" onclick="itemClick(${i.id})"><img src="${IMG_BASE + i.img}" class="card-img" onerror="this.src='https://via.placeholder.com/150'"><div class="card-name">${i.name} ${isHidden ? '🛑' : ''}</div><div class="card-price">${i.price ? i.price+' ₽' : 'от '+Object.values(i.sizes)[0]+' ₽'}</div></div>`;
         }).join('');
     }
 
