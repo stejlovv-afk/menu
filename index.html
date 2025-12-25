@@ -13,7 +13,6 @@
         .card { background: #fff; border-radius: 20px; border: 1px solid #eee; padding: 12px; transition: 0.2s; position: relative; }
         .card.selected-to-hide { border: 2px solid #ff3b30; background: #fff0f0; }
         .img-placeholder { width: 100%; aspect-ratio: 1/1; background: var(--gray); border-radius: 15px; margin-bottom: 10px; }
-        .price-btn { background: var(--gray); border: none; border-radius: 12px; padding: 10px; width: 100%; font-weight: 700; cursor: pointer; }
         
         #admin-panel { position: fixed; top: 0; left: 0; width: 100%; background: #ff3b30; color: #fff; padding: 10px; text-align: center; display: none; z-index: 2000; font-weight: bold; }
         #cart-view { position: fixed; bottom: -100%; left: 0; width: 100%; background: #fff; border-radius: 25px 25px 0 0; padding: 20px; box-sizing: border-box; z-index: 1000; transition: 0.4s; box-shadow: 0 -10px 30px rgba(0,0,0,0.1); }
@@ -25,13 +24,13 @@
 </head>
 <body>
 
-<div id="admin-panel" onclick="saveAdminChanges()">РЕЖИМ АДМИНА: Нажмите сюда, чтобы СОХРАНИТЬ</div>
+<div id="admin-panel" onclick="saveAdminChanges()">РЕЖИМ АДМИНА: СОХРАНИТЬ (НАЖМИ ТУТ)</div>
 <div class="header" id="main-header">URBAN LUNCH</div>
 <div id="app" class="grid"></div>
 
 <div class="overlay" id="overlay" onclick="closeCart()"></div>
 <div id="cart-view">
-    <h3 style="margin-top:0">Оформление</h3>
+    <h3 style="margin-top:0">Ваш заказ</h3>
     <div id="cart-list"></div>
     <div style="margin: 15px 0;">
         <input type="number" id="floor" placeholder="Этаж" inputmode="numeric">
@@ -45,8 +44,11 @@
     const tg = window.Telegram.WebApp;
     tg.expand();
 
+    // Пытаемся получить стоп-лист из параметров ссылки (если бот его передал)
+    const urlParams = new URLSearchParams(window.location.search);
+    let stopList = urlParams.get('stop') ? urlParams.get('stop').split(',').map(Number) : [];
+
     let isAdmin = false;
-    let stopList = []; // Массив ID выключенных товаров
     const menu = [
         { id: 1, name: "Капучино", price: 190 },
         { id: 2, name: "Латте", price: 190 },
@@ -55,9 +57,10 @@
     ];
     let cart = [];
 
-    // Долгое нажатие для входа
+    // Долгое нажатие на заголовок для входа в админку
     let pressTimer;
-    document.getElementById('main-header').addEventListener('touchstart', () => {
+    const header = document.getElementById('main-header');
+    header.addEventListener('touchstart', () => {
         pressTimer = window.setTimeout(() => {
             if (prompt("Пароль:") === "7654") {
                 isAdmin = true;
@@ -66,11 +69,11 @@
             }
         }, 1500);
     });
-    document.getElementById('main-header').addEventListener('touchend', () => clearTimeout(pressTimer));
+    header.addEventListener('touchend', () => clearTimeout(pressTimer));
 
     function render() {
         const app = document.getElementById('app');
-        // Если не админ — фильтруем (скрываем) товары из стоп-листа
+        // Если не админ — полностью убираем товары из стоп-листа
         const visibleMenu = isAdmin ? menu : menu.filter(item => !stopList.includes(item.id));
         
         app.innerHTML = visibleMenu.map(item => {
@@ -81,7 +84,7 @@
                     <div class="img-placeholder"></div>
                     <div style="font-weight:600">${item.name}</div>
                     <div>${item.price} ₽</div>
-                    ${isAdmin ? `<div style="color:red; font-size:10px">${isHidden ? 'СКРЫТО' : 'ВИДИМО'}</div>` : ''}
+                    ${isAdmin ? `<div style="color:red; font-size:10px; font-weight:bold">${isHidden ? 'СКРЫТО' : 'ВИДИМО'}</div>` : ''}
                 </div>
             `;
         }).join('');
@@ -97,10 +100,11 @@
     }
 
     function saveAdminChanges() {
+        // Отправляем массив ID боту
         tg.sendData(JSON.stringify({ type: 'admin_update', stop_list: stopList }));
         isAdmin = false;
         document.getElementById('admin-panel').style.display = 'none';
-        render();
+        tg.close(); // Закрываем, чтобы обновилось при следующем открытии
     }
 
     function addToCart(id) {
