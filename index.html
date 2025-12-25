@@ -12,17 +12,17 @@
         .top-bar { display: flex; align-items: center; padding: 10px 15px; gap: 10px; }
         .cat-nav { display: flex; overflow-x: auto; padding: 5px 15px 15px; gap: 20px; scrollbar-width: none; }
         .cat-nav::-webkit-scrollbar { display: none; }
-        .cat-link { white-space: nowrap; font-size: 14px; font-weight: 500; color: var(--hint); cursor: pointer; transition: 0.2s; }
+        .cat-link { white-space: nowrap; font-size: 14px; font-weight: 500; color: var(--hint); cursor: pointer; }
         .cat-link.active { color: #000; border-bottom: 2px solid #000; padding-bottom: 2px; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px; }
         .card { display: flex; flex-direction: column; position: relative; }
-        .img-box { width: 100%; aspect-ratio: 1/1; background: #f9f9f9; border-radius: 18px; overflow: hidden; cursor: pointer; }
+        .img-box { width: 100%; aspect-ratio: 1/1; background: #f9f9f9; border-radius: 18px; overflow: hidden; }
         .img-box img { width: 100%; height: 100%; object-fit: cover; }
-        .card-info { padding: 8px 0; cursor: pointer; }
+        .card-info { padding: 8px 0; }
         .card-name { font-size: 14px; font-weight: 500; height: 34px; overflow: hidden; margin-bottom: 6px; }
         .price-tag { background: var(--btn-bg); border: none; border-radius: 12px; padding: 10px 12px; width: 100%; display: flex; justify-content: space-between; font-weight: 700; font-size: 14px; }
         #modal-overlay, #cart-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; z-index: 1000; backdrop-filter: blur(4px); }
-        #modal, #cart-view { position: fixed; bottom: -100%; left: 0; width: 100%; background: #fff; border-radius: 25px 25px 0 0; padding: 20px; box-sizing: border-box; z-index: 1001; transition: 0.3s cubic-bezier(0.25, 0.1, 0.25, 1); max-height: 85vh; overflow-y: auto; }
+        #modal, #cart-view { position: fixed; bottom: -100%; left: 0; width: 100%; background: #fff; border-radius: 25px 25px 0 0; padding: 20px; box-sizing: border-box; z-index: 1001; transition: 0.3s; max-height: 85vh; overflow-y: auto; }
         #modal.open, #cart-view.open { bottom: 0; }
         .label { font-size: 11px; font-weight: 800; text-transform: uppercase; color: #999; margin: 15px 0 8px; }
         .opts { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -45,7 +45,7 @@
 <div id="app" class="grid"></div>
 
 <div class="tab-bar">
-    <button class="tab active" onclick="switchTab('home')">🏠 Меню</button>
+    <button class="tab active" onclick="location.reload()">🏠 Меню</button>
     <button class="tab" onclick="openCart()">🛒 Корзина</button>
 </div>
 
@@ -57,7 +57,7 @@
     <h2 style="margin-top:0">Мой заказ</h2>
     <div id="cart-list"></div>
     <div id="cart-total" style="font-weight:bold; margin: 20px 0; text-align:right; font-size: 18px;"></div>
-    <button class="main-add-btn" onclick="sendOrder()">Оформить заказ</button>
+    <button class="main-add-btn" id="pay-btn" onclick="sendOrder()">Оформить заказ</button>
 </div>
 
 <script>
@@ -67,11 +67,11 @@
     const milks = { "Обычное": 0, "Банановое": 70, "Кокосовое": 70, "Миндальное": 70 };
     const menuData = [
         { category: "Кофе", items: [
-            { id: 1, name: "Капучино", image: "https://via.placeholder.com/150", prices: {"250мл": 190, "350мл": 230, "450мл": 270}, hasMilk: true },
-            { id: 2, name: "Латте", image: "https://via.placeholder.com/150", prices: {"250мл": 190, "350мл": 230, "450мл": 270}, hasMilk: true }
+            { id: 1, name: "Капучино", prices: {"250мл": 190, "350мл": 230, "450мл": 270}, hasMilk: true },
+            { id: 2, name: "Латте", prices: {"250мл": 190, "350мл": 230, "450мл": 270}, hasMilk: true }
         ]},
         { category: "Чай", items: [
-            { id: 8, name: "Чай Черный", image: "https://via.placeholder.com/150", prices: {"250мл": 120, "350мл": 150, "450мл": 180} }
+            { id: 8, name: "Чай Черный", prices: {"250мл": 120, "350мл": 150, "450мл": 180} }
         ]}
     ];
 
@@ -87,7 +87,7 @@
         const app = document.getElementById('app'); app.innerHTML = '';
         items.forEach(item => {
             const card = document.createElement('div'); card.className = 'card';
-            card.innerHTML = `<div class="img-box" onclick="openItem(${item.id})"><img src="${item.image}"></div>
+            card.innerHTML = `<div class="img-box" onclick="openItem(${item.id})"><img src="https://via.placeholder.com/150"></div>
                 <div class="card-info" onclick="openItem(${item.id})"><div class="card-name">${item.name}</div>
                 <button class="price-tag">${Object.values(item.prices)[0]} ₽ <span>+</span></button></div>`;
             app.appendChild(card);
@@ -129,23 +129,20 @@
 
     function openCart() {
         const list = document.getElementById('cart-list');
-        list.innerHTML = cart.map(i => `<div class="cart-item"><span>${i.item.name} (${i.size})</span><b>${i.finalPrice}₽</b></div>`).join('');
+        list.innerHTML = cart.map(i => `<div class="cart-item"><span>${i.item.name} (${i.size}${i.milk !== 'Обычное' ? ', ' + i.milk : ''})</span><b>${i.finalPrice}₽</b></div>`).join('');
         document.getElementById('cart-total').innerText = `Итого: ${cart.reduce((a,b)=>a+b.finalPrice,0)} ₽`;
         document.getElementById('cart-overlay').style.display = 'block'; document.getElementById('cart-view').classList.add('open');
     }
 
-    // ИСПРАВЛЕННАЯ ФУНКЦИЯ: ОТПРАВКА БЕЗ ПРЯМОГО IP
     window.sendOrder = () => {
         if (cart.length === 0) return;
-        const orderData = {
-            action: "invoice",
+        const data = {
             items: cart.map(i => ({
                 label: `${i.item.name} (${i.size}${i.milk !== 'Обычное' ? ', ' + i.milk : ''})`,
                 amount: i.finalPrice * 100
             }))
         };
-        tg.sendData(JSON.stringify(orderData));
-        tg.close();
+        tg.sendData(JSON.stringify(data)); // Отправляем данные боту
     };
 
     window.closeModal = () => { document.getElementById('modal').classList.remove('open'); setTimeout(()=>document.getElementById('modal-overlay').style.display='none',300); };
