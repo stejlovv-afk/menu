@@ -20,7 +20,6 @@
         .card-name { font-weight: 700; font-size: 13px; margin-bottom: 4px; height: 32px; overflow: hidden; line-height: 1.2; }
         .card-price { font-size: 14px; color: #666; font-weight: 600; }
         
-        /* Модальные окна */
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; z-index: 1000; align-items: flex-end; }
         .modal-content { background: #fff; width: 100%; border-radius: 30px 30px 0 0; padding: 25px; box-sizing: border-box; max-height: 90vh; overflow-y: auto; }
         .option-group { margin-bottom: 20px; }
@@ -52,7 +51,7 @@
 
 <div id="app" class="grid"></div>
 
-<div id="admin-panel" onclick="deleteSelected()">Удалить выбранные (<span id="del-count">0</span>)</div>
+<div id="admin-panel" onclick="deleteSelected()">Скрыть выбранные (<span id="del-count">0</span>)</div>
 
 <div class="modal" id="opt-modal">
     <div class="modal-content">
@@ -167,21 +166,21 @@
     let cart = [], currentCat = 'coffee', activeItem = null;
     let selSize = null, selMilk = null, selSyrup = null, selTemp = null;
     
-    // Переменные админа
-    let isAdmin = false;
-    let selectedForDelete = [];
-    let titleTimer;
+    let isAdmin = false, selectedForDelete = [], titleTimer;
 
-    // Секретный вход для админа
+    // Чтение стоп-листа из URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const stopListRaw = urlParams.get('stop') || "";
+    const stopList = stopListRaw.split(',').map(id => parseInt(id)).filter(id => !isNaN(id));
+
     const titleEl = document.getElementById('main-title');
     titleEl.addEventListener('touchstart', () => {
         titleTimer = setTimeout(() => {
-            let pass = prompt("Введите пароль:");
+            let pass = prompt("Пароль:");
             if(pass === "7654") {
                 isAdmin = true;
                 document.getElementById('admin-panel').style.display = 'block';
                 tg.HapticFeedback.notificationOccurred('success');
-                alert("Режим администратора включен!");
                 render();
             }
         }, 2000);
@@ -197,7 +196,9 @@
 
     function render() {
         const app = document.getElementById('app');
-        const items = menu.filter(i => i.cat === currentCat);
+        // ФИЛЬТРУЕМ: Убираем товары, если их ID есть в стоп-листе
+        const items = menu.filter(i => i.cat === currentCat && !stopList.includes(i.id));
+        
         app.innerHTML = items.map(i => {
             const isSel = selectedForDelete.includes(i.id);
             return `
@@ -211,7 +212,6 @@
     }
 
     function itemClick(id) {
-        // Если админ - выбираем для удаления
         if(isAdmin) {
             if(selectedForDelete.includes(id)) {
                 selectedForDelete = selectedForDelete.filter(x => x !== id);
@@ -246,7 +246,7 @@
 
     function deleteSelected() {
         if(selectedForDelete.length === 0) return;
-        if(confirm(`Удалить выбранные товары (${selectedForDelete.length})?`)) {
+        if(confirm(`Скрыть выбранные товары (${selectedForDelete.length})?`)) {
             tg.sendData(JSON.stringify({
                 type: 'admin_delete',
                 ids: selectedForDelete
@@ -254,100 +254,18 @@
         }
     }
 
-    function setTemp(el, t) {
-        selTemp = t;
-        document.querySelectorAll('#temp-group .opt-btn').forEach(b => b.classList.remove('active'));
-        el.classList.add('active');
-    }
-
-    function setSize(el, s, p) {
-        selSize = {ml: s, price: p};
-        document.querySelectorAll('#m-sizes .opt-btn').forEach(b => b.classList.remove('active'));
-        el.classList.add('active');
-        updateLivePrice();
-    }
-
-    function setMilk(el, m) {
-        selMilk = (selMilk === m) ? null : m;
-        document.querySelectorAll('#m-milk .opt-btn').forEach(b => b.classList.remove('active'));
-        if(selMilk) el.classList.add('active');
-        updateLivePrice();
-    }
-
-    function setSyrup(el, s) {
-        selSyrup = (selSyrup === s) ? null : s;
-        document.querySelectorAll('#m-syrups .opt-btn').forEach(b => b.classList.remove('active'));
-        if(selSyrup) el.classList.add('active');
-        updateLivePrice();
-    }
-
-    function updateLivePrice() {
-        if(!activeItem.sizes) return;
-        let p = selSize ? selSize.price : 0;
-        if(selSize && selMilk) p += (selSize.ml <= 250 ? 70 : (selSize.ml <= 350 ? 80 : 90));
-        if(selSize && selSyrup) p += (selSize.ml <= 250 ? 30 : (selSize.ml <= 350 ? 40 : 50));
-        document.getElementById('live-price').innerText = p + ' ₽';
-    }
-
-    function confirmItem() {
-        if(activeItem.cat !== 'food' && !selTemp) return tg.showAlert("Выберите температуру!");
-        if(activeItem.sizes && !selSize) return tg.showAlert("Выберите объем!");
-        
-        let p = activeItem.sizes ? parseInt(document.getElementById('live-price').innerText) : activeItem.price;
-        let desc = activeItem.name + (activeItem.sizes ? ` ${selSize.ml}мл` : '') + (selTemp ? ` (${selTemp})` : '');
-        if(selMilk) desc += ` +${selMilk}`;
-        if(selSyrup) desc += ` +${selSyrup}`;
-        
-        cart.push({name: desc, price: p});
-        closeModal();
-        updateMainBtn();
-    }
-
-    function updateMainBtn() {
-        const total = cart.reduce((s,i) => s + i.price, 0);
-        if(cart.length > 0) {
-            tg.MainButton.setText(`ОФОРМИТЬ (${total} ₽)`).show();
-        } else {
-            tg.MainButton.hide();
-        }
-    }
-
-    function removeFromCart(index) {
-        cart.splice(index, 1);
-        renderCheckout();
-        updateMainBtn();
-        if(cart.length === 0) closeCheckout();
-    }
-
-    function renderCheckout() {
-        const total = cart.reduce((s,i) => s + i.price, 0);
-        document.getElementById('checkout-list').innerHTML = cart.map((i, idx) => `
-            <div class="cart-item">
-                <div style="flex:1">
-                    <div style="font-size:14px; font-weight:600;">${i.name}</div>
-                    <div style="color:#666; font-size:13px;">${i.price} ₽</div>
-                </div>
-                <div class="delete-btn" onclick="removeFromCart(${idx})">✕</div>
-            </div>
-        `).join('');
-        document.getElementById('final-total').innerText = total + ' ₽';
-    }
-
-    tg.MainButton.onClick(() => {
-        renderCheckout();
-        document.getElementById('checkout-modal').style.display = 'flex';
-    });
-
-    function finalSend() {
-        const f = document.getElementById('floor').value, o = document.getElementById('office').value;
-        if(!f || !o) return tg.showAlert("Заполните адрес!");
-        tg.sendData(JSON.stringify({
-            type: 'order',
-            items: cart.map(i => ({ label: i.name, amount: i.price * 100 })),
-            address: `Этаж: ${f}, Офис: ${o}`
-        }));
-    }
-
+    // Остальные функции без изменений
+    function setTemp(el, t) { selTemp = t; document.querySelectorAll('#temp-group .opt-btn').forEach(b => b.classList.remove('active')); el.classList.add('active'); }
+    function setSize(el, s, p) { selSize = {ml: s, price: p}; document.querySelectorAll('#m-sizes .opt-btn').forEach(b => b.classList.remove('active')); el.classList.add('active'); updateLivePrice(); }
+    function setMilk(el, m) { selMilk = (selMilk === m) ? null : m; document.querySelectorAll('#m-milk .opt-btn').forEach(b => b.classList.remove('active')); if(selMilk) el.classList.add('active'); updateLivePrice(); }
+    function setSyrup(el, s) { selSyrup = (selSyrup === s) ? null : s; document.querySelectorAll('#m-syrups .opt-btn').forEach(b => b.classList.remove('active')); if(selSyrup) el.classList.add('active'); updateLivePrice(); }
+    function updateLivePrice() { if(!activeItem.sizes) return; let p = selSize ? selSize.price : 0; if(selSize && selMilk) p += (selSize.ml <= 250 ? 70 : (selSize.ml <= 350 ? 80 : 90)); if(selSize && selSyrup) p += (selSize.ml <= 250 ? 30 : (selSize.ml <= 350 ? 40 : 50)); document.getElementById('live-price').innerText = p + ' ₽'; }
+    function confirmItem() { if(activeItem.cat !== 'food' && !selTemp) return tg.showAlert("Выберите температуру!"); if(activeItem.sizes && !selSize) return tg.showAlert("Выберите объем!"); let p = activeItem.sizes ? parseInt(document.getElementById('live-price').innerText) : activeItem.price; let desc = activeItem.name + (activeItem.sizes ? ` ${selSize.ml}мл` : '') + (selTemp ? ` (${selTemp})` : ''); if(selMilk) desc += ` +${selMilk}`; if(selSyrup) desc += ` +${selSyrup}`; cart.push({name: desc, price: p}); closeModal(); updateMainBtn(); }
+    function updateMainBtn() { const total = cart.reduce((s,i) => s + i.price, 0); if(cart.length > 0) { tg.MainButton.setText(`ОФОРМИТЬ (${total} ₽)`).show(); } else { tg.MainButton.hide(); } }
+    function removeFromCart(index) { cart.splice(index, 1); renderCheckout(); updateMainBtn(); if(cart.length === 0) closeCheckout(); }
+    function renderCheckout() { const total = cart.reduce((s,i) => s + i.price, 0); document.getElementById('checkout-list').innerHTML = cart.map((i, idx) => `<div class="cart-item"><div style="flex:1"><div style="font-size:14px; font-weight:600;">${i.name}</div><div style="color:#666; font-size:13px;">${i.price} ₽</div></div><div class="delete-btn" onclick="removeFromCart(${idx})">✕</div></div>`).join(''); document.getElementById('final-total').innerText = total + ' ₽'; }
+    tg.MainButton.onClick(() => { renderCheckout(); document.getElementById('checkout-modal').style.display = 'flex'; });
+    function finalSend() { const f = document.getElementById('floor').value, o = document.getElementById('office').value; if(!f || !o) return tg.showAlert("Заполните адрес!"); tg.sendData(JSON.stringify({ type: 'order', items: cart.map(i => ({ label: i.name, amount: i.price * 100 })), address: `Этаж: ${f}, Офис: ${o}` })); }
     function closeModal() { document.getElementById('opt-modal').style.display = 'none'; }
     function closeCheckout() { document.getElementById('checkout-modal').style.display = 'none'; }
 
