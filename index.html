@@ -3,148 +3,267 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Urban Lunch</title>
+    <title>Urban Lunch Menu</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --bg: #ffffff; --text: #000000; --accent: #000000; --gray: #f2f2f7; }
+        :root { --bg: #ffffff; --text: #000000; --accent: #ff3b30; --gray: #f2f2f7; }
         body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 100px; }
-        .header { text-align: center; padding: 20px; font-weight: 900; font-size: 20px; border-bottom: 1px solid #f0f0f0; cursor: pointer; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px; }
-        .card { background: #fff; border-radius: 20px; border: 1px solid #eee; padding: 12px; transition: 0.2s; position: relative; display: flex; flex-direction: column; }
-        .card.selected-to-hide { border: 2px solid #ff3b30; background: #fff0f0; }
-        .img-placeholder { width: 100%; aspect-ratio: 1/1; background: var(--gray); border-radius: 15px; margin-bottom: 10px; }
+        .header { text-align: center; padding: 15px; font-weight: 900; font-size: 20px; border-bottom: 1px solid #eee; }
         
-        #admin-panel { position: fixed; top: 0; left: 0; width: 100%; background: #ff3b30; color: #fff; padding: 12px; text-align: center; display: none; z-index: 2000; font-weight: bold; cursor: pointer; }
-        #cart-view { position: fixed; bottom: -100%; left: 0; width: 100%; background: #fff; border-radius: 25px 25px 0 0; padding: 20px; box-sizing: border-box; z-index: 1000; transition: 0.4s; box-shadow: 0 -10px 30px rgba(0,0,0,0.1); }
-        #cart-view.open { bottom: 0; }
-        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; z-index: 999; }
-        input { width: 100%; padding: 12px; border: 1px solid #eee; border-radius: 10px; font-size: 16px; margin-bottom: 10px; box-sizing: border-box; outline: none; }
-        .main-btn { width: 100%; background: var(--accent); color: #fff; border: none; padding: 18px; border-radius: 15px; font-weight: 700; font-size: 16px; cursor: pointer; }
+        /* Категории */
+        .tabs { display: flex; overflow-x: auto; padding: 10px; gap: 10px; sticky: top; background: #fff; z-index: 10; }
+        .tab { padding: 8px 16px; background: var(--gray); border-radius: 20px; white-space: nowrap; font-size: 14px; font-weight: 600; cursor: pointer; }
+        .tab.active { background: var(--text); color: #fff; }
+
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; }
+        .card { background: #fff; border-radius: 18px; border: 1px solid #eee; padding: 10px; position: relative; }
+        .card.hidden { display: none; }
+        .card.selected-to-hide { border: 2px solid red; background: #fff0f0; }
+        .img-placeholder { width: 100%; aspect-ratio: 1/1; background: var(--gray); border-radius: 12px; margin-bottom: 8px; }
+        
+        /* Окно опций (Модалка) */
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; z-index: 2000; align-items: flex-end; }
+        .modal-content { background: #fff; width: 100%; border-radius: 20px 20px 0 0; padding: 20px; box-sizing: border-box; max-height: 85vh; overflow-y: auto; }
+        .option-group { margin-bottom: 15px; }
+        .option-title { font-weight: 800; font-size: 14px; margin-bottom: 8px; text-transform: uppercase; color: #888; }
+        .option-list { display: flex; flex-wrap: wrap; gap: 8px; }
+        .opt-btn { padding: 8px 12px; border: 1px solid #eee; border-radius: 10px; font-size: 13px; cursor: pointer; background: #fff; }
+        .opt-btn.active { border-color: var(--text); background: var(--text); color: #fff; }
+
+        #admin-panel { position: fixed; top: 0; width: 100%; background: red; color: #fff; padding: 10px; text-align: center; z-index: 3000; display: none; font-weight: bold; }
+        .cart-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; font-size: 14px; }
     </style>
 </head>
 <body>
 
-<div id="admin-panel" onclick="saveAdminChanges()">РЕЖИМ АДМИНА: СОХРАНИТЬ ИЗМЕНЕНИЯ</div>
+<div id="admin-panel" onclick="saveAdminChanges()">РЕЖИМ АДМИНА: СОХРАНИТЬ</div>
 <div class="header" id="main-header">URBAN LUNCH</div>
+
+<div class="tabs" id="tabs">
+    <div class="tab active" onclick="filterCat('coffee')">Кофе</div>
+    <div class="tab" onclick="filterCat('tea')">Чай & Пунши</div>
+    <div class="tab" onclick="filterCat('cold')">Холодные</div>
+    <div class="tab" onclick="filterCat('food')">Сладости</div>
+    <div class="tab" onclick="filterCat('drinks')">Напитки</div>
+</div>
+
 <div id="app" class="grid"></div>
 
-<div class="overlay" id="overlay" onclick="closeCart()"></div>
-<div id="cart-view">
-    <h3 style="margin-top:0">Ваш заказ</h3>
-    <div id="cart-list"></div>
-    <div style="margin: 15px 0;">
-        <input type="number" id="floor" placeholder="Этаж" inputmode="numeric">
-        <input type="text" id="office" placeholder="Офис">
+<div class="modal" id="modal">
+    <div class="modal-content">
+        <h2 id="m-title" style="margin-top:0">Напиток</h2>
+        
+        <div class="option-group">
+            <div class="option-title">Объем</div>
+            <div class="option-list" id="m-sizes"></div>
+        </div>
+
+        <div id="extra-options">
+            <div class="option-group">
+                <div class="option-title">Молоко альтернативное</div>
+                <div class="option-list" id="m-milk"></div>
+            </div>
+            <div class="option-group">
+                <div class="option-title">Сироп</div>
+                <div class="option-list" id="m-syrups"></div>
+            </div>
+            <div class="option-group">
+                <div class="option-title">Бесплатно</div>
+                <div class="option-list">
+                    <div class="opt-btn" onclick="toggleAddon('Sugar')">Сахар</div>
+                    <div class="opt-btn" onclick="toggleAddon('Cinnamon')">Корица</div>
+                </div>
+            </div>
+        </div>
+
+        <button class="main-btn" style="width:100%; padding:15px; background:#000; color:#fff; border:none; border-radius:12px; font-weight:bold;" onclick="confirmAdd()">Добавить в корзину</button>
+        <button onclick="closeModal()" style="width:100%; background:none; border:none; margin-top:10px; color:#888;">Отмена</button>
     </div>
-    <div id="total" style="text-align:right; margin-bottom: 10px; font-weight:800; font-size:20px;">0 ₽</div>
-    <button class="main-btn" onclick="sendOrder()">Заказать доставку</button>
 </div>
 
 <script>
     const tg = window.Telegram.WebApp;
     tg.expand();
 
-    // Загружаем стоп-лист из ссылки
     const urlParams = new URLSearchParams(window.location.search);
-    const stopParam = urlParams.get('stop');
-    let stopList = stopParam ? stopParam.split(',').map(Number) : [];
-
+    let stopList = urlParams.get('stop') ? urlParams.get('stop').split(',').map(Number) : [];
     let isAdmin = false;
+    let currentCat = 'coffee';
     let cart = [];
+    let activeItem = null;
+    let selectedSize = null;
+    let selectedMilk = null;
+    let selectedSyrup = null;
+    let addons = [];
 
     const menu = [
-        { id: 1, name: "Капучино", price: 190 },
-        { id: 2, name: "Латте", price: 190 },
-        { id: 3, name: "Американо", price: 150 },
-        { id: 4, name: "Чай Черный", price: 120 }
+        // КОФЕ
+        { id: 1, cat: 'coffee', name: "Капучино", sizes: {250: 190, 350: 230, 450: 270} },
+        { id: 2, cat: 'coffee', name: "Латте", sizes: {250: 190, 350: 230, 450: 270} },
+        { id: 3, cat: 'coffee', name: "Американо", sizes: {250: 180, 350: 220, 450: 260} },
+        { id: 4, cat: 'coffee', name: "Эспрессо (30/60мл)", sizes: {30: 110, 60: 150} },
+        { id: 5, cat: 'coffee', name: "Флат Уайт", sizes: {250: 220, 350: 260, 450: 360} },
+        { id: 6, cat: 'coffee', name: "Раф", sizes: {250: 210, 350: 250, 450: 290} },
+        { id: 7, cat: 'coffee', name: "Бамбл Теплый", sizes: {250: 270, 350: 270, 450: 300} },
+        // ЧАЙ
+        { id: 8, cat: 'tea', name: "Чай Черный", sizes: {250: 120, 450: 180} },
+        { id: 9, cat: 'tea', name: "Чай Зеленый", sizes: {250: 120, 450: 180} },
+        { id: 10, cat: 'tea', name: "Глинтвейн", sizes: {350: 230, 450: 270} },
+        { id: 11, cat: 'tea', name: "Облепиховый пунш", sizes: {350: 230, 450: 270} },
+        { id: 12, cat: 'tea', name: "Малиновый пунш", sizes: {350: 230, 450: 270} },
+        // СЛАДОСТИ
+        { id: 100, cat: 'food', name: "Bombbar Орех", price: 130 },
+        { id: 101, cat: 'food', name: "Snaqer Карамель", price: 130 },
+        { id: 102, cat: 'food', name: "Chika Biscuit Банан", price: 170 },
+        // НАПИТКИ
+        { id: 200, cat: 'drinks', name: "Черноголовка Кола", price: 140 },
+        { id: 201, cat: 'drinks', name: "Черноголовка Вода", price: 70 },
     ];
 
-    // Долгое нажатие для админа
+    const milks = [
+        { name: "Кокосовое", prices: {250:70, 350:80, 450:90} },
+        { name: "Банановое", prices: {250:70, 350:80, 450:90} },
+        { name: "Миндальное", prices: {250:70, 350:80, 450:90} },
+        { name: "Безлактозное", prices: {250:70, 350:80, 450:90} }
+    ];
+
+    const syrups = ["Фисташка", "Лесной орех", "Кокос", "Миндаль", "Лаванда", "Клубника", "Соленая карамель"];
+
+    function filterCat(c) {
+        currentCat = c;
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        event.target.classList.add('active');
+        render();
+    }
+
+    function render() {
+        const app = document.getElementById('app');
+        const items = isAdmin ? menu : menu.filter(i => i.cat === currentCat && !stopList.includes(i.id));
+        
+        app.innerHTML = items.map(i => `
+            <div class="card ${isAdmin && stopList.includes(i.id) ? 'selected-to-hide' : ''}" onclick="handleItemClick(${i.id})">
+                <div class="img-placeholder"></div>
+                <div style="font-weight:700; font-size:14px;">${i.name}</div>
+                <div style="font-size:13px; color:#666;">${i.price ? i.price + ' ₽' : 'от ' + Object.values(i.sizes)[0] + ' ₽'}</div>
+            </div>
+        `).join('');
+    }
+
+    function handleItemClick(id) {
+        if(isAdmin) {
+            if(stopList.includes(id)) stopList = stopList.filter(x => x !== id);
+            else stopList.push(id);
+            render();
+            return;
+        }
+        
+        const item = menu.find(x => x.id === id);
+        if(!item.sizes) { // Если товар без выбора (еда/газировка)
+            cart.push({ name: item.name, price: item.price });
+            updateMainBtn();
+            return;
+        }
+
+        activeItem = item;
+        selectedSize = null; selectedMilk = null; selectedSyrup = null; addons = [];
+        showModal();
+    }
+
+    function showModal() {
+        document.getElementById('modal').style.display = 'flex';
+        document.getElementById('m-title').innerText = activeItem.name;
+        
+        const sizeBox = document.getElementById('m-sizes');
+        sizeBox.innerHTML = Object.entries(activeItem.sizes).map(([s, p]) => 
+            `<div class="opt-btn" onclick="setSize('${s}', ${p})">${s}мл - ${p}₽</div>`
+        ).join('');
+
+        const milkBox = document.getElementById('m-milk');
+        milkBox.innerHTML = milks.map(m => `<div class="opt-btn" onclick="setMilk('${m.name}')">${m.name}</div>`).join('');
+
+        const syrupBox = document.getElementById('m-syrups');
+        syrupBox.innerHTML = syrups.map(s => `<div class="opt-btn" onclick="setSyrup('${s}')">${s}</div>`).join('');
+    }
+
+    function setSize(s, p) {
+        selectedSize = { ml: s, price: p };
+        document.querySelectorAll('#m-sizes .opt-btn').forEach(b => b.classList.remove('active'));
+        event.target.classList.add('active');
+    }
+
+    function setMilk(m) {
+        selectedMilk = milks.find(x => x.name === m);
+        document.querySelectorAll('#m-milk .opt-btn').forEach(b => b.classList.remove('active'));
+        event.target.classList.add('active');
+    }
+
+    function setSyrup(s) {
+        selectedSyrup = s;
+        document.querySelectorAll('#m-syrups .opt-btn').forEach(b => b.classList.remove('active'));
+        event.target.classList.add('active');
+    }
+
+    function confirmAdd() {
+        if(!selectedSize) return alert("Выберите объем!");
+        
+        let finalPrice = selectedSize.price;
+        let desc = `${activeItem.name} (${selectedSize.ml}мл)`;
+        
+        if(selectedMilk) {
+            const milkPrice = selectedMilk.prices[selectedSize.ml] || 80;
+            finalPrice += milkPrice;
+            desc += ` + ${selectedMilk.name} молоко`;
+        }
+        
+        if(selectedSyrup) {
+            const syrupPrice = selectedSize.ml == 250 ? 30 : (selectedSize.ml == 350 ? 40 : 50);
+            finalPrice += syrupPrice;
+            desc += ` + сироп ${selectedSyrup}`;
+        }
+
+        cart.push({ name: desc, price: finalPrice });
+        updateMainBtn();
+        closeModal();
+    }
+
+    function updateMainBtn() {
+        const total = cart.reduce((s, i) => s + i.price, 0);
+        tg.MainButton.setText(`ОФОРМИТЬ ЗАКАЗ: ${total} ₽`).show();
+    }
+
+    function closeModal() { document.getElementById('modal').style.display = 'none'; }
+
+    // Админ логика
     let pressTimer;
-    const header = document.getElementById('main-header');
-    
-    header.addEventListener('touchstart', (e) => {
+    document.getElementById('main-header').addEventListener('touchstart', () => {
         pressTimer = window.setTimeout(() => {
-            const pass = prompt("Введите пароль:");
-            if (pass === "7654") {
+            if(prompt("Пароль:") === "7654") {
                 isAdmin = true;
                 document.getElementById('admin-panel').style.display = 'block';
                 render();
             }
-        }, 1500);
+        }, 2000);
     });
-
-    header.addEventListener('touchend', () => clearTimeout(pressTimer));
-
-    function render() {
-        const app = document.getElementById('app');
-        const visibleMenu = isAdmin ? menu : menu.filter(item => !stopList.includes(item.id));
-        
-        app.innerHTML = visibleMenu.map(item => {
-            const isHidden = stopList.includes(item.id);
-            return `
-                <div class="card ${isAdmin && isHidden ? 'selected-to-hide' : ''}" 
-                     onclick="${isAdmin ? `toggleAdminSelection(${item.id})` : `addToCart(${item.id})`}">
-                    <div class="img-placeholder"></div>
-                    <div style="font-weight:600; margin-bottom:5px;">${item.name}</div>
-                    <div style="font-weight:bold; font-size:14px;">${item.price} ₽</div>
-                    ${isAdmin ? `<div style="color:red; font-size:10px; font-weight:bold; margin-top:5px;">${isHidden ? 'СКРЫТО' : 'ВИДИМО'}</div>` : ''}
-                </div>
-            `;
-        }).join('');
-    }
-
-    function toggleAdminSelection(id) {
-        if (stopList.includes(id)) {
-            stopList = stopList.filter(item => item !== id);
-        } else {
-            stopList.push(id);
-        }
-        render();
-    }
+    document.getElementById('main-header').addEventListener('touchend', () => clearTimeout(pressTimer));
 
     function saveAdminChanges() {
         tg.sendData(JSON.stringify({ type: 'admin_update', stop_list: stopList }));
-        isAdmin = false;
-        document.getElementById('admin-panel').style.display = 'none';
         tg.close();
     }
 
-    function addToCart(id) {
-        const product = menu.find(i => i.id === id);
-        cart.push(product);
-        const total = cart.reduce((sum, item) => sum + item.price, 0);
-        tg.MainButton.setText(`КОРЗИНА: ${total} ₽`).show();
-    }
-
     tg.MainButton.onClick(() => {
-        if (cart.length === 0) return;
-        document.getElementById('cart-list').innerHTML = cart.map(i => `
-            <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #eee;">
-                <span>${i.name}</span><b>${i.price} ₽</b>
-            </div>
-        `).join('');
-        document.getElementById('total').innerText = cart.reduce((a,b)=>a+b.price,0) + ' ₽';
-        document.getElementById('overlay').style.display = 'block';
-        document.getElementById('cart-view').classList.add('open');
-    });
+        // Здесь можно добавить окно подтверждения заказа с вводом этажа
+        const total = cart.reduce((s, i) => s + i.price, 0);
+        const floor = prompt("Ваш этаж:");
+        const office = prompt("Ваш офис/кабинет:");
+        if(!floor || !office) return;
 
-    function closeCart() {
-        document.getElementById('overlay').style.display = 'none';
-        document.getElementById('cart-view').classList.remove('open');
-    }
-
-    function sendOrder() {
-        const floor = document.getElementById('floor').value;
-        const office = document.getElementById('office').value;
-        if(!floor || !office) { alert("Укажите этаж и офис!"); return; }
-        
         tg.sendData(JSON.stringify({
             type: 'order',
             items: cart.map(i => ({ label: i.name, amount: i.price * 100 })),
             address: `Этаж: ${floor}, Офис: ${office}`
         }));
-    }
+    });
 
     render();
 </script>
