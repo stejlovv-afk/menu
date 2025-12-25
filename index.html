@@ -6,23 +6,22 @@
     <title>Urban Lunch</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --bg: #ffffff; --text: #000000; --hint: #8e8e93; --btn-bg: #f2f2f7; }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 100px; }
-        .header { position: sticky; top: 0; background: #fff; text-align: center; padding: 15px; font-weight: 900; border-bottom: 1px solid #eee; z-index: 10; }
+        :root { --bg: #ffffff; --text: #000000; --hint: #8e8e93; --accent: #000000; }
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 100px; -webkit-tap-highlight-color: transparent; }
+        .header { text-align: center; padding: 20px; font-weight: 900; font-size: 20px; border-bottom: 1px solid #f0f0f0; letter-spacing: 1px; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px; }
-        .card { background: #fff; border-radius: 15px; overflow: hidden; }
-        .img-box { width: 100%; aspect-ratio: 1/1; background: #eee; border-radius: 15px; }
-        .price-btn { background: var(--btn-bg); border: none; border-radius: 10px; padding: 10px; width: 100%; font-weight: 700; margin-top: 5px; cursor: pointer; }
+        .card { background: #fff; border-radius: 20px; border: 1px solid #eee; padding: 12px; display: flex; flex-direction: column; transition: 0.2s; }
+        .card:active { transform: scale(0.97); }
+        .img-placeholder { width: 100%; aspect-ratio: 1/1; background: #f5f5f7; border-radius: 15px; margin-bottom: 10px; }
+        .item-name { font-size: 14px; font-weight: 600; margin-bottom: 8px; height: 34px; overflow: hidden; }
+        .price-btn { background: #f2f2f7; border: none; border-radius: 12px; padding: 10px; width: 100%; font-weight: 700; font-size: 14px; cursor: pointer; display: flex; justify-content: space-between; }
         
-        #cart-view { position: fixed; bottom: -100%; left: 0; width: 100%; background: #fff; border-radius: 20px 20px 0 0; padding: 20px; box-sizing: border-box; z-index: 1000; transition: 0.3s; box-shadow: 0 -5px 20px rgba(0,0,0,0.1); }
+        #cart-view { position: fixed; bottom: -100%; left: 0; width: 100%; background: #fff; border-radius: 25px 25px 0 0; padding: 25px; box-sizing: border-box; z-index: 1000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 -10px 30px rgba(0,0,0,0.1); }
         #cart-view.open { bottom: 0; }
-        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; z-index: 999; }
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; z-index: 999; backdrop-filter: blur(2px); }
         
-        .main-btn { width: 100%; background: #000; color: #fff; border: none; padding: 18px; border-radius: 15px; font-weight: 700; font-size: 16px; cursor: pointer; }
-        .main-btn:active { transform: scale(0.98); opacity: 0.8; }
-        .tab-bar { position: fixed; bottom: 0; width: 100%; background: #fff; display: flex; padding: 10px 0 30px; border-top: 1px solid #eee; }
-        .tab { flex: 1; text-align: center; background: none; border: none; color: var(--hint); }
-        .cart-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .main-btn { width: 100%; background: var(--accent); color: #fff; border: none; padding: 20px; border-radius: 18px; font-weight: 700; font-size: 16px; margin-top: 15px; cursor: pointer; }
+        .cart-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f5f5f5; }
     </style>
 </head>
 <body>
@@ -30,27 +29,25 @@
 <div class="header">URBAN LUNCH</div>
 <div id="app" class="grid"></div>
 
-<div class="tab-bar">
-    <button class="tab" onclick="location.reload()">🏠 Меню</button>
-    <button class="tab" onclick="openCart()" style="color:#000; font-weight:700;">🛒 Корзина</button>
-</div>
-
 <div class="overlay" id="overlay" onclick="closeCart()"></div>
 <div id="cart-view">
-    <h2 style="margin-top:0">Ваш заказ</h2>
+    <h2 style="margin-top:0">Корзина</h2>
     <div id="cart-list"></div>
-    <div id="total" style="text-align:right; margin: 20px 0; font-weight:800; font-size:20px;"></div>
+    <div id="total" style="text-align:right; margin: 20px 0; font-weight:800; font-size:22px;">0 ₽</div>
     <button class="main-btn" onclick="sendOrder()">Оформить заказ</button>
 </div>
 
 <script>
     const tg = window.Telegram.WebApp;
     tg.expand();
+    tg.MainButton.setParams({color: '#000000', text_color: '#ffffff'});
 
     const menu = [
         { id: 1, name: "Капучино", price: 190 },
         { id: 2, name: "Латте", price: 190 },
-        { id: 3, name: "Американо", price: 150 }
+        { id: 3, name: "Американо", price: 150 },
+        { id: 4, name: "Эспрессо", price: 110 },
+        { id: 5, name: "Чай Черный", price: 120 }
     ];
 
     let cart = [];
@@ -58,12 +55,13 @@
     function render() {
         const app = document.getElementById('app');
         app.innerHTML = menu.map(item => `
-            <div class="card">
-                <div class="img-box"></div>
-                <div style="padding:10px 0">
-                    <div style="font-size:14px; font-weight:500">${item.name}</div>
-                    <button class="price-btn" onclick="addToCart(${item.id})">${item.price} ₽ +</button>
-                </div>
+            <div class="card" onclick="addToCart(${item.id})">
+                <div class="img-placeholder"></div>
+                <div class="item-name">${item.name}</div>
+                <button class="price-btn">
+                    <span>${item.price} ₽</span>
+                    <span>+</span>
+                </button>
             </div>
         `).join('');
     }
@@ -71,19 +69,24 @@
     function addToCart(id) {
         const item = menu.find(i => i.id === id);
         cart.push(item);
-        tg.MainButton.setText(`В КОРЗИНЕ: ${cart.reduce((a,b)=>a+b.price,0)} ₽`).show();
-        tg.MainButton.onClick(openCart);
+        const total = cart.reduce((a,b) => a + b.price, 0);
+        tg.MainButton.setText(`ПОСМОТРЕТЬ КОРЗИНУ: ${total} ₽`).show();
     }
+
+    tg.MainButton.onClick(() => {
+        openCart();
+    });
 
     function openCart() {
         const list = document.getElementById('cart-list');
-        list.innerHTML = cart.map(i => `
+        list.innerHTML = cart.map((i, index) => `
             <div class="cart-item">
                 <span>${i.name}</span>
                 <b>${i.price} ₽</b>
             </div>
         `).join('');
-        document.getElementById('total').innerText = cart.reduce((a,b)=>a+b.price,0) + ' ₽';
+        const total = cart.reduce((a,b) => a + b.price, 0);
+        document.getElementById('total').innerText = total + ' ₽';
         document.getElementById('overlay').style.display = 'block';
         document.getElementById('cart-view').classList.add('open');
     }
@@ -93,19 +96,12 @@
         document.getElementById('cart-view').classList.remove('open');
     }
 
-    // ТА САМАЯ ФУНКЦИЯ
     function sendOrder() {
         if (cart.length === 0) return;
-        
         const data = {
-            items: cart.map(i => ({
-                label: i.name,
-                amount: i.price * 100
-            }))
+            items: cart.map(i => ({ label: i.name, amount: i.price * 100 }))
         };
-        
-        // Отправляем строку боту
-        tg.sendData(JSON.stringify(data));
+        tg.sendData(JSON.stringify(data)); 
     }
 
     render();
