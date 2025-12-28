@@ -1,275 +1,67 @@
 <!DOCTYPE html>
 <html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Urban Lunch</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              surface: '#ffffff',
+              background: '#f8f9fa',
+              primary: '#111111',
+              secondary: '#888888',
+              accent: '#007aff',
+            },
+            fontFamily: {
+              sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            },
+            boxShadow: {
+              'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+              'glow': '0 0 15px rgba(0, 0, 0, 0.1)',
+            }
+          }
+        }
+      }
+    </script>
     <style>
-        :root { --bg: #ffffff; --text: #1a1a1a; --accent: #000000; --gray: #f5f5f7; --red: #ff3b30; --blue: #007aff; }
-        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 100px; -webkit-tap-highlight-color: transparent; }
-        .header { text-align: center; padding: 20px; font-weight: 900; font-size: 22px; border-bottom: 1px solid #eee; user-select: none; }
-        .tabs { display: flex; overflow-x: auto; padding: 12px; gap: 8px; position: sticky; top: 0; background: #fff; z-index: 100; border-bottom: 1px solid #f0f0f0; }
-        .tabs::-webkit-scrollbar { display: none; }
-        .tab { padding: 10px 18px; background: var(--gray); border-radius: 25px; white-space: nowrap; font-size: 13px; font-weight: 600; cursor: pointer; }
-        .tab.active { background: var(--accent); color: #fff; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; }
-        .card { background: #fff; border-radius: 20px; border: 1px solid #f0f0f0; padding: 10px; position: relative; }
-        .card.hidden-item { opacity: 0.35; filter: grayscale(1); border: 1px dashed #ccc; }
-        .card-img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 15px; background: var(--gray); }
-        .card-name { font-weight: 700; font-size: 13px; margin: 8px 0 4px; height: 32px; overflow: hidden; line-height: 1.2; }
-        .card-price { font-size: 14px; color: #666; font-weight: 600; }
-        
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; display: flex; justify-content: space-around; padding: 10px 0 25px; border-top: 1px solid #eee; z-index: 1000; }
-        .nav-item { text-align: center; font-size: 11px; font-weight: 600; color: #999; cursor: pointer; flex: 1; }
-        .nav-item.active { color: var(--accent); }
+      body {
+        -webkit-tap-highlight-color: transparent;
+        background-color: #f8f9fa;
+        font-family: 'Inter', sans-serif;
+      }
+      @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+      @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+      @keyframes scaleIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; z-index: 2000; align-items: flex-end; }
-        .modal-content { background: #fff; width: 100%; border-radius: 30px 30px 0 0; padding: 25px; box-sizing: border-box; max-height: 90vh; overflow-y: auto; }
-        .option-group { margin-bottom: 18px; }
-        .option-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
-        .opt-btn { padding: 9px 13px; border: 1.5px solid #eee; border-radius: 12px; font-size: 12px; font-weight: 600; background: #fff; }
-        .opt-btn.active { border-color: var(--accent); background: var(--accent); color: #fff; }
-        .live-price-bar { background: var(--accent); color: #fff; padding: 18px; border-radius: 16px; display: flex; justify-content: space-between; width: 100%; border: none; font-weight: 700; font-size: 16px; margin-top: 10px; cursor: pointer; }
+      .animate-slide-up { animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+      .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
+      .animate-scale-in { animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+      
+      .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
-</head>
-<body>
-
-<div class="header" id="main-title">URBAN LUNCH</div>
-
-<div class="tabs">
-    <div class="tab active" onclick="filterCat(event, 'coffee')">Кофе</div>
-    <div class="tab" onclick="filterCat(event, 'tea')">Чай</div>
-    <div class="tab" onclick="filterCat(event, 'punsh')">Пунши</div>
-    <div class="tab" onclick="filterCat(event, 'seasonal')">Сезонные</div>
-    <div class="tab" onclick="filterCat(event, 'ice')">Холодные</div>
-    <div class="tab" onclick="filterCat(event, 'food')">Сладости</div>
-    <div class="tab" onclick="filterCat(event, 'drinks')">Газировка</div>
-</div>
-
-<div id="app" class="grid"></div>
-<div id="admin-panel" style="display:none; padding:10px;"><button style="width:100%; padding:15px; border-radius:12px; background:var(--blue); color:#fff; border:none;" onclick="saveAdminChanges()">✅ Сохранить Стоп-Лист</button></div>
-
-<div class="bottom-nav">
-    <div class="nav-item active" onclick="location.reload()"><span>☕</span><br>Меню</div>
-    <div class="nav-item" onclick="openCart()"><span>🛒</span><br>Корзина (<span id="cart-count">0</span>)</div>
-</div>
-
-<div class="modal" id="opt-modal">
-    <div class="modal-content">
-        <h2 id="m-title" style="margin:0 0 15px 0"></h2>
-        
-        <div id="temp-section" class="option-group" style="display:none;"><b>Температура</b>
-            <div class="option-list">
-                <div class="opt-btn" onclick="setOpt(this,'temp','Теплый')">Теплый 🌡</div>
-                <div class="opt-btn" onclick="setOpt(this,'temp','Холодный')">Холодный 🧊</div>
-            </div>
-        </div>
-
-        <div id="size-section" class="option-group"><b>Объем</b><div class="option-list" id="m-sizes"></div></div>
-        <div id="milk-section" class="option-group"><b>Молоко</b><div class="option-list" id="m-milk"></div></div>
-        
-        <div id="juice-section" class="option-group" style="display:none;"><b>Выбор сока</b>
-            <div class="option-list">
-                <div class="opt-btn" onclick="setOpt(this,'juice','Апельсиновый')">Апельсиновый</div>
-                <div class="opt-btn" onclick="setOpt(this,'juice','Вишневый')">Вишневый</div>
-            </div>
-        </div>
-
-        <div id="syrup-section" class="option-group"><b>Сироп</b><div class="option-list" id="m-syrups"></div></div>
-
-        <div id="extras-section" class="option-group"><b>Добавки</b>
-            <div class="option-list"><div class="opt-btn" onclick="setOpt(this,'cinnamon','Корица')">Корица</div></div>
-            <div style="margin-top:10px;"><b>Сахар</b></div>
-            <div class="option-list">
-                <div class="opt-btn" onclick="setOpt(this,'sugar','5г')">5г</div>
-                <div class="opt-btn" onclick="setOpt(this,'sugar','10г')">10г</div>
-                <div class="opt-btn" onclick="setOpt(this,'sugar','15г')">15г</div>
-            </div>
-        </div>
-
-        <button class="live-price-bar" onclick="confirmItem()"><span>Добавить</span><span id="live-price">0 ₽</span></button>
-        <button onclick="closeModal()" style="width:100%;border:none;background:none;margin-top:15px;color:#999;">Отмена</button>
-    </div>
-</div>
-
-<div class="modal" id="checkout-modal">
-    <div class="modal-content">
-        <h2 style="display:flex; justify-content:space-between">Корзина <span onclick="cart=[] ; closeModal() ; updateCartCount()" style="font-size:12px; color:var(--red)">Очистить</span></h2>
-        <div id="checkout-list" style="margin-bottom:15px"></div>
-        <input type="number" id="floor" placeholder="Этаж" style="width:100%; padding:14px; margin-bottom:10px; border:1px solid #eee; border-radius:12px;">
-        <input type="text" id="office" placeholder="Офис / Кабинет" style="width:100%; padding:14px; margin-bottom:15px; border:1px solid #eee; border-radius:12px;">
-        <button class="live-price-bar" onclick="finalSend()"><span>Оформить заказ</span><span id="final-total">0 ₽</span></button>
-        <button onclick="closeModal()" style="width:100%;border:none;background:none;margin-top:15px;color:#999;">Закрыть</button>
-    </div>
-</div>
-
-<script>
-    const tg = window.Telegram.WebApp;
-    tg.MainButton.hide(); // Убираем синюю кнопку Telegram навсегда
-    const IMG_BASE = "https://raw.githubusercontent.com/stejlovv-afk/menu/main/";
-    
-    let menu = [
-        { id: 1, cat: 'coffee', name: "Капучино", sizes: {250:190, 350:230, 450:270}, img: "kapuchino-min.jpg" },
-        { id: 2, cat: 'coffee', name: "Латте", sizes: {250:190, 350:230, 450:270}, img: "latte-min.jpg" },
-        { id: 3, cat: 'coffee', name: "Эспрессо", sizes: {30:110, 60:150}, img: "espresso1-min.jpg", noMilk: true },
-        { id: 4, cat: 'coffee', name: "Американо", sizes: {250:180, 350:220, 450:260}, img: "americano-min.jpg", noMilk: true },
-        { id: 5, cat: 'coffee', name: "Флат Уайт", sizes: {250:220, 350:260, 450:360}, img: "kapuchino-min.jpg" },
-        { id: 6, cat: 'coffee', name: "Раф", sizes: {250:210, 350:250, 450:290}, img: "latte-min.jpg" },
-        { id: 7, cat: 'coffee', name: "Бамбл Теплый", sizes: {250:270, 350:270, 450:300}, img: "kapuchino-min.jpg", isBumble: true },
-        { id: 20, cat: 'tea', name: "Чай Черный", sizes: {350:120, 450:180}, img: "teablack-min.jpg" },
-        { id: 21, cat: 'tea', name: "Чай Зеленый", sizes: {350:120, 450:180}, img: "greentea-min.jpg" },
-        { id: 22, cat: 'tea', name: "Чай Каркаде", sizes: {350:120, 450:180}, img: "karkadetea-min.jpg" },
-        { id: 23, cat: 'tea', name: "Чай Зеленый Жасмин", sizes: {350:120, 450:180}, img: "greenjasmin-min.jpg" },
-        { id: 24, cat: 'tea', name: "Чай Травяной", sizes: {350:120, 450:180}, img: "travatea-min.jpg" },
-        { id: 25, cat: 'tea', name: "Матча", sizes: {250:180, 350:220, 450:260}, img: "matcha-min.jpg" },
-        { id: 26, cat: 'tea', name: "Какао", sizes: {250:180, 350:220, 450:260}, img: "kakao-min.jpg" },
-        { id: 27, cat: 'tea', name: "Пряный чай", sizes: {250:240, 350:280, 450:320}, img: "kakao-min.jpg" },
-        { id: 28, cat: 'tea', name: "Горячий шоколад", price: 180, img: "kakao-min.jpg" },
-        { id: 29, cat: 'tea', name: "Глинтвейн", sizes: {350:230, 450:270}, img: "glintveinpunch-min.jpg" },
-        { id: 50, cat: 'punsh', name: "Облепиховый пунш", sizes: {350:230, 450:270}, img: "oblepihapunch-min.jpg" },
-        { id: 51, cat: 'punsh', name: "Малиновый пунш", sizes: {350:230, 450:270}, img: "malinapunsh-min.jpg" },
-        { id: 80, cat: 'seasonal', name: "Латте Халва", sizes: {350:290, 450:350}, img: "lattehalva-min.jpg", noSyrup: true },
-        { id: 81, cat: 'seasonal', name: "Латте Тыква", sizes: {350:290, 450:350}, img: "lattetikva-min.jpg", noSyrup: true },
-        { id: 82, cat: 'seasonal', name: "Раф Сникерс", sizes: {350:320, 450:380}, img: "rafsnikers-min.jpg", noSyrup: true },
-        { id: 83, cat: 'seasonal', name: "Латте Orange Christmas", sizes: {350:320, 450:380}, img: "latteorangecristmas-min.jpg", noSyrup: true },
-        { id: 60, cat: 'ice', name: "Айс Латте", sizes: {250:240, 350:280}, img: "latte-min.jpg" },
-        { id: 61, cat: 'ice', name: "Эспрессо Тоник", sizes: {250:250, 350:290}, img: "granattonic-min.jpg" },
-        { id: 62, cat: 'ice', name: "Бамбл Холодный", sizes: {270:270, 300:300}, img: "kapuchino-min.jpg", isBumble: true },
-        { id: 63, cat: 'ice', name: "Айс Матча", sizes: {230:230, 270:270}, img: "matcha-min.jpg" },
-        { id: 64, cat: 'ice', name: "Лимонад (Киви/Манго/Смор)", sizes: {260:260, 290:290}, img: "lemonchernogo-min.jpg" },
-        { id: 100, cat: 'food', name: "Bombbar Лесной орех", price: 130, img: "bombbarfunduk-min.jpg" },
-        { id: 101, cat: 'food', name: "Bombbar Малиновый", price: 130, img: "bombbarfunduk-min.jpg" },
-        { id: 102, cat: 'food', name: "Bombbar Кокос", price: 130, img: "bombbarfunduk-min.jpg" },
-        { id: 103, cat: 'food', name: "Snaqer Орех/Карамель", price: 130, img: "snaqerfunduk-min.jpg" },
-        { id: 104, cat: 'food', name: "Печенье Chika Смородина", price: 170, img: "chikabiscuitbanan-min.jpg" },
-        { id: 105, cat: 'food', name: "Печенье Chika Банан", price: 170, img: "chikabiscuitbanan-min.jpg" },
-        { id: 106, cat: 'food', name: "Жвачка Эклипс", price: 80, img: "eclipce.jpg" },
-        { id: 107, cat: 'food', name: "Горький шоколад", price: 80, img: "chokolatgorkiy.jpg" },
-        { id: 108, cat: 'food', name: "Молочный шоколад", price: 80, img: "chokolatgorkiy.jpg" },
-        { id: 109, cat: 'food', name: "Choco Pie", price: 30, img: "chudo.jpg" },
-        { id: 110, cat: 'food', name: "Батончик Чудо", price: 60, img: "chudo.jpg" },
-        { id: 111, cat: 'food', name: "Бабаевский батончик", price: 100, img: "babka.jpg" },
-        { id: 200, cat: 'drinks', name: "Черноголовка Cola", price: 140, img: "colachernogo-min.jpg" },
-        { id: 201, cat: 'drinks', name: "Черноголовка Байкал", price: 140, img: "colachernogo-min.jpg" },
-        { id: 202, cat: 'drinks', name: "Черноголовка газ/негаз", price: 70, img: "negazcernogo-min.jpg" },
-        { id: 203, cat: 'drinks', name: "Черноголовка лимонад", price: 140, img: "colachernogo-min.jpg" },
-        { id: 204, cat: 'drinks', name: "Cosmos Тропический", price: 130, img: "cosmos.jpg" },
-        { id: 205, cat: 'drinks', name: "Cosmos Оригинальный", price: 130, img: "cosmos.jpg" },
-        { id: 206, cat: 'drinks', name: "Adrenaline Без сахара", price: 200, img: "adrenalin.jpg" },
-        { id: 207, cat: 'drinks', name: "Adrenaline Оригинальный", price: 200, img: "adrenalin.jpg" },
-        { id: 208, cat: 'drinks', name: "Сок Il Primo Томат", price: 120, img: "iltomato.jpg" },
-        { id: 209, cat: 'drinks', name: "Сок Il Primo Яблоко", price: 120, img: "iltomato.jpg" },
-        { id: 210, cat: 'drinks', name: "Сок Il Primo Апельсин", price: 120, img: "iltomato.jpg" },
-        { id: 211, cat: 'drinks', name: "Lipton Персик", price: 130, img: "lipton.jpg" },
-        { id: 212, cat: 'drinks', name: "Дикий апельсин-Юдзу", price: 110, img: "chernogolovkaorange.jpg" }
-    ];
-
-    const milks = ["Обычное", "Кокосовое", "Банановое", "Миндальное", "Безлактозное"];
-    const syrups = ["Фисташка", "Лесной орех", "Кокос", "Миндаль", "Лаванда", "Малина", "Соленая карамель"];
-
-    let cart = [], currentCat = 'coffee', activeItem = null, isAdmin = false, stopList = [];
-    let sel = { size: null, milk: null, syrup: null, temp: null, sugar: null, cinnamon: false, juice: null };
-
-    // Админка
-    const titleEl = document.getElementById('main-title');
-    let titleTimer;
-    titleEl.addEventListener('touchstart', () => { titleTimer = setTimeout(() => { if(prompt("Пароль:") === "7654") { isAdmin = true; document.getElementById('admin-panel').style.display='block'; render(); } }, 2000); });
-    titleEl.addEventListener('touchend', () => clearTimeout(titleTimer));
-
-    function filterCat(e, cat) {
-        currentCat = cat;
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        e.target.classList.add('active');
-        render();
-    }
-
-    function render() {
-        const app = document.getElementById('app');
-        const items = menu.filter(i => i.cat === currentCat && (isAdmin || !stopList.includes(i.id)));
-        app.innerHTML = items.map(i => `<div class="card ${stopList.includes(i.id)?'hidden-item':''}" onclick="itemClick(${i.id})"><img src="${IMG_BASE + i.img}" class="card-img"><div class="card-name">${i.name}</div><div class="card-price">${i.price ? i.price+' ₽' : 'от '+Object.values(i.sizes)[0]+' ₽'}</div></div>`).join('');
-    }
-
-    function itemClick(id) {
-        if(isAdmin) { if(stopList.includes(id)) stopList = stopList.filter(x=>x!==id); else stopList.push(id); render(); return; }
-        activeItem = menu.find(x => x.id === id);
-        sel = { size: null, milk: null, syrup: null, temp: null, sugar: null, cinnamon: false, juice: null };
-        document.getElementById('m-title').innerText = activeItem.name;
-        
-        // Температура ТОЛЬКО для газировок и льда
-        document.getElementById('temp-section').style.display = (activeItem.cat==='drinks' || activeItem.cat==='ice') ? 'block' : 'none';
-        
-        if(activeItem.sizes) {
-            document.getElementById('m-sizes').innerHTML = Object.entries(activeItem.sizes).map(([s,p]) => `<div class="opt-btn" onclick="setOpt(this,'size',{ml:'${s}', p:${p}})">${s}мл</div>`).join('');
-            document.getElementById('size-section').style.display = 'block';
-        } else { document.getElementById('size-section').style.display = 'none'; }
-        
-        // Молоко/Сироп/Добавки убираем для еды и газировки
-        const hideOptions = (activeItem.cat === 'food' || activeItem.cat === 'drinks');
-        document.getElementById('milk-section').style.display = (hideOptions || activeItem.noMilk || activeItem.cat==='tea' || activeItem.cat==='punsh') ? 'none' : 'block';
-        document.getElementById('syrup-section').style.display = (hideOptions || activeItem.noSyrup || activeItem.cat==='punsh') ? 'none' : 'block';
-        document.getElementById('extras-section').style.display = (hideOptions) ? 'none' : 'block';
-
-        if(activeItem.isBumble) { 
-            document.getElementById('milk-section').style.display='none'; 
-            document.getElementById('juice-section').style.display='block'; 
-        } else { 
-            document.getElementById('juice-section').style.display='none'; 
-            document.getElementById('m-milk').innerHTML = milks.map(m=>`<div class="opt-btn" onclick="setOpt(this,'milk','${m}')">${m}</div>`).join(''); 
-        }
-        
-        document.getElementById('m-syrups').innerHTML = syrups.map(s => `<div class="opt-btn" onclick="setOpt(this,'syrup','${s}')">${s}</div>`).join('');
-        document.getElementById('opt-modal').style.display = 'flex';
-        updatePrice();
-    }
-
-    function setOpt(el, type, val) {
-        if(type === 'cinnamon') { sel.cinnamon = !sel.cinnamon; el.classList.toggle('active'); }
-        else {
-            sel[type] = (sel[type] === val) ? null : val;
-            el.parentNode.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('active'));
-            if(sel[type]) el.classList.add('active');
-        }
-        updatePrice();
-    }
-
-    function updatePrice() {
-        let p = activeItem.price || (sel.size ? sel.size.p : 0);
-        if(sel.milk && sel.milk !== "Обычное") p += (sel.size && parseInt(sel.size.ml) > 300) ? 90 : 70;
-        if(sel.syrup) p += (sel.size && parseInt(sel.size.ml) > 300) ? 50 : 30;
-        document.getElementById('live-price').innerText = p + ' ₽';
-    }
-
-    function confirmItem() {
-        if((activeItem.cat==='drinks' || activeItem.cat==='ice') && !sel.temp) return tg.showAlert("Выберите температуру!");
-        if(activeItem.sizes && !sel.size) return tg.showAlert("Выберите объем!");
-        const price = parseInt(document.getElementById('live-price').innerText);
-        let d = `${activeItem.name} ${sel.size?sel.size.ml+'мл':''} ${sel.temp?`[${sel.temp}]`:''} ${sel.milk?`(${sel.milk})`:''} ${sel.syrup?`+${sel.syrup}`:''} ${sel.juice?`(сок:${sel.juice})`:''}`;
-        cart.push({ name: d, price: price });
-        closeModal();
-        updateCartCount();
-    }
-
-    function updateCartCount() {
-        document.getElementById('cart-count').innerText = cart.length;
-    }
-
-    function openCart() {
-        if(!cart.length) return tg.showAlert("Корзина пуста");
-        document.getElementById('checkout-list').innerHTML = cart.map(i => `<div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #eee; font-size:12px;"><span>${i.name}</span><b>${i.price}₽</b></div>`).join('');
-        document.getElementById('final-total').innerText = cart.reduce((s,i)=>s+i.price,0) + ' ₽';
-        document.getElementById('checkout-modal').style.display = 'flex';
-    }
-
-    function finalSend() {
-        const f = document.getElementById('floor').value, o = document.getElementById('office').value;
-        if(!f || !o) return tg.showAlert("Укажите этаж и офис!");
-        tg.sendData(JSON.stringify({ type: 'order', items: cart.map(i => ({ label: i.name, amount: i.price * 100 })), address: `Этаж ${f}, Офис ${o}` }));
-    }
-
-    function closeModal() { document.querySelectorAll('.modal').forEach(m=>m.style.display='none'); }
-    function saveAdminChanges() { tg.sendData(JSON.stringify({ type: 'admin_sync', stop_list: stopList })); }
-    render();
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
+    "vite": "https://esm.sh/vite@^7.3.0"
+  }
+}
 </script>
-</body>
+</head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>
