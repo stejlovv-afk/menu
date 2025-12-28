@@ -99,7 +99,7 @@ const App: React.FC = () => {
   };
 
   const handleRepeatOrder = (items: CartItem[]) => {
-      const newItems = items.map(i => ({...i, id: generateId()}));
+      const newItems = items.map(i => ({...i, id: generateId()})); // ИСПРАВЛЕНО
       setCart(prev => [...prev, ...newItems]);
       setIsHistoryOpen(false);
       setIsCartOpen(true);
