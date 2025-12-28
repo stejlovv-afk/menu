@@ -9,7 +9,8 @@ interface ProductModalProps {
   onAddToCart: (item: any) => void;
 }
 
-const generateId = () => Math.random().toString(36).substring(2, 15);
+// Безопасная генерация ID для старых версий WebView
+const generateId = () => Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 
 const ProductModal: React.FC<ProductModalProps> = ({ product, onClose, onAddToCart }) => {
   const [selection, setSelection] = useState<SelectionState>({
@@ -65,7 +66,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, onClose, onAddToCa
     const fullName = parts.filter(Boolean).join(' ');
 
     onAddToCart({
-        id: generateId(),
+        id: generateId(), // ИСПРАВЛЕНО
         productId: product.id,
         name: fullName,
         basePrice: price,
@@ -80,7 +81,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, onClose, onAddToCa
     if(!newReviewText.trim()) return;
     
     const review: Review = {
-        id: generateId(),
+        id: generateId(), // ИСПРАВЛЕНО
         productId: product.id,
         rating: newRating,
         text: newReviewText,
