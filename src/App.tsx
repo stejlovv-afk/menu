@@ -78,8 +78,9 @@ const App: React.FC = () => {
     const totalAmount = cart.reduce((sum, i) => sum + i.totalPrice, 0);
     const address = `Этаж ${floor}, Офис ${office}`;
     
+    // ИСПРАВЛЕНО: используем generateId() вместо crypto.randomUUID()
     const newOrder: OrderHistoryItem = {
-        id: generateId(), // ИСПРАВЛЕНО: generateId вместо crypto.randomUUID
+        id: generateId(), 
         date: new Date().toLocaleString('ru-RU', { day: 'numeric', month: 'long', hour: '2-digit', minute:'2-digit' }),
         items: cart,
         totalAmount,
@@ -99,7 +100,8 @@ const App: React.FC = () => {
   };
 
   const handleRepeatOrder = (items: CartItem[]) => {
-      const newItems = items.map(i => ({...i, id: generateId()})); // ИСПРАВЛЕНО
+      // ИСПРАВЛЕНО: используем generateId() вместо crypto.randomUUID()
+      const newItems = items.map(i => ({...i, id: generateId()}));
       setCart(prev => [...prev, ...newItems]);
       setIsHistoryOpen(false);
       setIsCartOpen(true);
