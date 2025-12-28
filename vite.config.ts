@@ -4,9 +4,5 @@ import react from '@vitejs/plugin-react'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: '/menu/', 
-  build: {
-    outDir: 'dist',
-    sourcemap: true
-  }
+  base: '/menu/', // Это самое важное исправление для GitHub Pages
 })
