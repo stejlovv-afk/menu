@@ -4,11 +4,14 @@ import { CategoryId, Product, CartItem, OrderHistoryItem } from './types';
 import ProductModal from './components/ProductModal';
 import CartModal from './components/CartModal';
 import HistoryModal from './components/HistoryModal';
-import { ShoppingBag, Lock, Save, Ban, Clock, Star } from 'lucide-react';
+import { ShoppingBag, Lock, Save, Ban, Clock } from 'lucide-react';
 
 declare global {
   interface Window { Telegram: { WebApp: any; }; }
 }
+
+// Безопасная генерация ID для старых версий WebView
+const generateId = () => Math.random().toString(36).substring(2, 15);
 
 const App: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<CategoryId>('coffee');
@@ -34,7 +37,11 @@ const App: React.FC = () => {
 
     // Load History
     const historyStored = localStorage.getItem('urban_history');
-    if (historyStored) setOrderHistory(JSON.parse(historyStored));
+    if (historyStored) {
+        try {
+            setOrderHistory(JSON.parse(historyStored));
+        } catch (e) { console.error("History parse error", e); }
+    }
 
     const params = new URLSearchParams(window.location.search);
     const stopStr = params.get('stop');
@@ -61,7 +68,9 @@ const App: React.FC = () => {
 
   const handleAddToCart = (item: CartItem) => {
     setCart(prev => [...prev, item]);
-    window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
+    if(window.Telegram.WebApp.HapticFeedback) {
+        window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
+    }
   };
 
   const handleCheckout = (floor: string, office: string) => {
@@ -69,9 +78,8 @@ const App: React.FC = () => {
     const totalAmount = cart.reduce((sum, i) => sum + i.totalPrice, 0);
     const address = `Этаж ${floor}, Офис ${office}`;
     
-    // Save to History before sending (Webview closes after sendData)
     const newOrder: OrderHistoryItem = {
-        id: crypto.randomUUID(),
+        id: generateId(),
         date: new Date().toLocaleString('ru-RU', { day: 'numeric', month: 'long', hour: '2-digit', minute:'2-digit' }),
         items: cart,
         totalAmount,
@@ -91,8 +99,7 @@ const App: React.FC = () => {
   };
 
   const handleRepeatOrder = (items: CartItem[]) => {
-      // Generate new UUIDs for items to avoid key collisions
-      const newItems = items.map(i => ({...i, id: crypto.randomUUID()}));
+      const newItems = items.map(i => ({...i, id: generateId()}));
       setCart(prev => [...prev, ...newItems]);
       setIsHistoryOpen(false);
       setIsCartOpen(true);
@@ -129,7 +136,7 @@ const App: React.FC = () => {
       {/* Header */}
       <header className="sticky top-0 bg-white/80 backdrop-blur-md z-40 border-b border-gray-200/50">
         <div 
-            className="flex items-center justify-center h-14 relative select-none"
+            className="flex items-center justify-center h-14 relative select-none cursor-pointer"
             onTouchStart={handleTitleTouchStart}
             onTouchEnd={handleTitleTouchEnd}
             onMouseDown={handleTitleTouchStart}
