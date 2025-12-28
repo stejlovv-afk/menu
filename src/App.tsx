@@ -10,8 +10,8 @@ declare global {
   interface Window { Telegram: { WebApp: any; }; }
 }
 
-// Безопасная генерация ID для старых версий WebView
-const generateId = () => Math.random().toString(36).substring(2, 15);
+// Безопасная генерация ID для старых версий WebView (crypto.randomUUID крашит Android)
+const generateId = () => Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 
 const App: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<CategoryId>('coffee');
@@ -79,7 +79,7 @@ const App: React.FC = () => {
     const address = `Этаж ${floor}, Офис ${office}`;
     
     const newOrder: OrderHistoryItem = {
-        id: generateId(),
+        id: generateId(), // ИСПРАВЛЕНО: generateId вместо crypto.randomUUID
         date: new Date().toLocaleString('ru-RU', { day: 'numeric', month: 'long', hour: '2-digit', minute:'2-digit' }),
         items: cart,
         totalAmount,
