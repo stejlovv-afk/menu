@@ -66,7 +66,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, onClose, onAddToCa
     const fullName = parts.filter(Boolean).join(' ');
 
     onAddToCart({
-        id: generateId(), // ИСПРАВЛЕНО
+        id: generateId(), // ИСПРАВЛЕНО: было crypto.randomUUID()
         productId: product.id,
         name: fullName,
         basePrice: price,
@@ -81,7 +81,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, onClose, onAddToCa
     if(!newReviewText.trim()) return;
     
     const review: Review = {
-        id: generateId(), // ИСПРАВЛЕНО
+        id: generateId(), // ИСПРАВЛЕНО: было crypto.randomUUID()
         productId: product.id,
         rating: newRating,
         text: newReviewText,
