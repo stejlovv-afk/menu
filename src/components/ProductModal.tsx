@@ -9,9 +9,6 @@ interface ProductModalProps {
   onAddToCart: (item: any) => void;
 }
 
-// Безопасная генерация ID для старых версий WebView и Android
-const generateId = () => Math.random().toString(36).substring(2) + Date.now().toString(36);
-
 const ProductModal: React.FC<ProductModalProps> = ({ product, onClose, onAddToCart }) => {
   const [selection, setSelection] = useState<SelectionState>({
     size: null, milk: null, syrup: null, temp: null, sugar: null, cinnamon: false, juice: null
@@ -65,9 +62,8 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, onClose, onAddToCa
     
     const fullName = parts.filter(Boolean).join(' ');
 
-    // ИСПРАВЛЕНИЕ: Используем generateId()
     onAddToCart({
-        id: generateId(),
+        id: crypto.randomUUID(),
         productId: product.id,
         name: fullName,
         basePrice: price,
@@ -81,9 +77,8 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, onClose, onAddToCa
   const handleSubmitReview = () => {
     if(!newReviewText.trim()) return;
     
-    // ИСПРАВЛЕНИЕ: Используем generateId()
     const review: Review = {
-        id: generateId(),
+        id: crypto.randomUUID(),
         productId: product.id,
         rating: newRating,
         text: newReviewText,
