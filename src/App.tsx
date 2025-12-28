@@ -4,14 +4,11 @@ import { CategoryId, Product, CartItem, OrderHistoryItem } from './types';
 import ProductModal from './components/ProductModal';
 import CartModal from './components/CartModal';
 import HistoryModal from './components/HistoryModal';
-import { ShoppingBag, Lock, Save, Ban, Clock } from 'lucide-react';
+import { ShoppingBag, Lock, Save, Ban, Clock, Star } from 'lucide-react';
 
 declare global {
   interface Window { Telegram: { WebApp: any; }; }
 }
-
-// Безопасная генерация ID для стабильной работы в Telegram WebView
-const generateId = () => Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 
 const App: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<CategoryId>('coffee');
@@ -19,7 +16,11 @@ const App: React.FC = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  
+  // Persistence
   const [orderHistory, setOrderHistory] = useState<OrderHistoryItem[]>([]);
+  
+  // Admin & Stop List
   const [isAdmin, setIsAdmin] = useState(false);
   const [stopList, setStopList] = useState<number[]>([]);
   
@@ -31,12 +32,9 @@ const App: React.FC = () => {
     tg.expand();
     tg.MainButton.hide();
 
+    // Load History
     const historyStored = localStorage.getItem('urban_history');
-    if (historyStored) {
-        try {
-            setOrderHistory(JSON.parse(historyStored));
-        } catch (e) { console.error("History parse error", e); }
-    }
+    if (historyStored) setOrderHistory(JSON.parse(historyStored));
 
     const params = new URLSearchParams(window.location.search);
     const stopStr = params.get('stop');
@@ -63,9 +61,7 @@ const App: React.FC = () => {
 
   const handleAddToCart = (item: CartItem) => {
     setCart(prev => [...prev, item]);
-    if(window.Telegram.WebApp.HapticFeedback) {
-        window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
-    }
+    window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
   };
 
   const handleCheckout = (floor: string, office: string) => {
@@ -73,9 +69,9 @@ const App: React.FC = () => {
     const totalAmount = cart.reduce((sum, i) => sum + i.totalPrice, 0);
     const address = `Этаж ${floor}, Офис ${office}`;
     
-    // ИСПРАВЛЕНИЕ №1: Замена на generateId()
+    // Save to History before sending (Webview closes after sendData)
     const newOrder: OrderHistoryItem = {
-        id: generateId(), 
+        id: crypto.randomUUID(),
         date: new Date().toLocaleString('ru-RU', { day: 'numeric', month: 'long', hour: '2-digit', minute:'2-digit' }),
         items: cart,
         totalAmount,
@@ -95,8 +91,8 @@ const App: React.FC = () => {
   };
 
   const handleRepeatOrder = (items: CartItem[]) => {
-      // ИСПРАВЛЕНИЕ №2: Замена на generateId()
-      const newItems = items.map(i => ({...i, id: generateId()}));
+      // Generate new UUIDs for items to avoid key collisions
+      const newItems = items.map(i => ({...i, id: crypto.randomUUID()}));
       setCart(prev => [...prev, ...newItems]);
       setIsHistoryOpen(false);
       setIsCartOpen(true);
@@ -107,6 +103,7 @@ const App: React.FC = () => {
     window.Telegram.WebApp.sendData(JSON.stringify({ type: 'admin_sync', stop_list: stopList }));
   };
 
+  // Admin Toggle
   const handleTitleTouchStart = () => {
     titleTimerRef.current = setTimeout(() => {
         if (prompt("Введите пароль администратора:") === "7654") {
@@ -128,9 +125,11 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen pb-28 bg-background font-sans text-primary">
+      
+      {/* Header */}
       <header className="sticky top-0 bg-white/80 backdrop-blur-md z-40 border-b border-gray-200/50">
         <div 
-            className="flex items-center justify-center h-14 relative select-none cursor-pointer"
+            className="flex items-center justify-center h-14 relative select-none"
             onTouchStart={handleTitleTouchStart}
             onTouchEnd={handleTitleTouchEnd}
             onMouseDown={handleTitleTouchStart}
@@ -144,6 +143,7 @@ const App: React.FC = () => {
             )}
         </div>
 
+        {/* Tabs */}
         <div className="flex overflow-x-auto no-scrollbar gap-2 px-4 pb-3">
             {CATEGORIES.map(cat => (
                 <button key={cat.id} onClick={() => handleCategoryChange(cat.id)}
@@ -159,6 +159,7 @@ const App: React.FC = () => {
         </div>
       </header>
 
+      {/* Admin Panel */}
       {isAdmin && (
           <div className="mx-4 mt-4 p-3 bg-red-50 rounded-xl border border-red-100 flex justify-between items-center animate-fade-in">
               <p className="text-xs text-red-800 font-bold">Редактирование стоп-листа</p>
@@ -168,6 +169,7 @@ const App: React.FC = () => {
           </div>
       )}
 
+      {/* Product Grid */}
       <main className="p-4 grid grid-cols-2 gap-3">
         {products.map((product, idx) => {
             const isStopped = stopList.includes(product.id);
@@ -181,9 +183,11 @@ const App: React.FC = () => {
                             <div className="bg-red-500 text-white p-2 rounded-full shadow-lg animate-scale-in"><Ban size={20} /></div>
                         </div>
                     )}
+
                     <div className="aspect-square w-full rounded-2xl bg-gray-50 mb-3 overflow-hidden relative">
                          <img src={`${IMG_BASE}${product.img}`} alt={product.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                     </div>
+                    
                     <div className="px-1 pb-1">
                         <h3 className="font-bold text-[13px] leading-tight line-clamp-2 min-h-[2.4em] mb-1.5 text-gray-800">{product.name}</h3>
                         <div className="flex justify-between items-center">
@@ -195,15 +199,18 @@ const App: React.FC = () => {
         })}
       </main>
 
+      {/* Bottom Nav */}
       <nav className="fixed bottom-6 left-4 right-4 h-16 bg-primary/90 backdrop-blur-md rounded-2xl shadow-2xl shadow-primary/20 z-30 text-white flex justify-between px-2 items-center">
            <button onClick={() => window.location.reload()} className="flex-1 flex flex-col items-center justify-center h-full active:opacity-70 transition-opacity">
                <div className="p-1 rounded-full"><span className="text-xl">☕</span></div>
            </button>
+           
            <button onClick={() => setIsHistoryOpen(true)} className="flex-1 flex flex-col items-center justify-center h-full active:opacity-70 transition-opacity relative group">
                <div className={`p-1.5 rounded-full transition-colors ${isHistoryOpen ? 'bg-white/20' : ''}`}>
                     <Clock size={22} className="text-white/80 group-hover:text-white" />
                </div>
            </button>
+
            <button onClick={() => setIsCartOpen(true)} className="flex-1 flex flex-col items-center justify-center h-full active:opacity-70 transition-opacity relative">
                <div className="bg-white/10 p-2.5 rounded-xl relative">
                    <ShoppingBag size={22} className="text-white" />
@@ -216,6 +223,7 @@ const App: React.FC = () => {
            </button>
       </nav>
 
+      {/* Modals */}
       {selectedProduct && <ProductModal product={selectedProduct} onClose={() => setSelectedProduct(null)} onAddToCart={handleAddToCart} />}
       {isCartOpen && <CartModal cart={cart} onClose={() => setIsCartOpen(false)} onClear={() => setCart([])} onCheckout={handleCheckout} />}
       {isHistoryOpen && <HistoryModal orders={orderHistory} onClose={() => setIsHistoryOpen(false)} onRepeat={handleRepeatOrder} />}
