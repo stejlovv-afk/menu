@@ -9,6 +9,8 @@ interface ProductModalProps {
   onAddToCart: (item: any) => void;
 }
 
+const generateId = () => Math.random().toString(36).substring(2, 15);
+
 const ProductModal: React.FC<ProductModalProps> = ({ product, onClose, onAddToCart }) => {
   const [selection, setSelection] = useState<SelectionState>({
     size: null, milk: null, syrup: null, temp: null, sugar: null, cinnamon: false, juice: null
@@ -63,7 +65,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, onClose, onAddToCa
     const fullName = parts.filter(Boolean).join(' ');
 
     onAddToCart({
-        id: crypto.randomUUID(),
+        id: generateId(),
         productId: product.id,
         name: fullName,
         basePrice: price,
@@ -78,7 +80,7 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, onClose, onAddToCa
     if(!newReviewText.trim()) return;
     
     const review: Review = {
-        id: crypto.randomUUID(),
+        id: generateId(),
         productId: product.id,
         rating: newRating,
         text: newReviewText,
